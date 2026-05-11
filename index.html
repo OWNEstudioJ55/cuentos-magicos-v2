@@ -1857,7 +1857,50 @@ async function dbDelete(store, id) {
   });
 }
 
-// ===================== CRYPTO =====================
+// Convertir blob a base64 para guardar en IndexedDB (evita error en Firefox mobile)
+async function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function base64ToBlob(base64, type) {
+  const res = await fetch(base64);
+  return res.blob();
+}
+
+async function dbPutAudio(id, blob) {
+  // Guardamos como base64 string — funciona en todos los browsers
+  try {
+    const base64 = await blobToBase64(blob);
+    await dbPut('audio', { id, base64, type: blob.type, size: blob.size });
+    console.log('✅ Audio guardado como base64 — id:', id, 'tamaño:', blob.size);
+  } catch(err) {
+    const msg = err?.message || err?.name || String(err);
+    console.error('dbPutAudio error:', msg, err);
+    throw err;
+  }
+}
+
+async function dbGetAudio(id) {
+  const data = await dbGet('audio', id);
+  if (!data) return null;
+  // Si es formato nuevo (base64)
+  if (data.base64) {
+    try {
+      const blob = await base64ToBlob(data.base64, data.type || 'audio/webm');
+      return { id, blob };
+    } catch(e) {
+      console.error('dbGetAudio base64 error:', e);
+      return null;
+    }
+  }
+  // Formato viejo (blob directo)
+  return data;
+}
 async function hashPassword(pass) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
@@ -2437,7 +2480,7 @@ async function saveStory() {
     // 1. Guardar en IndexedDB (local — siempre funciona)
     await dbPut('stories', story);
     if(appState.recordedBlob) {
-      await dbPut('audio', {id, blob: appState.recordedBlob});
+      await dbPutAudio(id, appState.recordedBlob);
       console.log('✅ Audio guardado local — id:', id, 'tamaño:', appState.recordedBlob.size);
     }
 
@@ -2558,7 +2601,7 @@ async function deleteStory(id) {
 }
 
 async function downloadStoryAudio(id) {
-  const audioData=await dbGet('audio',id);
+  const audioData=await dbGetAudio(id);
   if(!audioData||!audioData.blob) { showToast('❌ No hay audio para este cuento'); return; }
   const url=URL.createObjectURL(audioData.blob);
   const a=document.createElement('a');
@@ -3124,7 +3167,7 @@ async function toggleMsgAudio(msgIdx, audioKey) {
   }
   // Load from DB
   if(btn) btn.textContent='⏳';
-  const data=await dbGet('audio',audioKey).catch(()=>null);
+  const data=await dbGetAudio(audioKey);
   if(!data||!data.blob){ showToast('❌ No se encontró el audio del niño'); if(btn) btn.textContent='▶'; return; }
   if(window._msgAudioUrls&&window._msgAudioUrls[msgIdx]){ try{ URL.revokeObjectURL(window._msgAudioUrls[msgIdx]); }catch(e){} }
   window._msgAudioUrls=window._msgAudioUrls||{};
@@ -3160,7 +3203,7 @@ function seekMsgAudio(msgIdx, event) {
 
 async function downloadMsgAudio(audioKey, title) {
   if(!isPremium()){ showToast('🔒 Solo Premium'); return; }
-  const data=await dbGet('audio',audioKey).catch(()=>null);
+  const data=await dbGetAudio(audioKey);
   if(!data||!data.blob){ showToast('❌ No se encontró el audio'); return; }
   const url=URL.createObjectURL(data.blob);
   const a=document.createElement('a');
@@ -3183,7 +3226,7 @@ function downloadMsgImages(msgIdx) {
 }
 
 async function playKidMessage(key, btn) {
-  const data = await dbGet('audio', key).catch(()=>null);
+  const data = await dbGetAudio(key);
   if(!data||!data.blob) { showToast('❌ No se encontró el audio'); return; }
   const url = URL.createObjectURL(data.blob);
   if(btn && btn._audio) {
@@ -3358,7 +3401,7 @@ async function sendWritingToParent() {
   await dbPut('writings',{id,title,text,images:writeSelectedImages,created:new Date().toLocaleDateString('es-AR')}).catch(()=>{});
   // Save audio if recorded
   if(writeRecState.recordedBlob) {
-    await dbPut('audio',{id,blob:writeRecState.recordedBlob}).catch(()=>{});
+    await dbPutAudio(id, writeRecState.recordedBlob);
   }
   // Save message to localStorage for parent to see
   const msgs=JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
@@ -3631,7 +3674,7 @@ async function openKidStory(id) {
   const pr=document.getElementById('kidProgress'); if(pr) pr.style.width='0%';
   const td0=document.getElementById('kidTimeDisplay'); if(td0) td0.textContent='0:00';
 
-  const audioData=await dbGet('audio',id).catch(e=>{ console.error('dbGet audio error:',e); return null; });
+  const audioData=await dbGetAudio(id);
   console.log('🎵 Resultado buscar audio id "'+id+'":', audioData ? 'ENCONTRADO ('+audioData.blob?.size+' bytes)' : 'NO ENCONTRADO');
 
   if(audioData&&audioData.blob&&audioData.blob.size>0) {
@@ -4075,7 +4118,7 @@ async function saveKidVoice() {
   try {
     const id='kid_'+appState.currentStory.id;
     console.log('💾 Guardando voz niño — id:',id,'tamaño:',appState.kidOwnAudioBlob.size,'tipo:',appState.kidOwnAudioBlob.type);
-    await dbPut('audio',{id, blob:appState.kidOwnAudioBlob});
+    await dbPutAudio(id, appState.kidOwnAudioBlob);
     console.log('✅ Guardado OK');
     showToast('💾 ¡Tu voz guardada!');
     const stars=5; appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay();
@@ -4092,7 +4135,7 @@ async function sendKidVoiceToParent() {
   try {
     const id='kidvoice_'+Date.now();
     console.log('📤 Enviando voz al padre — id:',id,'tamaño:',appState.kidOwnAudioBlob.size,'tipo:',appState.kidOwnAudioBlob.type);
-    await dbPut('audio',{id, blob:appState.kidOwnAudioBlob});
+    await dbPutAudio(id, appState.kidOwnAudioBlob);
     console.log('✅ Audio guardado en DB OK');
 
     const imgs=appState.kidImages||[];
@@ -4331,7 +4374,7 @@ async function sendKidDrawingsToParent() {
     const id='kiddraw_'+Date.now();
     let hasAudio=false;
     if(kidDrawRecState.recordedBlob&&kidDrawRecState.recordedBlob.size>0) {
-      await dbPut('audio',{id,blob:kidDrawRecState.recordedBlob});
+      await dbPutAudio(id, kidDrawRecState.recordedBlob);
       console.log('✅ Audio dibujos guardado — id:',id,'tamaño:',kidDrawRecState.recordedBlob.size);
       hasAudio=true;
     }
@@ -5174,7 +5217,7 @@ async function saveOroStory() {
   const id='oro_'+Date.now();
   const story={id, title, type:'oro', char:'⭐', images:oroState.images, storyText:document.getElementById('oroStoryText')?.value||'', created:new Date().toLocaleDateString('es-AR')};
   dbPut('stories',story).catch(e=>console.warn(e));
-  if(oroState.recordedBlob) dbPut('audio',{id,blob:oroState.recordedBlob}).catch(e=>console.warn(e));
+  if(oroState.recordedBlob) dbPutAudio(id, oroState.recordedBlob).catch(e=>console.warn(e));
   showToast('⭐ ¡Cuento de Oro guardado y enviado al niño!');
   // Reset
   oroState.images=[]; oroState.recordedBlob=null; oroState.recAudio=null; oroState.recordSeconds=0;
