@@ -137,7 +137,57 @@ async function supaGetAudioUrl(filename) {
   } catch(e) { console.error('supaGetAudioUrl error:', e); return null; }
 }
 
-// ── FAMILIA ID (sesión actual) ────────────────────────────────
+// ══════════════════════════════════════════
+// SPRITE SHEET SYSTEM
+// ══════════════════════════════════════════
+const SPRITE_URL = 'https://raw.githubusercontent.com/PROPIOOWNEstudioJ55/cuentos-magicos-propios/main/assets/sprites.png';
+const IMG_W = 1448; const IMG_H = 1086;
+
+const CHAR_SPRITES = {
+  'dragon':    { x:0,    y:30, w:181, h:390 },
+  'hada':      { x:181,  y:30, w:181, h:390 },
+  'leon':      { x:362,  y:30, w:181, h:390 },
+  'delfin':    { x:543,  y:30, w:181, h:390 },
+  'zorro':     { x:724,  y:30, w:181, h:390 },
+  'robot':     { x:905,  y:30, w:181, h:390 },
+  'unicornio': { x:1086, y:30, w:181, h:390 },
+  'mago':      { x:1267, y:30, w:181, h:390 },
+};
+
+const ICON_SPRITES = {
+  'home':     { x:0,    y:455, w:144, h:270 },
+  'mic':      { x:144,  y:455, w:144, h:270 },
+  'books':    { x:288,  y:455, w:144, h:270 },
+  'progress': { x:432,  y:455, w:144, h:270 },
+  'trophy':   { x:576,  y:455, w:144, h:270 },
+  'star':     { x:720,  y:455, w:144, h:270 },
+  'play':     { x:864,  y:455, w:144, h:270 },
+  'rocket':   { x:1008, y:455, w:144, h:270 },
+  'camera':   { x:1152, y:455, w:144, h:270 },
+  'pencil':   { x:1296, y:455, w:144, h:270 },
+};
+
+// Helper: render a sprite as a div with background-image crop
+function spriteDiv(sprite, sizePx, extraStyle='') {
+  const scaleX = sizePx / sprite.w;
+  const scaleY = sizePx / sprite.h;
+  const scale = Math.min(scaleX, scaleY);
+  const bgW = Math.round(IMG_W * scale);
+  const bgH = Math.round(IMG_H * scale);
+  const bx  = -Math.round(sprite.x * scale);
+  const by  = -Math.round(sprite.y * scale);
+  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;flex-shrink:0;${extraStyle}"></div>`;
+}
+
+// Helper: get CSS background-position string for a sprite (for use in existing elements)
+function spriteBg(sprite, sizePx) {
+  const scale = sizePx / Math.max(sprite.w, sprite.h);
+  const bgW = Math.round(IMG_W * scale);
+  const bgH = Math.round(IMG_H * scale);
+  const bx  = -Math.round(sprite.x * scale);
+  const by  = -Math.round(sprite.y * scale);
+  return `background:url('${SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
+}
 function getFamiliaId() {
   return localStorage.getItem('ownFamiliaId') || null;
 }
@@ -872,7 +922,8 @@ textarea{resize:vertical;min-height:80px}
 .kid-guide-step{flex-shrink:0;text-align:center;background:rgba(255,255,255,.05);border-radius:12px;padding:10px;min-width:64px}
 .kid-guide-step .gs-icon{font-size:26px;margin-bottom:3px}
 .kid-guide-step .gs-label{font-size:9px;font-weight:800;color:var(--lavender)}
-.write-voice-pill.active{border-color:var(--coral);background:rgba(255,107,107,.12);color:var(--coral)}
+.nav-icon-sprite{display:block;margin:0 auto 2px;border-radius:8px}
+.nav-btn .nav-icon, .kid-nav-btn .nav-icon{display:block;width:28px;height:28px;margin:0 auto 2px}
 </style>
 </head>
 <body>
@@ -1282,11 +1333,11 @@ textarea{resize:vertical;min-height:80px}
   </div>
 
   <div class="bottom-nav">
-    <button class="nav-btn active" id="pnav-home" onclick="switchParentTab('home')"><span class="nav-icon">🏠</span>Inicio</button>
-    <button class="nav-btn" id="pnav-record" onclick="switchParentTab('record')"><span class="nav-icon">🎙️</span>Grabar</button>
-    <button class="nav-btn" id="pnav-library" onclick="switchParentTab('library')"><span class="nav-icon">📚</span>Cuentos</button>
-    <button class="nav-btn" id="pnav-progress" onclick="switchParentTab('progress')"><span class="nav-icon">📊</span>Progreso</button>
-    <button class="nav-btn" id="pnav-tokens" onclick="switchParentTab('tokens')"><span class="nav-icon">🏆</span>Tokens</button>
+    <button class="nav-btn active" id="pnav-home" onclick="switchParentTab('home')"><span class="nav-icon" id="picon-home"></span>Inicio</button>
+    <button class="nav-btn" id="pnav-record" onclick="switchParentTab('record')"><span class="nav-icon" id="picon-record"></span>Grabar</button>
+    <button class="nav-btn" id="pnav-library" onclick="switchParentTab('library')"><span class="nav-icon" id="picon-library"></span>Cuentos</button>
+    <button class="nav-btn" id="pnav-progress" onclick="switchParentTab('progress')"><span class="nav-icon" id="picon-progress"></span>Progreso</button>
+    <button class="nav-btn" id="pnav-tokens" onclick="switchParentTab('tokens')"><span class="nav-icon" id="picon-tokens"></span>Tokens</button>
   </div>
 </div>
 
@@ -2035,11 +2086,11 @@ textarea{resize:vertical;min-height:80px}
   </div>
 
   <div class="kid-bottom-nav">
-    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')"><span class="nav-icon">🏠</span>Inicio</button>
-    <button class="kid-nav-btn" id="knav-player" onclick="switchKidTab('player')"><span class="nav-icon">▶️</span>Cuento</button>
-    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()"><span class="nav-icon">🎨</span>Dibujar</button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')"><span class="nav-icon">🎮</span>Jugar</button>
-    <button class="kid-nav-btn" id="knav-stars" onclick="switchKidTab('stars')"><span class="nav-icon">⭐</span>Logros</button>
+    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')"><span class="nav-icon" id="kicon-home"></span>Inicio</button>
+    <button class="kid-nav-btn" id="knav-player" onclick="switchKidTab('player')"><span class="nav-icon" id="kicon-player"></span>Cuento</button>
+    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()"><span class="nav-icon" id="kicon-draw"></span>Dibujar</button>
+    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')"><span class="nav-icon" id="kicon-play"></span>Jugar</button>
+    <button class="kid-nav-btn" id="knav-stars" onclick="switchKidTab('stars')"><span class="nav-icon" id="kicon-stars"></span>Logros</button>
   </div>
 </div>
 
@@ -2694,6 +2745,7 @@ function showParentApp() {
   }
   switchParentTab('home');
   showScreen('parentApp');
+  injectNavSprites();
 }
 
 function switchParentTab(tab) {
@@ -2733,6 +2785,36 @@ function _doSwitchParentTab(tab) {
   if(tab==='record') showRecTab();
 }
 
+function injectNavSprites() {
+  // Parent nav
+  const pNav = [
+    ['picon-home',     ICON_SPRITES.home,     28],
+    ['picon-record',   ICON_SPRITES.mic,      28],
+    ['picon-library',  ICON_SPRITES.books,    28],
+    ['picon-progress', ICON_SPRITES.progress, 28],
+    ['picon-tokens',   ICON_SPRITES.trophy,   28],
+  ];
+  pNav.forEach(([id, sprite, size]) => {
+    const el = document.getElementById(id);
+    if(!el || !sprite) return;
+    const scale = size / Math.max(sprite.w, sprite.h);
+    el.style.cssText = `display:block;width:${size}px;height:${size}px;` + spriteBg(sprite, size);
+  });
+  // Kid nav
+  const kNav = [
+    ['kicon-home',   ICON_SPRITES.home,   28],
+    ['kicon-player', ICON_SPRITES.play,   28],
+    ['kicon-draw',   ICON_SPRITES.pencil, 28],
+    ['kicon-play',   ICON_SPRITES.star,   28],
+    ['kicon-stars',  ICON_SPRITES.trophy, 28],
+  ];
+  kNav.forEach(([id, sprite, size]) => {
+    const el = document.getElementById(id);
+    if(!el || !sprite) return;
+    el.style.cssText = `display:block;width:${size}px;height:${size}px;` + spriteBg(sprite, size);
+  });
+}
+
 function buildParentVoicePills() {
   const el=document.getElementById('parentVoicePills');
   if(!el) return;
@@ -2740,9 +2822,9 @@ function buildParentVoicePills() {
   el.innerHTML=VOICES.map(v=>{
     const locked=!v.free && !prem;
     const isActive=v.id===appState.selectedVoice;
-    return `<button class="voice-pill ${isActive?'active':''} ${!v.free?'premium-voice':''}" onclick="${locked?`showToast('🔒 Disponible en Premium')`:`selectParentVoice('${v.id}')`}" style="${locked?'opacity:0.5':''}">
-      ${locked?'🔒 ':''}${v.label}${!v.free&&prem?'<span style="font-size:9px;color:var(--gold);display:block">✨</span>':''}
-    </button>`;
+    const onclick=locked ? "showToast('🔒 Disponible en Premium')" : "selectParentVoice('"+v.id+"')";
+    const premStar=(!v.free&&prem)?'<span style="font-size:9px;color:var(--gold);display:block">✨</span>':'';
+    return '<button class="voice-pill '+(isActive?'active':'')+' '+(!v.free?'premium-voice':'')+'" onclick="'+onclick+'" style="'+(locked?'opacity:0.5':'')+'">'+(locked?'🔒 ':'')+v.label+premStar+'</button>';
   }).join('');
 }
 
@@ -2755,11 +2837,26 @@ function selectParentVoice(id) {
 function buildParentCharGrid() {
   const el=document.getElementById('parentCharGrid');
   if(!el) return;
-  el.innerHTML=CHARACTERS.map(c=>
-    `<button class="char-btn ${c.emoji===appState.selectedChar?'active':''}" onclick="selectParentChar('${c.emoji}')">
-      ${c.emoji}<span>${c.name}</span>
-    </button>`
-  ).join('');
+  const chars=[
+    {id:'dragon',label:'Dragón'},
+    {id:'hada',label:'Hada'},
+    {id:'leon',label:'León'},
+    {id:'delfin',label:'Delfín'},
+    {id:'zorro',label:'Zorro'},
+    {id:'robot',label:'Robot'},
+    {id:'unicornio',label:'Unicornio'},
+    {id:'mago',label:'Mago'},
+  ];
+  el.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px';
+  el.innerHTML=chars.map(c=>{
+    const sprite=CHAR_SPRITES[c.id];
+    const isActive=appState.selectedChar===c.id;
+    const bg=sprite?spriteBg(sprite,64):'';
+    return `<button onclick="selectParentChar('${c.id}')" style="padding:8px 4px;border-radius:14px;border:2px solid ${isActive?'var(--lavender)':'rgba(255,255,255,.06)'};background:${isActive?'rgba(167,139,250,.15)':'var(--bg2)'};cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .2s">
+      <div style="width:56px;height:56px;${bg}border-radius:8px"></div>
+      <span style="font-size:10px;font-weight:700;color:${isActive?'var(--lavender)':'var(--text2)'}">${c.label}</span>
+    </button>`;
+  }).join('');
 }
 
 function selectParentChar(e) {
@@ -3060,19 +3157,23 @@ async function loadParentLibrary() {
     el.innerHTML=`<div class="empty-state"><div class="empty-icon">📚</div><p>Aún no grabaste ningún cuento</p></div>`;
     return;
   }
-  el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>`
-    <div class="story-card">
-      <div class="story-thumb">${s.char||'📖'}</div>
+  el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>{
+    const sprite=CHAR_SPRITES[s.char];
+    const thumbContent=sprite
+      ? `<div style="width:100%;height:100%;${spriteBg(sprite,60)}border-radius:12px"></div>`
+      : `<span style="font-size:28px">${s.char||'📖'}</span>`;
+    return `<div class="story-card" onclick="openEditStory('${s.id}')">
+      <div class="story-thumb">${thumbContent}</div>
       <div class="story-info">
         <div class="story-title">${s.title}</div>
         <div class="story-meta">${s.created||''} ${s.hasAudio?'🔊':'📝'}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
-        <button class="btn btn-ghost btn-sm" onclick="editStory('${s.id}')">✏️</button>
-        <button class="btn btn-danger btn-sm" onclick="deleteStory('${s.id}')">🗑</button>
-        <button class="btn btn-green btn-sm" onclick="downloadStoryAudio('${s.id}')">📥</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editStory('${s.id}')">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteStory('${s.id}')">🗑</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 async function loadParentHomeStories() {
@@ -3503,7 +3604,15 @@ function stopSpeakStory() {
 let portadaLocked = false; // portada is permanent once set
 function updatePortadaChar() {
   const el = document.getElementById('portadaChar');
-  if(el) el.textContent = appState.selectedChar;
+  if(!el) return;
+  const sprite = CHAR_SPRITES[appState.selectedChar];
+  if(sprite) {
+    el.style.cssText = `width:120px;height:120px;${spriteBg(sprite,120)}margin:0 auto;display:block;border-radius:12px`;
+    el.textContent = '';
+  } else {
+    el.style.cssText = 'font-size:80px';
+    el.textContent = appState.selectedChar || '🐉';
+  }
 }
 function updatePortadaTitleOverlay() {
   const title = document.getElementById('storyTitle')?.value?.trim();
@@ -4258,9 +4367,15 @@ async function loadKidHomeStories() {
   }
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>{
     const img=s.images&&s.images[0];
-    return `<div class="kid-story-card" onclick="openKidStory('${s.id}')" style="background:var(--card2)">
-      ${img?`<img class="kid-story-card-img" src="${img}" onerror="this.parentElement.querySelector('.kid-story-card-img-placeholder').style.display='flex';this.style.display='none'">`:''}
-      <div class="kid-story-card-img-placeholder" style="${img?'display:none':'display:flex'}">${s.char||'📖'}</div>
+    const sprite=CHAR_SPRITES[s.char];
+    const thumbBg=sprite?spriteBg(sprite,70):'';
+    return `<div class="kid-story-card" onclick="openKidStory('${s.id}')">
+      ${img
+        ? `<img class="kid-story-card-img" src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : ''}
+      <div class="kid-story-card-img-placeholder" style="${img?'display:none':'display:flex'};${thumbBg}${!sprite?'font-size:32px':''}">
+        ${!sprite?(s.char||'📖'):''}
+      </div>
       <div class="kid-story-card-body">
         <div class="kid-story-card-title">${s.title}</div>
         <div class="kid-story-card-meta">por Papá/Mamá · ${s.created||''}</div>
