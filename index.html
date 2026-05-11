@@ -542,9 +542,23 @@ input:focus, textarea:focus { border-color: var(--accent2); }
       <h1><span class="logo-o">O</span><span class="logo-w">W</span><span class="logo-n">N</span></h1>
       <p>✨ Cuentos Mágicos ✨</p>
     </div>
-    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="setupProgress" style="width:33%"></div></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="setupProgress" style="width:25%"></div></div>
 
-    <div class="step active" id="step1">
+    <!-- PASO 0: Código de familia -->
+    <div class="step active" id="step0">
+      <div class="card-title" style="font-size:16px;color:var(--text);margin-bottom:8px">🔑 Código de acceso</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6">Ingresá el código que te enviamos por WhatsApp para activar tu familia.</p>
+      <div class="input-group">
+        <label>Código de familia</label>
+        <input type="text" id="setupCodigo" placeholder="Ej: OWN-1004" style="text-transform:uppercase;letter-spacing:2px;font-weight:800;font-size:18px;text-align:center">
+      </div>
+      <div id="codigoError" style="display:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:10px;font-size:13px;color:#f87171;margin-bottom:10px;text-align:center"></div>
+      <button class="btn-primary" onclick="setupVerificarCodigo()">Verificar código →</button>
+      <p style="font-size:11px;color:var(--text3);text-align:center;margin-top:14px;line-height:1.6">¿No tenés código? Escribinos por WhatsApp para solicitar acceso beta.</p>
+    </div>
+
+    <!-- PASO 1: Datos del padre -->
+    <div class="step" id="step1">
       <div class="card-title" style="font-size:16px;color:var(--text);margin-bottom:8px">👨 Cuenta de Papá / Mamá</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:18px">Esta contraseña protege el modo de grabación y configuración.</p>
       <div class="input-group"><label>Nombre</label><input type="text" id="setupParentName" placeholder="Ej: Papá Marcos"></div>
@@ -553,6 +567,7 @@ input:focus, textarea:focus { border-color: var(--accent2); }
       <button class="btn-primary" onclick="setupStep2()">Siguiente →</button>
     </div>
 
+    <!-- PASO 2: Datos del niño -->
     <div class="step" id="step2">
       <div class="card-title" style="font-size:16px;color:var(--text);margin-bottom:8px">🧒 Cuenta del Niño/a</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:18px">El niño usará esta contraseña para acceder a sus cuentos.</p>
@@ -562,11 +577,13 @@ input:focus, textarea:focus { border-color: var(--accent2); }
       <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="goStep(1)">← Volver</button>
     </div>
 
+    <!-- PASO 3: Todo listo -->
     <div class="step" id="step3">
       <div style="text-align:center;padding:20px 0">
         <div style="font-size:64px;margin-bottom:16px">🎉</div>
         <div style="font-family:'Fredoka One',cursive;font-size:24px;margin-bottom:8px">¡Todo listo!</div>
-        <p style="font-size:14px;color:var(--text2);margin-bottom:24px">Las cuentas están creadas. ¡Comenzá a crear cuentos mágicos!</p>
+        <div id="setupBetaInfo" style="background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:12px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--accent3);line-height:1.6"></div>
+        <p style="font-size:14px;color:var(--text2);margin-bottom:24px">¡Comenzá a crear cuentos mágicos!</p>
         <button class="btn-primary" onclick="finishSetup()">¡Empezar! 🚀</button>
       </div>
     </div>
@@ -631,6 +648,9 @@ input:focus, textarea:focus { border-color: var(--accent2); }
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
+
+  <!-- Beta expiry banner -->
+  <div id="betaBanner" style="display:none;background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(245,158,11,.08));border-bottom:1px solid rgba(251,191,36,.3);padding:8px 16px;text-align:center;font-size:12px;font-weight:700;color:var(--gold);flex-shrink:0"></div>
 
   <div class="content" id="parentContent">
 
@@ -2055,6 +2075,28 @@ async function init() {
   appState.stars = parseInt(localStorage.getItem('ownStars') || '0');
   appState.parentName = settings.parentName || 'Papá';
   appState.kidName = settings.kidName || 'Niño';
+
+  // Verificar vencimiento beta
+  const venceStr = localStorage.getItem('ownVenceEn');
+  if(venceStr) {
+    const vence = new Date(venceStr);
+    const hoy = new Date();
+    const diasRestantes = Math.ceil((vence - hoy) / (1000*60*60*24));
+    if(diasRestantes <= 0) {
+      // Acceso vencido
+      showScreen('setupScreen');
+      goStep(0);
+      const errEl = document.getElementById('codigoError');
+      if(errEl) {
+        errEl.textContent = '⏳ Tu acceso beta venció. Escribinos por WhatsApp para renovarlo.';
+        errEl.style.display = 'block';
+      }
+      return;
+    }
+    appState.diasRestantes = diasRestantes;
+    localStorage.setItem('ownDiasRestantes', diasRestantes);
+  }
+
   const session = localStorage.getItem('ownSession');
   if (session === 'parent') showParentApp();
   else if (session === 'kid') showKidApp();
@@ -2067,6 +2109,64 @@ function showScreen(id) {
 }
 
 // ===================== SETUP =====================
+// ===================== SETUP =====================
+function goStep(n) {
+  [0,1,2,3].forEach(i => {
+    const el = document.getElementById('step'+i);
+    if(el) el.classList.toggle('active', i===n);
+  });
+  document.getElementById('setupProgress').style.width=((n+1)/4*100)+'%';
+}
+
+async function setupVerificarCodigo() {
+  const codigo = document.getElementById('setupCodigo').value.trim().toUpperCase();
+  const errEl = document.getElementById('codigoError');
+  errEl.style.display = 'none';
+
+  if(!codigo || codigo.length < 4) {
+    errEl.textContent = '❌ Ingresá tu código de acceso';
+    errEl.style.display = 'block'; return;
+  }
+
+  if(!supa) {
+    errEl.textContent = '❌ Sin conexión al servidor. Verificá tu internet.';
+    errEl.style.display = 'block'; return;
+  }
+
+  showLoading('Verificando código...');
+  try {
+    const { data, error } = await supa
+      .from('familias')
+      .select('*')
+      .eq('codigo', codigo)
+      .single();
+
+    hideLoading();
+
+    if(error || !data) {
+      errEl.textContent = '❌ Código no encontrado. Verificá que esté bien escrito.';
+      errEl.style.display = 'block'; return;
+    }
+
+    if(data.activo) {
+      errEl.textContent = '❌ Este código ya fue activado. Cada código es para una sola familia.';
+      errEl.style.display = 'block'; return;
+    }
+
+    // Código válido — guardar y continuar
+    localStorage.setItem('ownFamiliaId', data.id);
+    localStorage.setItem('ownCodigo', codigo);
+    console.log('✅ Código válido:', codigo, '| familia_id:', data.id);
+    goStep(1);
+
+  } catch(e) {
+    hideLoading();
+    console.error('setupVerificarCodigo error:', e);
+    errEl.textContent = '❌ Error de conexión. Intentá de nuevo.';
+    errEl.style.display = 'block';
+  }
+}
+
 async function setupStep2() {
   const name=document.getElementById('setupParentName').value.trim();
   const pass=document.getElementById('setupParentPass').value;
@@ -2079,6 +2179,7 @@ async function setupStep2() {
   localStorage.setItem('ownParentName',name);
   goStep(2);
 }
+
 async function setupStep3() {
   const name=document.getElementById('setupKidName').value.trim();
   const pass=document.getElementById('setupKidPass').value;
@@ -2088,13 +2189,40 @@ async function setupStep3() {
   localStorage.setItem('ownKidPass',hash);
   localStorage.setItem('ownKidName',name);
   goStep(3);
+
+  // Calcular fecha de vencimiento (15 días desde hoy)
+  const vence = new Date();
+  vence.setDate(vence.getDate() + 15);
+  const venceStr = vence.toLocaleDateString('es-AR');
+  localStorage.setItem('ownVenceEn', vence.toISOString());
+
+  // Mostrar info beta
+  const betaEl = document.getElementById('setupBetaInfo');
+  if(betaEl) betaEl.innerHTML = `⏳ Tu acceso beta vence el <strong>${venceStr}</strong><br>Tenés 15 días para probar OWN con tu familia.`;
+
+  // Activar familia en Supabase
+  const familiaId = getFamiliaId();
+  const parentName = document.getElementById('setupParentName').value.trim();
+  const kidName = name;
+  const parentHash = localStorage.getItem('ownParentPass');
+  const kidHash = hash;
+
+  if(supa && familiaId) {
+    const venceISO = vence.toISOString();
+    supa.from('familias').update({
+      activo: true,
+      nombre_padre: parentName,
+      nombre_nino: kidName,
+      password_hash: parentHash,
+      vence_en: venceISO,
+    }).eq('id', familiaId)
+    .then(({error}) => {
+      if(error) console.error('Error activando familia:', error.message);
+      else console.log('✅ Familia activada en Supabase');
+    });
+  }
 }
-function goStep(n) {
-  [1,2,3].forEach(i => {
-    document.getElementById('step'+i).classList.toggle('active', i===n);
-  });
-  document.getElementById('setupProgress').style.width=(n/3*100)+'%';
-}
+
 function finishSetup() {
   const parentName=localStorage.getItem('ownParentName')||'Papá';
   const kidName=localStorage.getItem('ownKidName')||'Niño';
@@ -2149,17 +2277,12 @@ function doLogout() {
 function doFullReset() {
   if(!confirm('¿Seguro? Esto borra toda la configuración y los cuentos del celular.')) return;
   localStorage.clear();
-  // Limpiar estado de audio
   appState.kidOwnAudioBlob = null;
   appState.recordedBlob = null;
   if(appState.kidAudio){ try{ appState.kidAudio.pause(); }catch(e){} appState.kidAudio=null; }
   if(appState.recAudio){ try{ appState.recAudio.pause(); }catch(e){} appState.recAudio=null; }
-  // Ir al setup para crear nuevas contraseñas
   showScreen('setupScreen');
-  // Resetear pasos del setup
-  ['setupStep1','setupStep2','setupStep3'].forEach((id,i)=>{
-    const el=document.getElementById(id); if(el) el.style.display=i===0?'block':'none';
-  });
+  goStep(0);
 }
 
 async function doResetPassword() {
@@ -2200,6 +2323,20 @@ function showParentApp() {
   parentSelectedCelebration='fiesta';
   buildParentSequenceScenes();
   updateParentNotifBadge();
+  // Beta expiry banner
+  const diasRestantes = parseInt(localStorage.getItem('ownDiasRestantes') || '99');
+  const betaBanner = document.getElementById('betaBanner');
+  if(betaBanner) {
+    if(diasRestantes <= 5) {
+      betaBanner.style.display = 'block';
+      betaBanner.innerHTML = `⏳ Tu acceso beta vence en <strong>${diasRestantes} día${diasRestantes!==1?'s':''}</strong> — Escribinos por WhatsApp para renovar`;
+    } else if(diasRestantes <= 10) {
+      betaBanner.style.display = 'block';
+      betaBanner.innerHTML = `⏳ Acceso beta: ${diasRestantes} días restantes`;
+    } else {
+      betaBanner.style.display = 'none';
+    }
+  }
   switchParentTab('home');
   showScreen('parentApp');
 }
