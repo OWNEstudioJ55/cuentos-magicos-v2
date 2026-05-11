@@ -1117,20 +1117,11 @@ textarea{resize:vertical;min-height:80px}
       <!-- ========== STEP 2: ESCENAS ========== -->
       <div id="recStep-2" style="display:none">
         <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:4px;background:linear-gradient(135deg,var(--accent2),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent">2️⃣ Elegir las 5 escenas</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Armá las escenas del cuento. Elegí el personaje y la acción de cada una, luego generá las imágenes.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Tocá cada escena para elegir el personaje y la acción. La última escena es el final festivo.</p>
 
         <div id="parentSequenceScenes"></div>
-        <div style="margin-top:14px">
-          <div class="card-title" style="margin-bottom:8px">🎉 Final festivo</div>
-          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px" id="parentCelebrationPicker">
-            <button class="seq-action-btn" data-cel="torta" onclick="selectParentCelebration('torta')"><span class="seq-action-icon">🎂</span>Torta</button>
-            <button class="seq-action-btn" data-cel="baile" onclick="selectParentCelebration('baile')"><span class="seq-action-icon">💃</span>Baile</button>
-            <button class="seq-action-btn" data-cel="risas" onclick="selectParentCelebration('risas')"><span class="seq-action-icon">😂</span>Risas</button>
-            <button class="seq-action-btn active" data-cel="fiesta" onclick="selectParentCelebration('fiesta')"><span class="seq-action-icon">🎊</span>Fiesta</button>
-            <button class="seq-action-btn" data-cel="globos" onclick="selectParentCelebration('globos')"><span class="seq-action-icon">🎈</span>Globos</button>
-          </div>
-        </div>
-        <button class="btn btn-accent btn-full" onclick="generateParentSequenceImages()" id="btnGenScenes">✨ Generar las 5 imágenes</button>
+
+        <button class="btn btn-accent btn-full" onclick="generateParentSequenceImages()" id="btnGenScenes" style="margin-top:10px">✨ Generar las 5 imágenes</button>
 
         <!-- Preview grid of generated images -->
         <div id="scenesPreviewGrid" style="display:none;margin-top:14px">
@@ -1147,7 +1138,12 @@ textarea{resize:vertical;min-height:80px}
       <!-- ========== STEP 3: GRABAR (imágenes arriba, botón abajo) ========== -->
       <div id="recStep-3" style="display:none">
         <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:4px;background:linear-gradient(135deg,var(--accent),#ff6fd8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">3️⃣ Grabar el cuento</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Las imágenes pasan mientras grabás. Podés avanzarlas manualmente o dejar que pasen solas.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Las imágenes pasan mientras grabás. Podés avanzarlas o dejar que pasen solas.</p>
+
+        <!-- Título editable en el paso de grabación -->
+        <div style="margin-bottom:12px">
+          <input type="text" id="storyTitleStep3" placeholder="✏️ Título del cuento (podés cambiarlo acá)" style="font-size:15px;text-align:center;font-weight:700" oninput="document.getElementById('storyTitle').value=this.value;updatePortadaTitleOverlay()">
+        </div>
 
         <!-- Slideshow de escenas mientras graba — arriba -->
         <div style="background:var(--bg2);border-radius:18px;overflow:hidden;margin-bottom:14px;border:2px solid rgba(167,139,250,0.25)">
@@ -1785,8 +1781,11 @@ textarea{resize:vertical;min-height:80px}
           <!-- Big record button at bottom -->
           <div style="background:var(--card);border-radius:18px;padding:20px;text-align:center;margin-bottom:14px">
             <div class="timer-display" id="kidRecTimer" style="font-size:48px;margin-bottom:6px">0:00</div>
-            <div class="rec-status" id="kidRecStatus" style="font-size:15px;margin-bottom:16px">¡Tocá para grabar!</div>
-            <button class="record-circle" id="kidRecBtn" onclick="toggleKidRecord()" style="width:120px;height:120px;font-size:52px;margin:0 auto">🎙️</button>
+            <div class="rec-status" id="kidRecStatus" style="font-size:15px;margin-bottom:16px">Tocá para grabar tu cuento</div>
+            <button id="kidRecBtn" onclick="toggleKidRecord()" style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#ff8e53);border:none;color:white;cursor:pointer;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(255,107,107,.5);transition:transform .15s;font-size:inherit">
+              <span style="font-size:48px;line-height:1">🎙️</span>
+              <span style="font-size:16px;font-weight:900;margin-top:6px;font-family:'Nunito',sans-serif">GRABAR</span>
+            </button>
           </div>
 
           <!-- Playback after recording -->
@@ -1876,10 +1875,13 @@ textarea{resize:vertical;min-height:80px}
 
       <!-- Grabación de voz para el cuento dibujado -->
       <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(255,111,216,0.2)">
-        <div style="font-family:'Baloo 2',cursive;font-size:17px;margin-bottom:10px;color:var(--accent)">🎙️ Grabá tu voz para el cuento</div>
-        <div class="timer-display" id="kidDrawRecTimer" style="font-size:32px">0:00</div>
-        <div class="rec-status" id="kidDrawRecStatus">¡Tocá para grabar!</div>
-        <button class="record-circle" id="kidDrawRecBtn" onclick="toggleKidDrawRecord()" style="width:100px;height:100px;font-size:44px;margin:12px auto">🎙️</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:17px;margin-bottom:10px;color:var(--coral)">🎙️ Grabá tu voz para el cuento</div>
+        <div class="timer-display" id="kidDrawRecTimer" style="font-size:36px;margin-bottom:4px">0:00</div>
+        <div class="rec-status" id="kidDrawRecStatus">Tocá para grabar tu voz</div>
+        <button id="kidDrawRecBtn" onclick="toggleKidDrawRecord()" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#ff8e53);border:none;color:white;cursor:pointer;margin:8px auto 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(255,107,107,.5);transition:transform .15s">
+          <span style="font-size:36px">🎙️</span>
+          <span style="font-size:13px;font-weight:800;margin-top:4px">GRABAR</span>
+        </button>
         <div id="kidDrawRecPlayback" style="display:none;margin-top:12px">
           <div style="font-size:13px;font-weight:800;color:var(--accent3);margin-bottom:8px">✅ Escuchá tu grabación:</div>
           <div class="audio-player" style="background:rgba(0,0,0,0.15);border-radius:12px;padding:12px">
@@ -2695,6 +2697,31 @@ function showParentApp() {
 }
 
 function switchParentTab(tab) {
+  // Si está grabando o tiene grabación no guardada, preguntar
+  if(tab !== 'record' && (appState.isRecording || appState.recordedBlob)) {
+    showSaveBeforeLeaveDialog(tab);
+    return;
+  }
+  _doSwitchParentTab(tab);
+}
+
+function showSaveBeforeLeaveDialog(targetTab) {
+  const div=document.createElement('div');
+  div.className='modal-overlay open';
+  div.innerHTML=`<div class="modal-box" style="text-align:center">
+    <div style="font-size:48px;margin-bottom:12px">🎙️</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:8px;color:var(--text)">¿Guardás la grabación?</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:24px;line-height:1.6">Tenés una grabación sin guardar. Si salís ahora la perdés.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-danger btn-full" onclick="this.closest('.modal-overlay').remove();_doSwitchParentTab('${targetTab}');appState.recordedBlob=null;appState.recAudio=null;">Salir sin guardar</button>
+      <button class="btn btn-green btn-full" onclick="this.closest('.modal-overlay').remove();">Quedarme a grabar</button>
+    </div>
+  </div>`;
+  div.addEventListener('click',e=>{ if(e.target===div) div.remove(); });
+  document.body.appendChild(div);
+}
+
+function _doSwitchParentTab(tab) {
   ['home','record','library','tokens','progress'].forEach(t=>{
     document.getElementById('pTab-'+t).style.display=t===tab?'block':'none';
     const nav=document.getElementById('pnav-'+t);
@@ -2764,8 +2791,14 @@ function goRecStep(n) {
     const tab=document.getElementById('rstab-'+i);
     if(tab) { tab.classList.toggle('active',i===n); tab.classList.toggle('done',i<n); }
   });
+  if(n===3) {
+    // Sync title from step 1 to step 3 editable field
+    const t1=document.getElementById('storyTitle');
+    const t3=document.getElementById('storyTitleStep3');
+    if(t1&&t3) t3.value=t1.value;
+    buildRecSlideshow(appState.currentStoryImages||[]);
+  }
   if(n===4) updateRecStep4Summary();
-  // Scroll to top of content
   const content=document.getElementById('parentContent');
   if(content) content.scrollTo(0,0);
 }
@@ -4051,21 +4084,81 @@ function showParentNotifs() {
 // ===================== SEQUENCE BUILDER PARENT =====================
 let parentSequenceData=[{},{},{},{},{}], parentSelectedCelebration='fiesta';
 function buildParentSequenceScenes() {
-  const el=document.getElementById('parentSequenceScenes');
-  if(!el) return;
-  el.innerHTML=parentSequenceData.map((scene,i)=>`
-    <div class="seq-scene ${scene.char&&scene.action?'complete':''}" id="pScene${i}">
-      <div class="seq-scene-title">Escena ${i+1}</div>
-      <div class="seq-char-row">${SEQ_CHARS.map(c=>`<button class="seq-char-pick ${scene.char===c?'active':''}" onclick="selectParentSeqChar(${i},'${c}')">${c}</button>`).join('')}</div>
-      <div class="seq-actions">${SEQ_ACTIONS.map((a,j)=>`<button class="seq-action-btn ${scene.action===j?'active':''}" onclick="selectParentSeqAction(${i},${j})"><span class="seq-action-icon">${a.icon}</span>${a.label}</button>`).join('')}</div>
-    </div>`).join('');
+  const el=document.getElementById('parentSequenceScenes'); if(!el) return;
+  el.innerHTML=parentSequenceData.map((scene,i)=>{
+    const charSel=scene.char||null;
+    const actSel=scene.action!==undefined?SEQ_ACTIONS[scene.action]:null;
+    const isLast=i===4;
+    const celSel=SEQ_CELEBRATIONS.find(c=>c.id===parentSelectedCelebration)||SEQ_CELEBRATIONS[3];
+    const done=charSel&&(actSel||isLast);
+    return `<div class="seq-scene${done?' complete':''}" id="pScene${i}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div class="seq-scene-title" style="margin:0">Escena ${i+1}${isLast?' 🎉':''}</div>
+        ${done?'<span style="color:var(--mint);font-size:16px">✅</span>':''}
+      </div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1">
+          <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:4px">PERSONAJE</div>
+          <button onclick="toggleSeqPicker('char',${i})" style="width:100%;padding:12px 8px;border-radius:12px;border:2px solid ${charSel?'var(--lavender)':'rgba(255,255,255,.08)'};background:${charSel?'rgba(167,139,250,.15)':'var(--bg2)'};cursor:pointer;font-size:${charSel?'28px':'20px'};display:block;text-align:center">
+            ${charSel||'➕'}
+          </button>
+          <div id="charPicker${i}" style="display:none;background:var(--card3);border-radius:12px;padding:8px;margin-top:6px;border:1px solid rgba(167,139,250,.2)">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
+              ${SEQ_CHARS.map(c=>`<button onclick="selectParentSeqChar(${i},'${c}')" style="font-size:22px;padding:8px;border-radius:8px;border:2px solid ${scene.char===c?'var(--lavender)':'rgba(255,255,255,.06)'};background:${scene.char===c?'rgba(167,139,250,.2)':'var(--bg2)'};cursor:pointer">${c}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:4px">${isLast?'FESTEJO':'ACCIÓN'}</div>
+          <button onclick="toggleSeqPicker('${isLast?'celeb':'action'}',${i})" style="width:100%;padding:12px 8px;border-radius:12px;border:2px solid ${(actSel||isLast)?'var(--coral)':'rgba(255,255,255,.08)'};background:${(actSel||isLast)?'rgba(255,107,107,.12)':'var(--bg2)'};cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
+            <span style="font-size:${(actSel||isLast)?'22px':'18px'}">${isLast?celSel.icon:(actSel?actSel.icon:'➕')}</span>
+            <span style="font-size:11px;font-weight:700;color:${(actSel||isLast)?'var(--coral)':'var(--text3)'}">${isLast?celSel.label:(actSel?actSel.label:'elegir')}</span>
+          </button>
+          ${!isLast?`<div id="actionPicker${i}" style="display:none;background:var(--card3);border-radius:12px;padding:8px;margin-top:6px;border:1px solid rgba(255,107,107,.2)">
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              ${SEQ_ACTIONS.map((a,j)=>`<button onclick="selectParentSeqAction(${i},${j})" style="padding:5px 8px;border-radius:8px;border:2px solid ${scene.action===j?'var(--coral)':'rgba(255,255,255,.06)'};background:${scene.action===j?'rgba(255,107,107,.15)':'var(--bg2)'};cursor:pointer;font-size:12px;font-weight:700;color:${scene.action===j?'var(--coral)':'var(--text2)'};font-family:Nunito,sans-serif">${a.icon} ${a.label}</button>`).join('')}
+            </div>
+          </div>`:
+          `<div id="celebPicker${i}" style="display:none;background:var(--card3);border-radius:12px;padding:8px;margin-top:6px;border:1px solid rgba(255,209,102,.2)">
+            <div style="display:flex;flex-wrap:wrap;gap:5px">
+              ${SEQ_CELEBRATIONS.map(c=>`<button onclick="selectParentCelebration('${c.id}')" style="padding:5px 10px;border-radius:8px;border:2px solid ${parentSelectedCelebration===c.id?'var(--warm)':'rgba(255,255,255,.06)'};background:${parentSelectedCelebration===c.id?'rgba(255,209,102,.15)':'var(--bg2)'};cursor:pointer;font-size:12px;font-weight:700;color:${parentSelectedCelebration===c.id?'var(--warm)':'var(--text2)'};font-family:Nunito,sans-serif">${c.icon} ${c.label}</button>`).join('')}
+            </div>
+          </div>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
-function selectParentSeqChar(sceneIdx,char) { parentSequenceData[sceneIdx].char=char; buildParentSequenceScenes(); }
-function selectParentSeqAction(sceneIdx,actionIdx) { parentSequenceData[sceneIdx].action=actionIdx; buildParentSequenceScenes(); }
+function toggleSeqPicker(type,idx) {
+  const pid=`${type==='char'?'charPicker':type==='action'?'actionPicker':'celebPicker'}${idx}`;
+  document.querySelectorAll('[id^="charPicker"],[id^="actionPicker"],[id^="celebPicker"]').forEach(el=>{
+    el.style.display = el.id===pid ? (el.style.display==='none'?'block':'none') : 'none';
+  });
+}
+
+const SEQ_CELEBRATIONS=[
+  {id:'torta',icon:'🎂',label:'Torta'},{id:'baile',icon:'💃',label:'Baile'},
+  {id:'risas',icon:'😂',label:'Risas'},{id:'fiesta',icon:'🎊',label:'Fiesta'},
+  {id:'globos',icon:'🎈',label:'Globos'},
+];
+
+function selectParentSeqChar(sceneIdx,char) {
+  parentSequenceData[sceneIdx].char=char;
+  const pid=`charPicker${sceneIdx}`;
+  buildParentSequenceScenes();
+  // Reopen picker after rebuild so user can see selection
+  const picker=document.getElementById(pid); if(picker) picker.style.display='none';
+}
+function selectParentSeqAction(sceneIdx,actionIdx) {
+  parentSequenceData[sceneIdx].action=actionIdx;
+  buildParentSequenceScenes();
+  const picker=document.getElementById(`actionPicker${sceneIdx}`); if(picker) picker.style.display='none';
+}
 function selectParentCelebration(cel) {
   parentSelectedCelebration=cel;
-  document.querySelectorAll('#parentCelebrationPicker .seq-action-btn').forEach(b=>b.classList.toggle('active',b.dataset.cel===cel));
+  buildParentSequenceScenes();
+  const picker=document.getElementById(`celebPicker4`); if(picker) picker.style.display='none';
 }
 
 async function generateParentSequenceImages() {
@@ -4598,8 +4691,13 @@ async function toggleKidRecord() {
     appState.isKidRecording=true;
     appState.kidRecSeconds=0;
     const btn=document.getElementById('kidRecBtn');
-    if(btn){ btn.classList.add('recording'); btn.textContent='⏹️'; }
-    const ks=document.getElementById('kidRecStatus'); if(ks) ks.textContent='🔴 Grabando...';
+    if(btn){
+      btn.classList.add('recording');
+      btn.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
+      btn.style.boxShadow='0 8px 32px rgba(239,68,68,.6)';
+      btn.innerHTML='<span style="font-size:48px;line-height:1">⏹️</span><span style="font-size:16px;font-weight:900;margin-top:6px;font-family:Nunito,sans-serif">PARAR</span>';
+    }
+    const ks=document.getElementById('kidRecStatus'); if(ks) ks.textContent='🔴 Grabando... tocá PARAR cuando termines';
     clearInterval(kidRecordingInterval);
     kidRecordingInterval=setInterval(()=>{
       appState.kidRecSeconds=(appState.kidRecSeconds||0)+1;
@@ -4613,8 +4711,13 @@ function stopKidRecord() {
     appState.kidMediaRecorder.stop(); appState.isKidRecording=false;
     clearInterval(kidRecordingInterval);
     const btn=document.getElementById('kidRecBtn');
-    if(btn){ btn.classList.remove('recording'); btn.textContent='🎙️'; }
-    const ks=document.getElementById('kidRecStatus'); if(ks) ks.textContent='✅ ¡Grabado! Escuchá ↓';
+    if(btn){
+      btn.classList.remove('recording');
+      btn.style.background='linear-gradient(135deg,var(--coral),#ff8e53)';
+      btn.style.boxShadow='0 8px 32px rgba(255,107,107,.5)';
+      btn.innerHTML='<span style="font-size:48px;line-height:1">🎙️</span><span style="font-size:16px;font-weight:900;margin-top:6px;font-family:Nunito,sans-serif">GRABAR</span>';
+    }
+    const ks=document.getElementById('kidRecStatus'); if(ks) ks.textContent='✅ ¡Listo! Escuchá tu cuento abajo';
   }
 }
 
@@ -4641,19 +4744,12 @@ function deleteKidRecording() {
 async function applyVoiceToKidRecording() {
   if(!appState.kidOwnAudioBlob){ showToast('❌ Grabá tu voz primero'); return; }
   const v=VOICES.find(v=>v.id===appState.kidVoice)||VOICES[0];
-  if(v.id==='normal'){
-    showToast('Elegí una voz diferente primero');
-    return;
-  }
+  if(v.id==='normal'){ showToast('Elegí una voz diferente primero'); return; }
 
-  // Simple approach: apply playbackRate directly to the Audio element.
-  // OfflineAudioContext re-encoding is unreliable on mobile (iOS/Android).
-  // The blob stays original; the effect is heard on playback.
-  if(!appState.kidRecAudio){
-    // Rebuild audio from blob if needed
+  // Apply playbackRate directly on the audio element — reliable on all mobile browsers
+  if(!appState.kidRecAudio) {
     const url=URL.createObjectURL(appState.kidOwnAudioBlob);
-    const audio=new Audio();
-    audio.preload='auto'; audio.src=url; audio.load();
+    const audio=new Audio(); audio.preload='auto'; audio.src=url; audio.load();
     audio.ontimeupdate=()=>{
       const p=document.getElementById('kidRecProgress');
       if(p&&audio.duration) p.style.width=(audio.currentTime/audio.duration*100)+'%';
@@ -4664,13 +4760,17 @@ async function applyVoiceToKidRecording() {
     appState.kidRecAudio=audio;
   }
 
-  // Apply voice effect via playbackRate (changes pitch + speed — works everywhere)
-  appState.kidRecAudio.playbackRate=v.rate||1;
+  appState.kidRecAudio.playbackRate = v.rate || 1;
 
-  // Store the chosen voice rate on the blob so it gets sent with the message
-  appState.kidOwnAudioVoice=v;
-
+  // Show playback section so user can hear the distorted voice
+  const pb=document.getElementById('kidRecPlayback'); if(pb) pb.style.display='block';
   showToast(`✅ Voz "${v.label}" aplicada — tocá ▶ para escuchar`);
+
+  // Auto-play so they hear it immediately
+  appState.kidRecAudio.currentTime=0;
+  appState.kidRecAudio.play()
+    .then(()=>{ appState.kidRecIsPlaying=true; const b=document.getElementById('kidRecPlayBtn'); if(b) b.textContent='⏸'; })
+    .catch(e=>{ console.warn('autoplay blocked:',e.message); });
 }
 
 async function saveKidVoice() {
@@ -4750,6 +4850,20 @@ let kidDrawSlideState = { idx:0, imgs:[] };
 let kidDrawInited = false;
 
 function initKidDraw() {
+  // CRITICAL: reset draw recording state completely — independent from story recording
+  if(kidDrawRecState.isRecording) {
+    try { kidDrawRecState.mediaRecorder?.stop(); } catch(e){}
+    try { kidDrawRecState.stream?.getTracks().forEach(t=>t.stop()); } catch(e){}
+  }
+  clearInterval(kidDrawRecState.recInterval);
+  if(kidDrawRecState.recAudio){ try{ kidDrawRecState.recAudio.pause(); }catch(e){} }
+  if(kidDrawRecState.recAudioUrl){ try{ URL.revokeObjectURL(kidDrawRecState.recAudioUrl); }catch(e){} }
+  kidDrawRecState = { isRecording:false, mediaRecorder:null, audioChunks:[], recordedBlob:null, recAudio:null, recIsPlaying:false, recordSeconds:0, recInterval:null, recAudioUrl:null, stream:null };
+  // Reset UI
+  const btn=document.getElementById('kidDrawRecBtn'); if(btn){ btn.classList.remove('recording'); btn.innerHTML='<span style="font-size:36px">🎙️</span><span style="font-size:14px;font-weight:800;display:block;margin-top:4px">GRABAR</span>'; }
+  const pb=document.getElementById('kidDrawRecPlayback'); if(pb) pb.style.display='none';
+  const t=document.getElementById('kidDrawRecTimer'); if(t) t.textContent='0:00';
+  const s=document.getElementById('kidDrawRecStatus'); if(s) s.textContent='Tocá para grabar tu voz';
   if(!kidDrawInited) { initCanvas(); kidDrawInited=true; }
   updateKidDrawSlots();
   updateKidDrawSlotLabel();
@@ -4894,8 +5008,13 @@ async function toggleKidDrawRecord() {
     };
     kidDrawRecState.mediaRecorder.start(100);
     kidDrawRecState.isRecording=true; kidDrawRecState.recordSeconds=0;
-    const btn=document.getElementById('kidDrawRecBtn'); if(btn){btn.classList.add('recording');btn.textContent='⏹';}
-    const st=document.getElementById('kidDrawRecStatus'); if(st) st.textContent='🔴 Grabando...';
+    const btn=document.getElementById('kidDrawRecBtn');
+    if(btn){
+      btn.classList.add('recording');
+      btn.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
+      btn.innerHTML='<span style="font-size:36px">⏹️</span><span style="font-size:13px;font-weight:800;display:block;margin-top:4px;font-family:Nunito,sans-serif">PARAR</span>';
+    }
+    const st=document.getElementById('kidDrawRecStatus'); if(st) st.textContent='🔴 Grabando... tocá PARAR cuando termines';
     clearInterval(kidDrawRecState.recInterval);
     kidDrawRecState.recInterval=setInterval(()=>{
       kidDrawRecState.recordSeconds++;
@@ -4907,8 +5026,13 @@ function stopKidDrawRecord() {
   if(kidDrawRecState.mediaRecorder&&kidDrawRecState.isRecording){ kidDrawRecState.mediaRecorder.stop(); }
   clearInterval(kidDrawRecState.recInterval);
   kidDrawRecState.isRecording=false;
-  const btn=document.getElementById('kidDrawRecBtn'); if(btn){btn.classList.remove('recording');btn.textContent='🎙️';}
-  const st=document.getElementById('kidDrawRecStatus'); if(st) st.textContent='✅ ¡Grabado! Escuchá ↓';
+  const btn=document.getElementById('kidDrawRecBtn');
+  if(btn){
+    btn.classList.remove('recording');
+    btn.style.background='linear-gradient(135deg,var(--coral),#ff8e53)';
+    btn.innerHTML='<span style="font-size:36px">🎙️</span><span style="font-size:13px;font-weight:800;display:block;margin-top:4px;font-family:Nunito,sans-serif">GRABAR</span>';
+  }
+  const st=document.getElementById('kidDrawRecStatus'); if(st) st.textContent='✅ ¡Listo! Escuchá tu voz abajo';
 }
 function toggleKidDrawPlay() {
   if(!kidDrawRecState.recAudio){showToast('❌ No hay grabación');return;}
