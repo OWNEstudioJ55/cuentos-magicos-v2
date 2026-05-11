@@ -3199,6 +3199,38 @@ function goRecSlide(idx) {
 async function loadParentKidMessages() {
   const el = document.getElementById('parentKidMessages');
   if(!el) return;
+
+  // Sincronizar mensajes del niño desde Supabase
+  const familiaId = getFamiliaId();
+  if(supa && familiaId) {
+    try {
+      const msgsSupabase = await supaGetMensajes(familiaId);
+      if(msgsSupabase.length) {
+        const localMsgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
+        const localIds = new Set(localMsgs.map(m=>m.id));
+        // Agregar mensajes nuevos que no están en local
+        for(const m of msgsSupabase) {
+          if(!localIds.has(m.id)) {
+            localMsgs.unshift({
+              id: m.id,
+              title: m.titulo,
+              text: m.texto||'',
+              images: m.imagenes||[],
+              audioKey: m.tiene_audio ? m.id : null,
+              audioFile: m.tiene_audio ? `${familiaId}/${m.id}.webm` : null,
+              date: new Date(m.created_at).toLocaleDateString('es-AR'),
+              type: m.tipo,
+            });
+          }
+        }
+        localStorage.setItem('ownKidMessages', JSON.stringify(localMsgs.slice(0,20)));
+        console.log('✅ Mensajes sincronizados desde Supabase:', msgsSupabase.length);
+      }
+    } catch(e) {
+      console.warn('Sync mensajes Supabase:', e.message);
+    }
+  }
+
   const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
   if(!msgs.length) {
     el.innerHTML=`<div style="color:var(--text2);font-size:13px;padding:8px 0;text-align:center">
@@ -3209,62 +3241,52 @@ async function loadParentKidMessages() {
   }
 
   el.innerHTML = msgs.slice(0,10).map((m,i)=>`
-    <div class="card" style="background:linear-gradient(135deg,rgba(52,211,153,0.1),rgba(16,185,129,0.05));border:2px solid rgba(52,211,153,0.25);margin-bottom:12px;border-radius:18px;overflow:hidden;padding:0">
-
-      <!-- Header -->
-      <div style="padding:14px 14px 10px;border-bottom:1px solid rgba(52,211,153,0.1)">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+    <div class="msg-card">
+      <div class="msg-header">
+        <div style="display:flex;align-items:center;gap:8px">
           <div style="font-size:22px">${m.isDrawing?'🎨':m.isVoice?'🎙️':'✍️'}</div>
           <div>
-            <div style="font-weight:800;font-size:14px;color:var(--accent3)">${m.title}</div>
-            <div style="font-size:11px;color:var(--text2)">${m.date}${m.voiceLabel?' · Voz: '+m.voiceLabel:''}</div>
+            <div class="msg-title">${m.title}</div>
+            <div class="msg-date">${m.date}${m.voiceLabel?' · Voz: '+m.voiceLabel:''}</div>
           </div>
         </div>
         ${m.text?`<div style="font-size:13px;line-height:1.6;margin-top:8px;color:var(--text)">${m.text.substring(0,150)}${m.text.length>150?'...':''}</div>`:''}
       </div>
-
-      <!-- Slideshow of images (big) -->
       ${m.images&&m.images.length?`
       <div style="position:relative;width:100%;background:#000" id="msgSlideWrap${i}">
         <div style="position:relative;width:100%;aspect-ratio:1;overflow:hidden" id="msgSlide${i}">
-          ${m.images.map((u,j)=>`<img src="${u}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:${j===0?'block':'none'}" id="msgImg${i}_${j}" onerror="this.style.display='none'">`).join('')}
+          ${m.images.map((u,j)=>`<img src="${u}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:${j===0?'block':'none'}" id="msgImg${i}_${j}">`).join('')}
           ${m.images.length>1?`
-          <button onclick="slideMsgImg(${i},-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.5);border:none;color:white;font-size:20px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center">‹</button>
-          <button onclick="slideMsgImg(${i},1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,0.5);border:none;color:white;font-size:20px;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center">›</button>
+          <button onclick="slideMsgImg(${i},-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:white;font-size:20px;cursor:pointer;z-index:2">‹</button>
+          <button onclick="slideMsgImg(${i},1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:white;font-size:20px;cursor:pointer;z-index:2">›</button>
           <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2">
             ${m.images.map((_,j)=>`<div id="msgDot${i}_${j}" style="width:7px;height:7px;border-radius:50%;background:${j===0?'white':'rgba(255,255,255,0.4)'}"></div>`).join('')}
           </div>`:''}
         </div>
       </div>`:''}
-
-      <!-- Audio player -->
-      ${m.audioKey?`
-      <div style="padding:14px;background:rgba(0,0,0,0.15)" id="msgAudioWrap${i}">
+      ${m.audioKey||m.audioFile?`
+      <div class="msg-player">
         <div style="font-size:12px;font-weight:800;color:var(--accent3);margin-bottom:10px">🎧 Audio de ${appState.kidName}:</div>
-        <div style="background:rgba(52,211,153,0.1);border-radius:14px;padding:12px;border:1px solid rgba(52,211,153,0.2)">
+        <div style="background:rgba(52,211,153,.1);border-radius:14px;padding:12px;border:1px solid rgba(52,211,153,.2)">
           <div style="display:flex;align-items:center;gap:10px">
-            <button id="msgPlayBtn${i}" onclick="toggleMsgAudio(${i},'${m.audioKey}')" style="width:52px;height:52px;border-radius:50%;background:var(--accent3);border:none;color:white;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">▶</button>
+            <button id="msgPlayBtn${i}" class="msg-play-btn" onclick="toggleMsgAudio(${i},'${m.audioKey||''}','${m.audioFile||''}')">▶</button>
             <div style="flex:1">
-              <div style="background:rgba(255,255,255,0.1);border-radius:6px;height:8px;overflow:hidden;margin-bottom:6px;cursor:pointer" onclick="seekMsgAudio(${i},event)">
-                <div id="msgProgress${i}" style="height:100%;background:var(--accent3);width:0%;transition:width 0.1s;border-radius:6px"></div>
+              <div class="msg-progress-bar" onclick="seekMsgAudio(${i},event)">
+                <div id="msgProgress${i}" class="msg-progress-fill"></div>
               </div>
               <div style="font-size:11px;color:var(--text2)" id="msgTime${i}">0:00</div>
             </div>
           </div>
         </div>
       </div>`:`<div style="padding:10px 14px;font-size:12px;color:var(--text2)">Sin audio</div>`}
-
-      <!-- Actions -->
-      <div style="padding:10px 14px 14px;display:flex;gap:8px;flex-wrap:wrap">
-        ${isPremium()&&m.audioKey?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey}','${m.title}')">📥 Descargar audio</button>`:''}
-        ${isPremium()&&m.images&&m.images.length?`<button class="btn btn-gold btn-sm" onclick="downloadMsgImages(${i})">🖼️ Descargar imágenes</button>`:''}
-        ${!isPremium()&&(m.audioKey||m.images?.length)?`<button class="btn btn-ghost btn-sm" onclick="showPremiumScreen()" style="opacity:0.6">🔒 Descargar (Premium)</button>`:''}
+      <div class="msg-actions">
+        ${isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey||m.id}','${m.title}')">📥 Descargar</button>`:''}
+        ${!isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-ghost btn-sm" onclick="showPremiumScreen()" style="opacity:0.6">🔒 Descargar (Premium)</button>`:''}
         <button class="btn btn-green btn-sm" onclick="openParentQuizForMessage(${i})" style="margin-left:auto">🧠 Quiz</button>
       </div>
       <div id="parentQuizArea${i}" style="display:none;padding:0 14px 14px"></div>
     </div>`).join('');
 
-  // Init slide indices
   window._msgSlideIdx = window._msgSlideIdx || {};
   window._msgAudios  = window._msgAudios  || {};
   msgs.slice(0,10).forEach((_,i)=>{ window._msgSlideIdx[i]=0; });
@@ -3287,47 +3309,37 @@ function slideMsgImg(msgIdx, dir) {
 }
 
 // Message audio player
-async function toggleMsgAudio(msgIdx, audioKey) {
+async function toggleMsgAudio(msgIdx, audioKey, audioFile) {
   const btn=document.getElementById('msgPlayBtn'+msgIdx);
-  // If already loaded — toggle
   if(window._msgAudios[msgIdx]) {
     const audio=window._msgAudios[msgIdx];
-    if(!audio.paused) {
-      audio.pause();
-      if(btn) btn.textContent='▶';
-    } else {
-      audio.play()
-        .then(()=>{ if(btn) btn.textContent='⏸'; })
-        .catch(e=>{ showToast('❌ '+e.message); if(btn) btn.textContent='▶'; });
-    }
+    if(!audio.paused) { audio.pause(); if(btn) btn.textContent='▶'; }
+    else { audio.play().then(()=>{ if(btn) btn.textContent='⏸'; }).catch(e=>{ showToast('❌ '+e.message); if(btn) btn.textContent='▶'; }); }
     return;
   }
-  // Load from DB
   if(btn) btn.textContent='⏳';
-  const data=await dbGetAudio(audioKey);
-  if(!data||!data.blob){ showToast('❌ No se encontró el audio del niño'); if(btn) btn.textContent='▶'; return; }
-  if(window._msgAudioUrls&&window._msgAudioUrls[msgIdx]){ try{ URL.revokeObjectURL(window._msgAudioUrls[msgIdx]); }catch(e){} }
-  window._msgAudioUrls=window._msgAudioUrls||{};
-  const url=URL.createObjectURL(data.blob);
-  window._msgAudioUrls[msgIdx]=url;
-  const audio=new Audio();
-  audio.preload='auto'; audio.src=url; audio.load();
-  audio.onloadedmetadata=()=>{
-    const t=document.getElementById('msgTime'+msgIdx);
-    if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
-  };
+  let audioUrl = null;
+  // 1. Intentar local
+  if(audioKey) {
+    const data=await dbGetAudio(audioKey).catch(()=>null);
+    if(data&&data.blob&&data.blob.size>0) audioUrl=URL.createObjectURL(data.blob);
+  }
+  // 2. Fallback Supabase
+  if(!audioUrl && audioFile && supa) {
+    audioUrl = await supaGetAudioUrl(audioFile).catch(()=>null);
+  }
+  if(!audioUrl) { showToast('❌ No se encontró el audio'); if(btn) btn.textContent='▶'; return; }
+  const audio=new Audio(); audio.preload='auto'; audio.src=audioUrl; audio.load();
+  audio.onloadedmetadata=()=>{ const t=document.getElementById('msgTime'+msgIdx); if(t) t.textContent='0:00 / '+formatTime(audio.duration||0); };
   audio.ontimeupdate=()=>{
-    const p=document.getElementById('msgProgress'+msgIdx);
-    const t=document.getElementById('msgTime'+msgIdx);
+    const p=document.getElementById('msgProgress'+msgIdx); const t=document.getElementById('msgTime'+msgIdx);
     if(p&&audio.duration) p.style.width=(audio.currentTime/audio.duration*100)+'%';
     if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
   };
   audio.onended=()=>{ if(btn) btn.textContent='▶'; };
-  audio.onerror=()=>{ showToast('❌ Error cargando audio del niño'); console.error('msgAudio error',audio.error); if(btn) btn.textContent='▶'; };
+  audio.onerror=()=>{ showToast('❌ Error cargando audio'); if(btn) btn.textContent='▶'; };
   window._msgAudios[msgIdx]=audio;
-  audio.play()
-    .then(()=>{ if(btn) btn.textContent='⏸'; })
-    .catch(e=>{ showToast('❌ Error: '+e.message); if(btn) btn.textContent='▶'; console.error('msgAudio play error',e); });
+  audio.play().then(()=>{ if(btn) btn.textContent='⏸'; }).catch(e=>{ showToast('❌ '+e.message); if(btn) btn.textContent='▶'; });
 }
 
 function seekMsgAudio(msgIdx, event) {
@@ -3765,9 +3777,39 @@ function switchKidTab(tab) {
 async function loadKidHomeStories() {
   const el=document.getElementById('kidHomeStories');
   if(!el) return;
+
+  // Intentar sincronizar desde Supabase primero
+  const familiaId = getFamiliaId();
+  if(supa && familiaId) {
+    try {
+      const cuentosSupabase = await supaGetCuentos(familiaId);
+      if(cuentosSupabase.length) {
+        // Guardar en IndexedDB local para acceso offline
+        for(const c of cuentosSupabase) {
+          const local = {
+            id: c.id, title: c.titulo, char: c.personaje,
+            voice: c.voz, images: c.imagenes||[],
+            storyText: c.texto, portada: c.portada,
+            hasAudio: c.tiene_audio, created: new Date(c.created_at).toLocaleDateString('es-AR'),
+            type: 'parent', supaSync: true,
+            audioFile: c.tiene_audio ? `${familiaId}/${c.id}.webm` : null
+          };
+          await dbPut('stories', local).catch(()=>{});
+        }
+        console.log('✅ Sincronizados', cuentosSupabase.length, 'cuentos desde Supabase');
+      }
+    } catch(e) {
+      console.warn('Sync Supabase (usando local):', e.message);
+    }
+  }
+
+  // Cargar desde IndexedDB (local + sincronizado)
   const stories=await dbGetAll('stories');
   const userStories=stories.filter(s=>s.type==='parent'||!s.type);
-  if(!userStories.length) { el.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><p>Papá/Mamá no grabó ningún cuento aún</p></div>`; return; }
+  if(!userStories.length) {
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><p>Papá/Mamá no grabó ningún cuento aún</p></div>`;
+    return;
+  }
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>{
     const img=s.images&&s.images[0];
     return `<div class="kid-story-card" onclick="openKidStory('${s.id}')" style="background:var(--card2)">
@@ -3779,6 +3821,31 @@ async function loadKidHomeStories() {
       </div>
     </div>`;
   }).join('');
+}
+
+function loadKidAudioFromBlob(blob) {
+  if(appState.kidAudioUrl){ try{ URL.revokeObjectURL(appState.kidAudioUrl); }catch(e){} appState.kidAudioUrl=null; }
+  const url=URL.createObjectURL(blob);
+  appState.kidAudioUrl=url;
+  const audio=new Audio();
+  audio.preload='auto'; audio.src=url; audio.load();
+  audio.onloadedmetadata=()=>{
+    const t=document.getElementById('kidTimeDisplay');
+    if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
+  };
+  audio.ontimeupdate=()=>{
+    const p=document.getElementById('kidProgress');
+    if(p&&audio.duration) p.style.width=(audio.currentTime/audio.duration*100)+'%';
+    const t=document.getElementById('kidTimeDisplay');
+    if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
+  };
+  audio.onended=()=>{
+    const b=document.getElementById('kidPlayBtn'); if(b) b.textContent='▶';
+    appState.kidIsPlaying=false;
+    updateKidProgress('storiesListened');
+  };
+  audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
+  appState.kidAudio=audio;
 }
 
 function buildClassicStories() {
@@ -3812,45 +3879,50 @@ async function openKidStory(id) {
   const td0=document.getElementById('kidTimeDisplay'); if(td0) td0.textContent='0:00';
 
   const audioData=await dbGetAudio(id);
-  console.log('🎵 Resultado buscar audio id "'+id+'":', audioData ? 'ENCONTRADO ('+audioData.blob?.size+' bytes)' : 'NO ENCONTRADO');
+  console.log('🎵 Audio local:', audioData ? 'ENCONTRADO' : 'NO ENCONTRADO');
 
   if(audioData&&audioData.blob&&audioData.blob.size>0) {
-    if(appState.kidAudioUrl){ try{ URL.revokeObjectURL(appState.kidAudioUrl); }catch(e){} appState.kidAudioUrl=null; }
-    const url=URL.createObjectURL(audioData.blob);
-    appState.kidAudioUrl=url;
-    const audio=new Audio();
-    audio.preload='auto';
-    audio.src=url;
-    audio.load();
-    audio.onloadedmetadata=()=>{
-      const t=document.getElementById('kidTimeDisplay');
-      if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
-      console.log('✅ Audio listo, duración:', audio.duration, 's');
-    };
-    audio.ontimeupdate=()=>{
-      const p=document.getElementById('kidProgress');
-      if(p&&audio.duration) p.style.width=(audio.currentTime/audio.duration*100)+'%';
-      const t=document.getElementById('kidTimeDisplay');
-      if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
-    };
-    audio.onended=()=>{
-      const b=document.getElementById('kidPlayBtn'); if(b) b.textContent='▶';
-      appState.kidIsPlaying=false;
-      updateKidProgress('storiesListened');
-    };
-    audio.onerror=()=>{
-      console.error('Audio onerror — code:', audio.error?.code, 'msg:', audio.error?.message);
-      const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio';
-    };
-    appState.kidAudio=audio;
+    // Audio encontrado localmente
+    loadKidAudioFromBlob(audioData.blob);
+  } else if(story.hasAudio && story.audioFile && supa) {
+    // No está local — buscar en Supabase Storage
+    const td=document.getElementById('kidTimeDisplay'); if(td) td.textContent='⏳ Cargando...';
+    console.log('📥 Descargando audio desde Supabase:', story.audioFile);
+    try {
+      const url = await supaGetAudioUrl(story.audioFile);
+      if(url) {
+        const audio=new Audio();
+        audio.preload='auto'; audio.src=url; audio.load();
+        audio.onloadedmetadata=()=>{
+          const t=document.getElementById('kidTimeDisplay');
+          if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
+          console.log('✅ Audio Supabase listo:', audio.duration, 's');
+        };
+        audio.ontimeupdate=()=>{
+          const p=document.getElementById('kidProgress');
+          if(p&&audio.duration) p.style.width=(audio.currentTime/audio.duration*100)+'%';
+          const t=document.getElementById('kidTimeDisplay');
+          if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
+        };
+        audio.onended=()=>{
+          const b=document.getElementById('kidPlayBtn'); if(b) b.textContent='▶';
+          appState.kidIsPlaying=false;
+          updateKidProgress('storiesListened');
+        };
+        audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
+        appState.kidAudio=audio;
+      } else {
+        const td=document.getElementById('kidTimeDisplay'); if(td) td.textContent='Sin audio';
+      }
+    } catch(e) {
+      console.error('Error cargando audio Supabase:', e);
+      const td=document.getElementById('kidTimeDisplay'); if(td) td.textContent='Sin audio';
+    }
   } else {
     appState.kidAudio=null;
     const td=document.getElementById('kidTimeDisplay');
-    if(td) td.textContent=story.hasAudio?'Cargando audio...':'Sin audio grabado';
-    if(story.hasAudio) {
-      // hasAudio flag says there should be audio but we didn't find it — show warning
-      console.warn('⚠️ El cuento tiene hasAudio=true pero no se encontró el blob en IndexedDB');
-    }
+    if(td) td.textContent=story.hasAudio?'Sin audio':'Sin audio grabado';
+    if(story.hasAudio) console.warn('⚠️ hasAudio=true pero no se encontró audio');
   }
 
   buildKidSlideshow(appState.kidImages);
