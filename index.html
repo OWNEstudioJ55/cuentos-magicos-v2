@@ -592,6 +592,9 @@ input:focus, textarea:focus { border-color: var(--accent2); }
     <div style="margin-top:18px;text-align:center">
       <button onclick="document.getElementById('resetModal').classList.add('open')" style="background:none;border:none;color:var(--text2);font-family:'Nunito',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline">🔑 ¿Olvidaste la contraseña?</button>
     </div>
+    <div style="margin-top:10px;text-align:center">
+      <button onclick="doFullReset()" style="background:none;border:none;color:var(--text3);font-family:'Nunito',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ Reconfigurar desde cero</button>
+    </div>
   </div>
 </div>
 
@@ -2085,10 +2088,26 @@ function showLoginError(msg) {
   el.textContent=msg; el.style.display='block';
 }
 function doLogout() {
+  // Solo borra la sesión — NO borra contraseñas ni configuración
   localStorage.removeItem('ownSession');
-  stopKidPlay();
+  // Limpiar estado de audio del niño para evitar bug de audio viejo
+  appState.kidOwnAudioBlob = null;
+  appState.kidRecAudio = null;
+  appState.kidRecIsPlaying = false;
+  appState.kidOwnAudioMime = null;
+  if(appState.kidAudio){ try{ appState.kidAudio.pause(); }catch(e){} appState.kidAudio=null; }
+  if(appState.recAudio){ try{ appState.recAudio.pause(); }catch(e){} appState.recAudio=null; }
+  appState.recordedBlob = null;
+  try{ stopKidPlay(); }catch(e){}
   showScreen('loginScreen');
-  document.getElementById('loginPass').value='';
+  const lp = document.getElementById('loginPass'); if(lp) lp.value='';
+}
+
+function doFullReset() {
+  // Borra TODO — vuelve al setup desde cero
+  if(!confirm('¿Seguro? Esto borra toda la configuración y los cuentos del celular.')) return;
+  localStorage.clear();
+  showScreen('setupScreen');
 }
 
 async function doResetPassword() {
@@ -3920,6 +3939,13 @@ function selectKidChar(e) { appState.kidChar=e; buildKidCharRow(); }
 let kidRecordingInterval=null;
 async function toggleKidRecord() {
   if(appState.isKidRecording) { stopKidRecord(); return; }
+  // CRITICAL: clear old blob before new recording
+  appState.kidOwnAudioBlob = null;
+  appState.kidOwnAudioMime = null;
+  if(appState.kidRecAudio){ try{ appState.kidRecAudio.pause(); }catch(e){} appState.kidRecAudio=null; }
+  appState.kidRecIsPlaying = false;
+  const pb=document.getElementById('kidRecPlayback'); if(pb) pb.style.display='none';
+  const pr=document.getElementById('kidRecProgress'); if(pr) pr.style.width='0%';
   try {
     const stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
     appState.kidAudioChunks=[];
