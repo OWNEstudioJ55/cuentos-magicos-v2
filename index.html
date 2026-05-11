@@ -2104,10 +2104,19 @@ function doLogout() {
 }
 
 function doFullReset() {
-  // Borra TODO — vuelve al setup desde cero
   if(!confirm('¿Seguro? Esto borra toda la configuración y los cuentos del celular.')) return;
   localStorage.clear();
+  // Limpiar estado de audio
+  appState.kidOwnAudioBlob = null;
+  appState.recordedBlob = null;
+  if(appState.kidAudio){ try{ appState.kidAudio.pause(); }catch(e){} appState.kidAudio=null; }
+  if(appState.recAudio){ try{ appState.recAudio.pause(); }catch(e){} appState.recAudio=null; }
+  // Ir al setup para crear nuevas contraseñas
   showScreen('setupScreen');
+  // Resetear pasos del setup
+  ['setupStep1','setupStep2','setupStep3'].forEach((id,i)=>{
+    const el=document.getElementById(id); if(el) el.style.display=i===0?'block':'none';
+  });
 }
 
 async function doResetPassword() {
