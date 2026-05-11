@@ -4,6 +4,147 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>OWN — Cuentos Mágicos</title>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────────────────
+const SUPA_URL = 'https://hqhnjyiureadmdqhgfbk.supabase.co';
+const SUPA_KEY = 'sb_publishable_0i_uEVWfhfv9jta4VVwI8g_haKcej7O';
+let supa = null;
+
+function initSupabase() {
+  try {
+    supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+    console.log('✅ Supabase conectado');
+  } catch(e) {
+    console.error('❌ Supabase error:', e);
+  }
+}
+
+// ── FAMILIA (login/register) ─────────────────────────────────
+async function supaGetFamilia(codigo, passwordHash) {
+  if (!supa) return null;
+  try {
+    const { data, error } = await supa
+      .from('familias')
+      .select('*')
+      .eq('codigo', codigo.toLowerCase())
+      .eq('password_hash', passwordHash)
+      .single();
+    if (error) { console.warn('supaGetFamilia:', error.message); return null; }
+    return data;
+  } catch(e) { console.error('supaGetFamilia error:', e); return null; }
+}
+
+async function supaCreateFamilia(familia) {
+  if (!supa) return null;
+  try {
+    const { data, error } = await supa
+      .from('familias')
+      .insert(familia)
+      .select()
+      .single();
+    if (error) { console.error('supaCreateFamilia:', error.message); return null; }
+    return data;
+  } catch(e) { console.error('supaCreateFamilia error:', e); return null; }
+}
+
+async function supaUpdateFamilia(id, updates) {
+  if (!supa) return;
+  try {
+    await supa.from('familias').update(updates).eq('id', id);
+  } catch(e) { console.error('supaUpdateFamilia:', e); }
+}
+
+// ── CUENTOS ──────────────────────────────────────────────────
+async function supaSaveCuento(cuento) {
+  if (!supa) return null;
+  try {
+    const { data, error } = await supa
+      .from('cuentos')
+      .upsert(cuento)
+      .select()
+      .single();
+    if (error) { console.error('supaSaveCuento:', error.message); return null; }
+    return data;
+  } catch(e) { console.error('supaSaveCuento error:', e); return null; }
+}
+
+async function supaGetCuentos(familiaId) {
+  if (!supa) return [];
+  try {
+    const { data, error } = await supa
+      .from('cuentos')
+      .select('*')
+      .eq('familia_id', familiaId)
+      .order('created_at', { ascending: false });
+    if (error) { console.warn('supaGetCuentos:', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error('supaGetCuentos error:', e); return []; }
+}
+
+// ── MENSAJES NIÑO ────────────────────────────────────────────
+async function supaSaveMensaje(mensaje) {
+  if (!supa) return null;
+  try {
+    const { data, error } = await supa
+      .from('mensajes_nino')
+      .upsert(mensaje)
+      .select()
+      .single();
+    if (error) { console.error('supaSaveMensaje:', error.message); return null; }
+    return data;
+  } catch(e) { console.error('supaSaveMensaje error:', e); return null; }
+}
+
+async function supaGetMensajes(familiaId) {
+  if (!supa) return [];
+  try {
+    const { data, error } = await supa
+      .from('mensajes_nino')
+      .select('*')
+      .eq('familia_id', familiaId)
+      .order('created_at', { ascending: false });
+    if (error) { console.warn('supaGetMensajes:', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error('supaGetMensajes error:', e); return []; }
+}
+
+// ── AUDIO STORAGE ────────────────────────────────────────────
+async function supaUploadAudio(blob, filename) {
+  if (!supa || !blob) return null;
+  try {
+    const { data, error } = await supa.storage
+      .from('own-audios')
+      .upload(filename, blob, {
+        contentType: blob.type || 'audio/webm',
+        upsert: true
+      });
+    if (error) { console.error('supaUploadAudio:', error.message); return null; }
+    console.log('✅ Audio subido:', filename);
+    return filename;
+  } catch(e) { console.error('supaUploadAudio error:', e); return null; }
+}
+
+async function supaGetAudioUrl(filename) {
+  if (!supa || !filename) return null;
+  try {
+    const { data, error } = await supa.storage
+      .from('own-audios')
+      .createSignedUrl(filename, 3600); // 1 hora de validez
+    if (error) { console.error('supaGetAudioUrl:', error.message); return null; }
+    return data.signedUrl;
+  } catch(e) { console.error('supaGetAudioUrl error:', e); return null; }
+}
+
+// ── FAMILIA ID (sesión actual) ────────────────────────────────
+function getFamiliaId() {
+  return localStorage.getItem('ownFamiliaId') || null;
+}
+function setFamiliaId(id) {
+  localStorage.setItem('ownFamiliaId', id);
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
 <style>
@@ -2265,12 +2406,38 @@ async function saveStory() {
   };
 
   try {
-    // AWAIT both — critical so audio is saved before navigating away
+    // 1. Guardar en IndexedDB (local — siempre funciona)
     await dbPut('stories', story);
     if(appState.recordedBlob) {
       await dbPut('audio', {id, blob: appState.recordedBlob});
-      console.log('✅ Audio guardado con id:', id, '| tamaño blob:', appState.recordedBlob.size);
+      console.log('✅ Audio guardado local — id:', id, 'tamaño:', appState.recordedBlob.size);
     }
+
+    // 2. Sincronizar con Supabase (en segundo plano — no bloquea)
+    const familiaId = getFamiliaId();
+    if(supa && familiaId) {
+      const supaStory = {
+        id, titulo: title,
+        familia_id: familiaId,
+        personaje: appState.selectedChar,
+        voz: appState.selectedVoice,
+        imagenes: appState.currentStoryImages||[],
+        texto: document.getElementById('storyTextInput')?.value||'',
+        portada: appState.portadaUrl||null,
+        tiene_audio: !!appState.recordedBlob,
+      };
+      // Upload audio to Supabase Storage
+      if(appState.recordedBlob) {
+        const filename = `${familiaId}/${id}.webm`;
+        supaUploadAudio(appState.recordedBlob, filename)
+          .then(f => { if(f) console.log('✅ Audio en Supabase:', f); })
+          .catch(e => console.warn('Audio Supabase (no crítico):', e));
+      }
+      supaSaveCuento(supaStory)
+        .then(() => console.log('✅ Cuento en Supabase'))
+        .catch(e => console.warn('Cuento Supabase (no crítico):', e));
+    }
+
     appState._editingStoryId=null;
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
     showToast('✅ Cuento guardado!');
@@ -3904,6 +4071,22 @@ async function sendKidVoiceToParent() {
     });
     localStorage.setItem('ownKidMessages',JSON.stringify(msgs.slice(0,20)));
     notifyParent('🎙️ '+appState.kidName+' grabó su versión del cuento!');
+
+    // Sincronizar con Supabase en segundo plano
+    const familiaId = getFamiliaId();
+    if(supa && familiaId) {
+      const filename = `${familiaId}/${id}.webm`;
+      supaUploadAudio(appState.kidOwnAudioBlob, filename)
+        .then(f => {
+          if(f) return supaSaveMensaje({
+            id, familia_id: familiaId,
+            titulo: '🎙️ Mi versión de: '+(appState.currentStory?.title||'un cuento'),
+            imagenes: imgs, tiene_audio: true, tipo: 'voz',
+          });
+        })
+        .then(() => console.log('✅ Mensaje niño en Supabase'))
+        .catch(e => console.warn('Mensaje Supabase (no crítico):', e));
+    }
     showToast('🚀 ¡Enviado a papá/mamá! +5⭐');
     const stars=5; appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay();
     appState.kidOwnAudioBlob=null; appState.kidRecAudio=null; appState.kidRecIsPlaying=false;
@@ -4999,7 +5182,7 @@ document.addEventListener('keydown',e=>{
 });
 
 // ===================== BOOT =====================
-window.addEventListener('load',()=>{ openDB().then(()=>init()); });
+window.addEventListener('load',()=>{ initSupabase(); openDB().then(()=>init()); });
 </script>
 </body>
 </html>
