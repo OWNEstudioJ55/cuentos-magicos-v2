@@ -2479,14 +2479,13 @@ async function loginConGoogle() {
     const { data, error } = await supa.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://cuentos-magicos-propios.vercel.app'
+        redirectTo: window.location.origin
       }
     });
     if(error) {
       hideLoading();
       showToast('❌ Error: ' + error.message);
     }
-    // Browser will redirect to Google — loading stays visible
   } catch(e) {
     hideLoading();
     showToast('❌ Error de conexión');
