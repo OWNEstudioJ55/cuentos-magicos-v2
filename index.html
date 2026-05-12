@@ -2807,13 +2807,22 @@ async function doLogin() {
   const storedKey=appState.loginTab==='parent'?'ownParentPass':'ownKidPass';
   const stored=localStorage.getItem(storedKey);
 
-  // Si es el niño y no hay contraseña guardada — crear una nueva
-  if(appState.loginTab==='kid' && !stored) {
+  // Si es el niño y no hay contraseña guardada, o es placeholder — crear una nueva
+  if(appState.loginTab==='kid' && (!stored || stored==='google')) {
     localStorage.setItem('ownKidPass', hash);
     document.getElementById('loginError').style.display='none';
     localStorage.setItem('ownSession','kid');
     showKidApp();
     showToast('✅ Contraseña del niño creada');
+    return;
+  }
+
+  // Si el padre entró con Google, su hash es 'google' — aceptar cualquier contraseña y guardarla
+  if(appState.loginTab==='parent' && stored==='google') {
+    localStorage.setItem('ownParentPass', hash);
+    document.getElementById('loginError').style.display='none';
+    localStorage.setItem('ownSession','parent');
+    showParentApp();
     return;
   }
 
