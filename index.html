@@ -975,6 +975,12 @@ textarea{resize:vertical;min-height:80px}
       </div>
     </button>
 
+    <!-- OPCIÓN GOOGLE -->
+    <button onclick="loginConGoogle()" style="width:100%;padding:18px;border-radius:18px;border:2px solid rgba(255,255,255,.15);background:white;color:#1a1a1a;font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:12px;transition:all .2s">
+      <svg width="22" height="22" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+      Entrar con Google
+    </button>
+
     <!-- OPCIÓN 2: Primera vez -->
     <button onclick="showWelcomeSetup()" style="width:100%;padding:18px;border-radius:18px;border:2px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);color:var(--coral);font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;transition:all .2s">
       <span style="font-size:32px">🆕</span>
@@ -2424,6 +2430,8 @@ function checkAchievements() {
 // ===================== INIT =====================
 async function init() {
   await openDB();
+  // Check Google OAuth session first
+  await checkGoogleSession();
   const settings = JSON.parse(localStorage.getItem('ownSettings') || '{}');
   if (!settings.setupDone) { showScreen('welcomeScreen'); return; }
   appState.tokens = parseInt(localStorage.getItem('ownTokens') || '0');
@@ -2461,6 +2469,75 @@ async function init() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+}
+
+// ===================== GOOGLE LOGIN =====================
+async function loginConGoogle() {
+  if(!supa) { showToast('❌ Sin conexión'); return; }
+  showLoading('Abriendo Google...');
+  try {
+    const { data, error } = await supa.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://cuentos-magicos-propios.vercel.app'
+      }
+    });
+    if(error) {
+      hideLoading();
+      showToast('❌ Error: ' + error.message);
+    }
+    // Browser will redirect to Google — loading stays visible
+  } catch(e) {
+    hideLoading();
+    showToast('❌ Error de conexión');
+  }
+}
+
+// Handle OAuth callback on page load
+async function checkGoogleSession() {
+  if(!supa) return;
+  try {
+    const { data: { session } } = await supa.auth.getSession();
+    if(!session) return;
+
+    const user = session.user;
+    const email = user.email;
+    const name = user.user_metadata?.full_name || email.split('@')[0];
+
+    // Check if this Google user has a family in Supabase
+    const { data: familia } = await supa
+      .from('familias')
+      .select('*')
+      .eq('email_google', email)
+      .single();
+
+    if(familia && familia.activo) {
+      // Familia existe — restaurar sesión
+      localStorage.setItem('ownFamiliaId', familia.id);
+      localStorage.setItem('ownParentName', familia.nombre_padre || name);
+      localStorage.setItem('ownKidName', familia.nombre_nino || 'Mi hijo');
+      localStorage.setItem('ownParentPass', familia.password_hash || 'google');
+      localStorage.setItem('ownKidPass', familia.kid_password_hash || 'google');
+      localStorage.setItem('ownSettings', JSON.stringify({
+        setupDone: true,
+        parentName: familia.nombre_padre || name,
+        kidName: familia.nombre_nino || 'Mi hijo'
+      }));
+      showToast('✅ ¡Bienvenido de vuelta, ' + (familia.nombre_padre || name) + '!');
+      showScreen('loginScreen');
+    } else {
+      // Usuario nuevo con Google — ir al setup con datos pre-rellenados
+      localStorage.setItem('ownGoogleEmail', email);
+      localStorage.setItem('ownGoogleName', name);
+      showScreen('setupScreen');
+      goStep(1); // Skip code step — go directly to name/password
+      // Pre-fill parent name
+      const nameInput = document.getElementById('setupParentName');
+      if(nameInput) nameInput.value = name;
+    }
+  } catch(e) {
+    console.warn('checkGoogleSession:', e);
+  }
 }
 
 // ===================== WELCOME SCREEN =====================
@@ -2692,12 +2769,14 @@ async function setupStep3() {
 
   if(supa && familiaId) {
     const venceISO = vence.toISOString();
+    const googleEmail = localStorage.getItem('ownGoogleEmail') || null;
     supa.from('familias').update({
       activo: true,
       nombre_padre: parentName,
       nombre_nino: kidName,
       password_hash: parentHash,
       vence_en: venceISO,
+      ...(googleEmail ? { email_google: googleEmail } : {})
     }).eq('id', familiaId)
     .then(({error}) => {
       if(error) console.error('Error activando familia:', error.message);
