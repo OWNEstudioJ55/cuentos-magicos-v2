@@ -70,6 +70,15 @@ async function supaSaveCuento(cuento) {
   } catch(e) { console.error('supaSaveCuento error:', e); return null; }
 }
 
+async function supaDeleteCuento(id) {
+  if (!supa) return;
+  try {
+    const { error } = await supa.from('cuentos').delete().eq('id', id);
+    if (error) console.error('supaDeleteCuento:', error.message);
+    else console.log('✅ Cuento borrado de Supabase:', id);
+  } catch(e) { console.error('supaDeleteCuento error:', e); }
+}
+
 async function supaGetCuentos(familiaId) {
   if (!supa) return [];
   try {
@@ -3314,6 +3323,7 @@ async function saveStory() {
   if(!appState.recordedBlob&&!appState._editingStoryId) { showToast('❌ Grabá el cuento primero'); return; }
 
   const id=appState._editingStoryId||Date.now().toString();
+  const existingStory = await dbGet('stories', id);
   const story={
     id, title,
     char: appState.selectedChar,
@@ -3321,9 +3331,11 @@ async function saveStory() {
     images: appState.currentStoryImages||[],
     storyText: document.getElementById('storyTextInput')?.value||'',
     portada: appState.portadaUrl||null,
-    created: new Date().toLocaleDateString('es-AR'),
+    created: existingStory?.created || new Date().toLocaleDateString('es-AR'),
     type: 'parent',
-    hasAudio: !!appState.recordedBlob
+    hasAudio: !!(appState.recordedBlob || existingStory?.hasAudio),
+    audioFile: existingStory?.audioFile || null,
+    supaSync: existingStory?.supaSync || false,
   };
 
   try {
@@ -3345,7 +3357,7 @@ async function saveStory() {
         imagenes: appState.currentStoryImages||[],
         texto: document.getElementById('storyTextInput')?.value||'',
         portada: appState.portadaUrl||null,
-        tiene_audio: !!appState.recordedBlob,
+        tiene_audio: !!(appState.recordedBlob || story.hasAudio),
       };
       // Upload audio to Supabase Storage
       if(appState.recordedBlob) {
@@ -3450,8 +3462,14 @@ async function editStory(id) {
 }
 
 async function deleteStory(id) {
-  if(!confirm('¿Eliminar este cuento?')) return;
-  await dbDelete('stories',id); await dbDelete('audio',id);
+  if(!confirm('¿Eliminar este cuento? También se borrará para el niño.')) return;
+  showLoading('Eliminando cuento...');
+  // 1. Borrar local
+  await dbDelete('stories', id);
+  await dbDelete('audio', id);
+  // 2. Borrar en Supabase — el niño ya no lo verá
+  await supaDeleteCuento(id);
+  hideLoading();
   loadParentLibrary();
   showToast('🗑 Cuento eliminado');
 }
