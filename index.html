@@ -985,14 +985,14 @@ textarea{resize:vertical;min-height:80px}
       </div>
       <div class="input-group">
         <label>Contraseña del padre/madre</label>
-        <input type="password" id="loginPass" placeholder="Tu contraseña">
+        <input type="password" id="welcomePass" placeholder="Tu contraseña" autocomplete="new-password">
       </div>
       <!-- Campo contraseña niño -->
       <div class="input-group">
         <label>Contraseña del niño/a</label>
-        <input type="password" id="loginKidPass" placeholder="Contraseña del niño">
+        <input type="password" id="welcomeKidPass" placeholder="Contraseña del niño" autocomplete="new-password">
       </div>
-      <div id="loginError" style="display:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:10px;font-size:13px;color:#f87171;margin-bottom:10px;text-align:center"></div>
+      <div id="welcomeLoginError" style="display:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:10px;font-size:13px;color:#f87171;margin-bottom:10px;text-align:center"></div>
       <button class="btn-primary" onclick="loginConCodigo()">Entrar →</button>
       <button onclick="hideWelcomeLogin()" style="width:100%;padding:12px;border:none;background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;margin-top:8px">← Volver</button>
     </div>
@@ -1079,7 +1079,7 @@ textarea{resize:vertical;min-height:80px}
       <button class="login-tab active" id="tabParent" onclick="switchLoginTab('parent')">👨 Papá/Mamá</button>
       <button class="login-tab" id="tabKid" onclick="switchLoginTab('kid')">🧒 Niño/a</button>
     </div>
-    <div class="input-group"><label>Contraseña</label><input type="password" id="loginPass" placeholder="Tu contraseña secreta"></div>
+    <div class="input-group"><label>Contraseña</label><input type="password" id="loginPass" placeholder="Tu contraseña secreta" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar ✨</button>
     <div class="login-error" id="loginError">❌ Contraseña incorrecta</div>
     <div style="margin-top:18px;text-align:center">
@@ -2602,10 +2602,10 @@ function showWelcomeLogin() {
 }
 function hideWelcomeLogin() {
   document.getElementById('welcomeLoginWrap').style.display='none';
-  document.getElementById('loginError').style.display='none';
+  document.getElementById('welcomeLoginError').style.display='none';
   document.getElementById('loginCodigo').value='';
-  document.getElementById('loginPass').value='';
-  document.getElementById('loginKidPass').value='';
+  document.getElementById('welcomePass').value='';
+  document.getElementById('welcomeKidPass').value='';
 }
 function showWelcomeSetup() {
   showScreen('setupScreen');
@@ -2614,9 +2614,9 @@ function showWelcomeSetup() {
 
 async function loginConCodigo() {
   const codigo   = document.getElementById('loginCodigo').value.trim().toUpperCase();
-  const pass     = document.getElementById('loginPass').value;
-  const kidPass  = document.getElementById('loginKidPass').value;
-  const errEl    = document.getElementById('loginError');
+  const pass     = document.getElementById('welcomePass').value;
+  const kidPass  = document.getElementById('welcomeKidPass').value;
+  const errEl    = document.getElementById('welcomeLoginError');
   errEl.style.display='none';
 
   if(!codigo||codigo.length<4){errEl.textContent='❌ Ingresá tu código OWN';errEl.style.display='block';return;}
@@ -2633,9 +2633,7 @@ async function loginConCodigo() {
     if(!data.activo){errEl.textContent='❌ Código no activado. Usá "Es mi primera vez".';errEl.style.display='block';return;}
 
     const hash=await hashPassword(pass);
-    // Si password_hash es 'pendiente' — primera vez o reset — permitir entrada y guardar nueva contraseña
     if(data.password_hash === 'pendiente') {
-      // Actualizar contraseña en Supabase
       await supa.from('familias').update({ password_hash: hash }).eq('codigo', codigo);
     } else if(hash!==data.password_hash){
       errEl.textContent='❌ Contraseña de padre incorrecta.';errEl.style.display='block';return;
@@ -2647,14 +2645,12 @@ async function loginConCodigo() {
       localStorage.setItem('ownDiasRestantes',dias);
     }
 
-    // Guardar contraseña del niño hasheada
     const kidHash = await hashPassword(kidPass);
-
     localStorage.setItem('ownFamiliaId',data.id);
     localStorage.setItem('ownCodigo',codigo);
     localStorage.setItem('ownParentName',data.nombre_padre||'Papá');
     localStorage.setItem('ownKidName',data.nombre_nino||'Niño');
-    localStorage.setItem('ownParentPass',data.password_hash);
+    localStorage.setItem('ownParentPass',hash);
     localStorage.setItem('ownKidPass',kidHash);
     localStorage.setItem('ownVenceEn',data.vence_en||'');
     localStorage.setItem('ownSettings',JSON.stringify({setupDone:true,parentName:data.nombre_padre||'Papá',kidName:data.nombre_nino||'Niño'}));
