@@ -987,6 +987,11 @@ textarea{resize:vertical;min-height:80px}
         <label>Contraseña del padre/madre</label>
         <input type="password" id="loginPass" placeholder="Tu contraseña">
       </div>
+      <!-- Campo contraseña niño -->
+      <div class="input-group">
+        <label>Contraseña del niño/a</label>
+        <input type="password" id="loginKidPass" placeholder="Contraseña del niño">
+      </div>
       <div id="loginError" style="display:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:10px;font-size:13px;color:#f87171;margin-bottom:10px;text-align:center"></div>
       <button class="btn-primary" onclick="loginConCodigo()">Entrar →</button>
       <button onclick="hideWelcomeLogin()" style="width:100%;padding:12px;border:none;background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;margin-top:8px">← Volver</button>
@@ -2600,6 +2605,7 @@ function hideWelcomeLogin() {
   document.getElementById('loginError').style.display='none';
   document.getElementById('loginCodigo').value='';
   document.getElementById('loginPass').value='';
+  document.getElementById('loginKidPass').value='';
 }
 function showWelcomeSetup() {
   showScreen('setupScreen');
@@ -2607,13 +2613,15 @@ function showWelcomeSetup() {
 }
 
 async function loginConCodigo() {
-  const codigo = document.getElementById('loginCodigo').value.trim().toUpperCase();
-  const pass   = document.getElementById('loginPass').value;
-  const errEl  = document.getElementById('loginError');
+  const codigo   = document.getElementById('loginCodigo').value.trim().toUpperCase();
+  const pass     = document.getElementById('loginPass').value;
+  const kidPass  = document.getElementById('loginKidPass').value;
+  const errEl    = document.getElementById('loginError');
   errEl.style.display='none';
 
   if(!codigo||codigo.length<4){errEl.textContent='❌ Ingresá tu código OWN';errEl.style.display='block';return;}
-  if(!pass){errEl.textContent='❌ Ingresá tu contraseña';errEl.style.display='block';return;}
+  if(!pass){errEl.textContent='❌ Ingresá tu contraseña de padre/madre';errEl.style.display='block';return;}
+  if(!kidPass){errEl.textContent='❌ Ingresá la contraseña del niño';errEl.style.display='block';return;}
   if(!supa){errEl.textContent='❌ Sin conexión al servidor';errEl.style.display='block';return;}
 
   showLoading('Verificando...');
@@ -2625,7 +2633,7 @@ async function loginConCodigo() {
     if(!data.activo){errEl.textContent='❌ Código no activado. Usá "Es mi primera vez".';errEl.style.display='block';return;}
 
     const hash=await hashPassword(pass);
-    if(hash!==data.password_hash){errEl.textContent='❌ Contraseña incorrecta.';errEl.style.display='block';return;}
+    if(hash!==data.password_hash){errEl.textContent='❌ Contraseña de padre incorrecta.';errEl.style.display='block';return;}
 
     if(data.vence_en){
       const dias=Math.ceil((new Date(data.vence_en)-new Date())/(1000*60*60*24));
@@ -2633,11 +2641,15 @@ async function loginConCodigo() {
       localStorage.setItem('ownDiasRestantes',dias);
     }
 
+    // Guardar contraseña del niño hasheada
+    const kidHash = await hashPassword(kidPass);
+
     localStorage.setItem('ownFamiliaId',data.id);
     localStorage.setItem('ownCodigo',codigo);
     localStorage.setItem('ownParentName',data.nombre_padre||'Papá');
     localStorage.setItem('ownKidName',data.nombre_nino||'Niño');
     localStorage.setItem('ownParentPass',data.password_hash);
+    localStorage.setItem('ownKidPass',kidHash);
     localStorage.setItem('ownVenceEn',data.vence_en||'');
     localStorage.setItem('ownSettings',JSON.stringify({setupDone:true,parentName:data.nombre_padre||'Papá',kidName:data.nombre_nino||'Niño'}));
 
