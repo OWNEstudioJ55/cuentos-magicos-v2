@@ -150,36 +150,36 @@ async function supaGetAudioUrl(filename) {
 // SPRITE SHEET SYSTEM
 // ══════════════════════════════════════════
 const SPRITE_URL = '/sprites.png';
-const IMG_W = 1800; const IMG_H = 800;
+const IMG_W = 1504; const IMG_H = 704;
 
 const CHAR_SPRITES = {
-  'dragon':    { x:59,   y:41, w:168, h:210 },
-  'hada':      { x:286,  y:41, w:185, h:210 },
-  'leon':      { x:531,  y:41, w:158, h:210 },
-  'delfin':    { x:762,  y:41, w:162, h:210 },
-  'zorro':     { x:986,  y:41, w:163, h:210 },
-  'robot':     { x:1200, y:41, w:140, h:210 },
-  'unicornio': { x:1409, y:41, w:161, h:210 },
-  'mago':      { x:1618, y:41, w:150, h:210 },
+  'dragon':    { x:35,   y:49, w:168, h:191 },
+  'hada':      { x:214,  y:49, w:185, h:191 },
+  'leon':      { x:423,  y:49, w:158, h:191 },
+  'delfin':    { x:614,  y:49, w:162, h:191 },
+  'zorro':     { x:798,  y:49, w:163, h:191 },
+  'robot':     { x:972,  y:49, w:138, h:191 },
+  'unicornio': { x:1146, y:49, w:158, h:191 },
+  'mago':      { x:1320, y:49, w:150, h:191 },
 };
 
 const ICON_SPRITES = {
-  'home':     { x:58,   y:344, w:161, h:177 },
-  'mic':      { x:270,  y:344, w:180, h:177 },
-  'books':    { x:510,  y:344, w:160, h:177 },
-  'progress': { x:700,  y:344, w:160, h:177 },
-  'trophy':   { x:895,  y:344, w:157, h:177 },
-  'star':     { x:1120, y:344, w:145, h:177 },
-  'play':     { x:1335, y:344, w:140, h:177 },
-  'rocket':   { x:1555, y:344, w:180, h:177 },
-  'brain':    { x:65,   y:574, w:146, h:152 },
-  'book':     { x:289,  y:574, w:172, h:152 },
-  'trophy2':  { x:527,  y:574, w:142, h:152 },
-  'pencil':   { x:755,  y:574, w:134, h:152 },
-  'camera':   { x:967,  y:574, w:153, h:152 },
-  'sparkles': { x:1195, y:574, w:135, h:152 },
-  'heart':    { x:1418, y:574, w:129, h:152 },
-  'music':    { x:1639, y:574, w:112, h:152 },
+  'home':     { x:29,   y:322, w:170, h:150 },
+  'mic':      { x:210,  y:322, w:160, h:150 },
+  'books':    { x:395,  y:322, w:175, h:150 },
+  'progress': { x:585,  y:322, w:155, h:150 },
+  'trophy':   { x:765,  y:322, w:160, h:150 },
+  'star':     { x:950,  y:322, w:155, h:150 },
+  'play':     { x:1130, y:322, w:155, h:150 },
+  'rocket':   { x:1310, y:322, w:155, h:150 },
+  'brain':    { x:36,   y:539, w:156, h:127 },
+  'book':     { x:212,  y:539, w:182, h:127 },
+  'trophy2':  { x:414,  y:539, w:152, h:127 },
+  'pencil':   { x:603,  y:539, w:143, h:127 },
+  'camera':   { x:774,  y:539, w:163, h:127 },
+  'sparkles': { x:962,  y:539, w:145, h:127 },
+  'heart':    { x:1149, y:539, w:139, h:127 },
+  'music':    { x:1336, y:539, w:122, h:127 },
 };
 
 // Helper: render a sprite as a div with background-image crop
@@ -1864,18 +1864,32 @@ textarea{resize:vertical;min-height:80px}
 
       <!-- Drawing canvas -->
       <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(167,139,250,0.2)">
-        <!-- Color picker -->
+        <!-- Color picker lápiz -->
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
           <span style="font-size:11px;font-weight:800;color:var(--text2)">Lápiz:</span>
-          ${['#000000','#ff6b6b','#a78bfa','#06d6a0','#ffd166','#38bdf8','#f97316','#ffffff'].map(c=>`<button onclick="setDrawColor('${c}')" style="width:30px;height:30px;border-radius:50%;background:${c};border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0;transition:transform .1s" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></button>`).join('')}
+          <button onclick="setDrawColor('#000000')" style="width:30px;height:30px;border-radius:50%;background:#000000;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#ff6b6b')" style="width:30px;height:30px;border-radius:50%;background:#ff6b6b;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#a78bfa')" style="width:30px;height:30px;border-radius:50%;background:#a78bfa;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#06d6a0')" style="width:30px;height:30px;border-radius:50%;background:#06d6a0;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#ffd166')" style="width:30px;height:30px;border-radius:50%;background:#ffd166;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#38bdf8')" style="width:30px;height:30px;border-radius:50%;background:#38bdf8;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#f97316')" style="width:30px;height:30px;border-radius:50%;background:#f97316;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setDrawColor('#ffffff')" style="width:30px;height:30px;border-radius:50%;background:#ffffff;border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>
           <input type="range" id="drawSize" min="2" max="24" value="6" style="width:60px;accent-color:var(--coral)">
           <button onclick="setDrawEraser()" title="Borrador" style="padding:5px 10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:var(--text);font-size:16px;cursor:pointer">🧹</button>
           <button onclick="clearCanvas()" title="Limpiar todo" style="padding:5px 10px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#f87171;font-size:16px;cursor:pointer">🗑</button>
         </div>
-        <!-- Background color picker -->
+        <!-- Color picker fondo -->
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
           <span style="font-size:11px;font-weight:800;color:var(--text2)">Fondo:</span>
-          ${['#ffffff','#fef9c3','#dbeafe','#dcfce7','#fce7f3','#f3e8ff','#000000','#1e3a5f'].map(c=>`<button onclick="setCanvasBg('${c}')" style="width:26px;height:26px;border-radius:6px;background:${c};border:2px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>`).join('')}
+          <button onclick="setCanvasBg('#ffffff')" style="width:26px;height:26px;border-radius:6px;background:#ffffff;border:2px solid rgba(255,255,255,0.4);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#fef9c3')" style="width:26px;height:26px;border-radius:6px;background:#fef9c3;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#dbeafe')" style="width:26px;height:26px;border-radius:6px;background:#dbeafe;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#dcfce7')" style="width:26px;height:26px;border-radius:6px;background:#dcfce7;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#fce7f3')" style="width:26px;height:26px;border-radius:6px;background:#fce7f3;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#f3e8ff')" style="width:26px;height:26px;border-radius:6px;background:#f3e8ff;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#000000')" style="width:26px;height:26px;border-radius:6px;background:#000000;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
+          <button onclick="setCanvasBg('#1e3a5f')" style="width:26px;height:26px;border-radius:6px;background:#1e3a5f;border:2px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0"></button>
         </div>
         <canvas id="drawCanvas" width="320" height="240" style="background:white;border-radius:12px;touch-action:none;display:block;max-width:100%;border:2px solid rgba(167,139,250,0.3)"></canvas>
         <button class="btn btn-accent btn-full" style="margin-top:12px;font-size:15px;padding:14px" onclick="saveKidDrawingToSequence()">💾 Guardar dibujo (paso <span id="kidDrawSlotLabel">1</span> de 5)</button>
