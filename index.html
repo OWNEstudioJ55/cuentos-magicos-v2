@@ -855,7 +855,9 @@ textarea{resize:vertical;min-height:80px}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9990;align-items:flex-end;justify-content:center;padding:16px;backdrop-filter:blur(8px)}
 .modal-overlay.open{display:flex}
 .modal-box{background:var(--card);border-radius:24px 24px 20px 20px;width:100%;max-width:440px;padding:24px;border:1px solid rgba(255,255,255,.08);animation:slideUp .3s ease;max-height:88vh;overflow-y:auto}
-@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes confettiFall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes bounceIn{0%{transform:scale(0)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
 /* Notif */
 .notif-btn{position:relative;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);color:var(--text);padding:6px 10px;border-radius:12px;font-size:18px;cursor:pointer;line-height:1}
@@ -1625,7 +1627,26 @@ textarea{resize:vertical;min-height:80px}
         <div class="plan-feature highlight">📥 Descarga audio + imágenes</div>
       </div>
       <div id="activatePlanBtn" style="display:none;margin-top:12px">
-        <button class="btn btn-premium btn-full" onclick="activateSelectedPlan()">✨ Activar (simulación)</button>
+        <button class="btn btn-premium btn-full" onclick="activateSelectedPlan()" style="font-size:16px;padding:16px">✨ Activar Premium — $9.99/mes</button>
+        <p style="font-size:11px;color:rgba(255,209,102,.5);text-align:center;margin-top:8px">Pago seguro · Cancelá cuando quieras</p>
+      </div>
+
+      <!-- Token packages -->
+      <div style="margin-top:14px">
+        <div class="prem-subtitle">🪙 Comprar tokens</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <button onclick="buyTokens(10,1.99)" style="background:rgba(255,209,102,.08);border:1.5px solid rgba(255,209,102,.3);border-radius:14px;padding:14px;text-align:center;cursor:pointer">
+            <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--warm)">10</div>
+            <div style="font-size:13px;font-weight:800;color:var(--text)">$1.99</div>
+            <div style="font-size:11px;color:var(--text2)">tokens</div>
+          </button>
+          <button onclick="buyTokens(50,7.99)" style="background:rgba(255,209,102,.12);border:2px solid rgba(255,209,102,.5);border-radius:14px;padding:14px;text-align:center;cursor:pointer;position:relative">
+            <div style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);background:var(--coral);color:white;font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;font-family:Nunito,sans-serif">MEJOR</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--warm)">50</div>
+            <div style="font-size:13px;font-weight:800;color:var(--text)">$7.99</div>
+            <div style="font-size:11px;color:var(--text2)">tokens</div>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -1843,11 +1864,18 @@ textarea{resize:vertical;min-height:80px}
 
       <!-- Drawing canvas -->
       <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(167,139,250,0.2)">
+        <!-- Color picker -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+          <span style="font-size:11px;font-weight:800;color:var(--text2)">Lápiz:</span>
+          ${['#000000','#ff6b6b','#a78bfa','#06d6a0','#ffd166','#38bdf8','#f97316','#ffffff'].map(c=>`<button onclick="setDrawColor('${c}')" style="width:30px;height:30px;border-radius:50%;background:${c};border:3px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0;transition:transform .1s" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'"></button>`).join('')}
+          <input type="range" id="drawSize" min="2" max="24" value="6" style="width:60px;accent-color:var(--coral)">
+          <button onclick="setDrawEraser()" title="Borrador" style="padding:5px 10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:var(--text);font-size:16px;cursor:pointer">🧹</button>
+          <button onclick="clearCanvas()" title="Limpiar todo" style="padding:5px 10px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#f87171;font-size:16px;cursor:pointer">🗑</button>
+        </div>
+        <!-- Background color picker -->
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-          ${['#ff6fd8','#a78bfa','#34d399','#fbbf24','#38bdf8','#f87171','#f97316','#1e1a4a','#ffffff'].map(c=>`<button onclick="setDrawColor('${c}')" style="width:32px;height:32px;border-radius:50%;background:${c};border:3px solid rgba(255,255,255,0.2);cursor:pointer;flex-shrink:0" title="${c}"></button>`).join('')}
-          <input type="range" id="kidDrawSize" min="2" max="24" value="6" style="width:70px;accent-color:var(--accent)">
-          <button onclick="setDrawEraser()" style="padding:6px 10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;color:var(--text);font-size:13px;cursor:pointer;font-family:Nunito,sans-serif;font-weight:700">🧹</button>
-          <button onclick="clearCanvas()" style="padding:6px 10px;background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);border-radius:8px;color:#f87171;font-size:13px;cursor:pointer;font-family:Nunito,sans-serif;font-weight:700">🗑</button>
+          <span style="font-size:11px;font-weight:800;color:var(--text2)">Fondo:</span>
+          ${['#ffffff','#fef9c3','#dbeafe','#dcfce7','#fce7f3','#f3e8ff','#000000','#1e3a5f'].map(c=>`<button onclick="setCanvasBg('${c}')" style="width:26px;height:26px;border-radius:6px;background:${c};border:2px solid rgba(255,255,255,0.3);cursor:pointer;flex-shrink:0"></button>`).join('')}
         </div>
         <canvas id="drawCanvas" width="320" height="240" style="background:white;border-radius:12px;touch-action:none;display:block;max-width:100%;border:2px solid rgba(167,139,250,0.3)"></canvas>
         <button class="btn btn-accent btn-full" style="margin-top:12px;font-size:15px;padding:14px" onclick="saveKidDrawingToSequence()">💾 Guardar dibujo (paso <span id="kidDrawSlotLabel">1</span> de 5)</button>
@@ -3146,8 +3174,7 @@ async function toggleRecord() {
       btn.classList.add('recording');
       btn.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
       btn.style.boxShadow='0 8px 32px rgba(239,68,68,.6)';
-      const ic=document.getElementById('recBtnIcon'); if(ic) ic.style.cssText='width:60px;height:60px;font-size:44px;line-height:1;display:flex;align-items:center;justify-content:center';ic&&(ic.textContent='⏹️');
-      const sp=btn.querySelector('span'); if(sp) sp.textContent='PARAR';
+      btn.innerHTML='<span style="font-size:52px;line-height:1">⏹️</span><span style="font-size:14px;font-weight:900;font-family:Nunito,sans-serif">PARAR</span>';
     }
     const rs=document.getElementById('recStatus'); if(rs) rs.textContent='🔴 Grabando... tocá PARAR cuando termines';
     clearInterval(recordingInterval);
@@ -3165,9 +3192,11 @@ function stopRecording() {
     appState.isRecording=false;
     clearInterval(recordingInterval);
     const btn=document.getElementById('recBtn');
-    if(btn){ btn.classList.remove('recording'); btn.style.background='linear-gradient(135deg,var(--coral),#ff8e53)'; btn.style.boxShadow='0 8px 32px rgba(255,107,107,.5)';
-      const ic=document.getElementById('recBtnIcon'); if(ic&&ICON_SPRITES.mic) ic.style.cssText=`width:60px;height:60px;${spriteBg(ICON_SPRITES.mic,60)}`;
-      const sp=btn.querySelector('span'); if(sp) sp.textContent='GRABAR';
+    if(btn){
+      btn.classList.remove('recording');
+      btn.style.background='linear-gradient(135deg,var(--coral),#ff8e53)';
+      btn.style.boxShadow='0 8px 32px rgba(255,107,107,.5)';
+      btn.innerHTML='<span style="font-size:52px;line-height:1">🎙️</span><span style="font-size:14px;font-weight:900;font-family:Nunito,sans-serif">GRABAR</span>';
     }
     const rs=document.getElementById('recStatus'); if(rs) rs.textContent='✅ Grabación completa — escuchala ↓';
     stopAutoAdvance();
@@ -3384,27 +3413,28 @@ async function loadParentHomeStories() {
 
 async function editStory(id) {
   const story=await dbGet('stories',id);
-  if(!story) return;
+  if(!story){ showToast('❌ No se encontró el cuento'); return; }
   appState._editingStoryId=id;
+  appState.recordedBlob=null; // clear so save dialog doesn't trigger
+  appState.recAudio=null;
   appState.selectedChar=story.char||'🐉';
   appState.selectedVoice=story.voice||'normal';
   appState.currentStoryImages=story.images||[];
   appState.portadaUrl=story.portada||null;
   document.getElementById('storyTitle').value=story.title||'';
-  document.getElementById('editModeBanner').style.display='flex';
+  const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='flex';
   buildParentVoicePills(); buildParentCharGrid(); updatePortadaChar(); updatePortadaTitleOverlay();
-  // Restore portada image if any
   if(story.portada) {
     const img=document.getElementById('portadaImg'); const ph=document.getElementById('portadaPlaceholder');
     if(img){img.src=story.portada;img.style.display='block';}
     if(ph) ph.style.display='none';
   }
   if(appState.currentStoryImages.length) {
-    document.getElementById('storyImgWrap').innerHTML=`<div class="images-grid">${appState.currentStoryImages.map((u,i)=>`<div class="grid-img-wrap"><img src="${u}"></div>`).join('')}</div>`;
     buildRecSlideshow(appState.currentStoryImages);
   }
-  switchParentTab('record');
-  showToast('✏️ Modo edición activado');
+  _doSwitchParentTab('record');
+  goRecStep(1);
+  showToast('✏️ Editando cuento — guardá al terminar');
 }
 
 async function deleteStory(id) {
@@ -3612,6 +3642,30 @@ function buildProgressFull() {
 
 // ===================== PREMIUM SCREEN =====================
 let _selectedPlan=null;
+function hidePremiumScreen() {
+  showScreen('parentApp');
+}
+
+function showCelebration(msg) {
+  const div=document.createElement('div');
+  div.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(8px)';
+  div.innerHTML=`
+    <div style="font-size:80px;margin-bottom:16px;animation:bounceIn .5s ease">🎉</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:26px;color:white;text-align:center;margin-bottom:8px;padding:0 24px">${msg}</div>
+    <div style="font-size:14px;color:rgba(255,255,255,.7)">El cuento ya está disponible para ${appState.kidName||'tu hijo'} 🎙️</div>
+  `;
+  document.body.appendChild(div);
+  // Confetti effect
+  for(let i=0;i<20;i++){
+    const c=document.createElement('div');
+    const colors=['#ff6b6b','#ffd166','#06d6a0','#a78bfa','#38bdf8'];
+    c.style.cssText=`position:fixed;width:10px;height:10px;border-radius:50%;background:${colors[i%5]};left:${Math.random()*100}vw;top:-10px;z-index:10000;animation:confettiFall ${1+Math.random()*2}s ease forwards ${Math.random()}s`;
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(), 3000);
+  }
+  setTimeout(()=>{ div.style.opacity='0'; div.style.transition='opacity .4s'; setTimeout(()=>div.remove(),400); }, 2200);
+}
+
 function showPremiumScreen() {
   const plan=getUserPlan();
   const prem=isPremium();
@@ -4482,21 +4536,38 @@ function updateCurrencyDisplay() {
   const el1=document.getElementById('premCoinsDisplay'); if(el1) el1.textContent=getCoins();
   const el2=document.getElementById('premDiamondsDisplay'); if(el2) el2.textContent=getDiamonds();
 }
-function claimDailyCoins() {
-  const key='ownLastCoinClaim';
-  const last=localStorage.getItem(key);
-  const today=new Date().toDateString();
-  if(last===today) { showToast('⏰ Ya reclamaste las monedas de hoy'); return; }
-  localStorage.setItem(key,today);
-  const amount=isPremium()?100:10;
-  addCoins(amount);
-  showToast(`🪙 +${amount} monedas del día!`);
-  updateCurrencyDisplay();
-  // Sync both daily coin buttons
-  ['dailyCoinBtn','dailyCoinBtn2'].forEach(id=>{
-    const btn=document.getElementById(id); if(btn) { btn.textContent='✅ Reclamado hoy'; btn.disabled=true; }
-  });
+function selectPlan(plan) {
+  _selectedPlan = plan;
+  const btn = document.getElementById('activatePlanBtn');
+  if(btn) btn.style.display = plan === 'premium' ? 'block' : 'none';
 }
+
+function activateSelectedPlan() {
+  // Simulation for beta — real payment via MercadoPago in future
+  if(_selectedPlan === 'premium') {
+    showToast('🚧 Pagos disponibles próximamente. Escribinos por WhatsApp.');
+  }
+}
+
+function buyTokens(amount, price) {
+  showToast(`🚧 Compra de ${amount} tokens ($${price}) disponible próximamente.`);
+}
+
+function claimDailyCoins() {
+  const today = new Date().toDateString();
+  if(localStorage.getItem('ownLastCoinClaim') === today) {
+    showToast('✅ Ya reclamaste tus monedas hoy');
+    return;
+  }
+  const coins = parseInt(localStorage.getItem('ownCoins')||'0') + 10;
+  localStorage.setItem('ownCoins', coins);
+  localStorage.setItem('ownLastCoinClaim', today);
+  updateCurrencyDisplay();
+  showToast('🪙 ¡+10 monedas! Volvé mañana por más');
+  const btn = document.getElementById('dailyCoinBtn');
+  if(btn) { btn.textContent = '✅ Reclamado hoy'; btn.disabled = true; }
+}
+
 function claimDailyDiamonds() {
   if(!isPremium()) { showToast('💎 Los diamantes son exclusivos de Premium'); return; }
   const key='ownLastDiamondClaim';
@@ -5847,8 +5918,19 @@ function buildDrawGame() {
   initCanvas();
 }
 
-let drawCtx=null, drawColor='#ff6fd8', isDrawing=false, drawEraser=false;
+let drawCtx=null, drawColor='#000000', isDrawing=false, drawEraser=false, canvasBg='#ffffff';
 function setDrawColor(c) { drawColor=c; drawEraser=false; }
+function setCanvasBg(c) {
+  canvasBg=c;
+  const canvas=document.getElementById('drawCanvas');
+  if(!canvas||!drawCtx) return;
+  canvas.style.background=c;
+  // Redraw background
+  const imageData=drawCtx.getImageData(0,0,canvas.width,canvas.height);
+  drawCtx.fillStyle=c;
+  drawCtx.fillRect(0,0,canvas.width,canvas.height);
+  drawCtx.putImageData(imageData,0,0);
+}
 function setDrawEraser() { drawEraser=true; }
 function clearCanvas() { if(drawCtx) { drawCtx.clearRect(0,0,320,240); } }
 function initCanvas() {
@@ -5865,18 +5947,18 @@ function initCanvas() {
   const down=e=>{
     isDrawing=true;
     const p=getPos(e);
-    const sz=parseInt(document.getElementById('drawSize')?.value||'4');
+    const sz=parseInt(document.getElementById('drawSize')?.value||'6');
     drawCtx.lineWidth=drawEraser?sz*4:sz;
-    drawCtx.strokeStyle=drawEraser?'white':drawColor;
+    drawCtx.strokeStyle=drawEraser?canvasBg:drawColor;
     drawCtx.beginPath(); drawCtx.moveTo(p.x,p.y);
     e.preventDefault();
   };
   const move=e=>{
     if(!isDrawing) return;
     const p=getPos(e);
-    const sz=parseInt(document.getElementById('drawSize')?.value||'4');
+    const sz=parseInt(document.getElementById('drawSize')?.value||'6');
     drawCtx.lineWidth=drawEraser?sz*4:sz;
-    drawCtx.strokeStyle=drawEraser?'white':drawColor;
+    drawCtx.strokeStyle=drawEraser?canvasBg:drawColor;
     drawCtx.lineTo(p.x,p.y); drawCtx.stroke();
     e.preventDefault();
   };
