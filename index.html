@@ -141,37 +141,36 @@ async function supaGetAudioUrl(filename) {
 // SPRITE SHEET SYSTEM
 // ══════════════════════════════════════════
 const SPRITE_URL = '/sprites.png';
-const IMG_W = 1504; const IMG_H = 704;
+const IMG_W = 1800; const IMG_H = 800;
 
-// Exact coordinates measured from actual pixel content
 const CHAR_SPRITES = {
-  'dragon':    { x:47,   y:49,  w:142, h:191 },
-  'hada':      { x:216,  y:49,  w:175, h:191 },
-  'leon':      { x:432,  y:49,  w:146, h:191 },
-  'delfin':    { x:621,  y:49,  w:127, h:191 },
-  'zorro':     { x:804,  y:49,  w:154, h:191 },
-  'robot':     { x:981,  y:49,  w:124, h:191 },
-  'unicornio': { x:1155, y:49,  w:146, h:191 },
-  'mago':      { x:1326, y:49,  w:141, h:191 },
+  'dragon':    { x:59,   y:41, w:168, h:210 },
+  'hada':      { x:286,  y:41, w:185, h:210 },
+  'leon':      { x:531,  y:41, w:158, h:210 },
+  'delfin':    { x:762,  y:41, w:162, h:210 },
+  'zorro':     { x:986,  y:41, w:163, h:210 },
+  'robot':     { x:1200, y:41, w:140, h:210 },
+  'unicornio': { x:1409, y:41, w:161, h:210 },
+  'mago':      { x:1618, y:41, w:150, h:210 },
 };
 
 const ICON_SPRITES = {
-  'home':     { x:40,   y:322, w:148, h:150 },
-  'mic':      { x:266,  y:322, w:73,  h:150 },
-  'books':    { x:416,  y:322, w:151, h:150 },
-  'progress': { x:609,  y:322, w:130, h:150 },
-  'trophy':   { x:788,  y:322, w:135, h:150 },
-  'star':     { x:976,  y:322, w:123, h:150 },
-  'play':     { x:1155, y:322, w:127, h:150 },
-  'rocket':   { x:1327, y:322, w:134, h:150 },
-  'brain':    { x:45,   y:539, w:140, h:127 },
-  'book':     { x:222,  y:539, w:164, h:127 },
-  'trophy2':  { x:423,  y:539, w:135, h:127 },
-  'pencil':   { x:613,  y:539, w:126, h:127 },
-  'camera':   { x:780,  y:539, w:152, h:127 },
-  'sparkles': { x:975,  y:539, w:120, h:127 },
-  'heart':    { x:1157, y:539, w:123, h:127 },
-  'music':    { x:1346, y:539, w:106, h:127 },
+  'home':     { x:58,   y:344, w:161, h:177 },
+  'mic':      { x:270,  y:344, w:180, h:177 },
+  'books':    { x:510,  y:344, w:160, h:177 },
+  'progress': { x:700,  y:344, w:160, h:177 },
+  'trophy':   { x:895,  y:344, w:157, h:177 },
+  'star':     { x:1120, y:344, w:145, h:177 },
+  'play':     { x:1335, y:344, w:140, h:177 },
+  'rocket':   { x:1555, y:344, w:180, h:177 },
+  'brain':    { x:65,   y:574, w:146, h:152 },
+  'book':     { x:289,  y:574, w:172, h:152 },
+  'trophy2':  { x:527,  y:574, w:142, h:152 },
+  'pencil':   { x:755,  y:574, w:134, h:152 },
+  'camera':   { x:967,  y:574, w:153, h:152 },
+  'sparkles': { x:1195, y:574, w:135, h:152 },
+  'heart':    { x:1418, y:574, w:129, h:152 },
+  'music':    { x:1639, y:574, w:112, h:152 },
 };
 
 // Helper: render a sprite as a div with background-image crop
