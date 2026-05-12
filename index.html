@@ -1234,7 +1234,10 @@ textarea{resize:vertical;min-height:80px}
         <div style="background:var(--card);border-radius:18px;padding:20px;border:1px solid rgba(167,139,250,0.15);margin-bottom:14px">
           <div class="timer-display" id="recTimer" style="font-size:48px;margin-bottom:4px">0:00</div>
           <div class="rec-status" id="recStatus" style="font-size:14px;margin-bottom:16px">Listo para grabar</div>
-          <button class="record-circle" id="recBtn" onclick="toggleRecord()" style="width:120px;height:120px;font-size:52px">🎙️</button>
+          <button class="record-circle" id="recBtn" onclick="toggleRecord()" style="width:120px;height:120px;font-size:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+            <div id="recBtnIcon" style="width:60px;height:60px"></div>
+            <span style="font-size:14px;font-weight:900;font-family:'Nunito',sans-serif">GRABAR</span>
+          </button>
 
           <!-- Playback — aparece al terminar de grabar -->
           <div id="recPlayback" style="display:none;margin-top:18px">
@@ -1606,7 +1609,10 @@ textarea{resize:vertical;min-height:80px}
           </div>
           <div class="timer-display" id="oroRecTimer" style="font-size:28px">0:00</div>
           <div class="rec-status" id="oroRecStatus" style="font-size:13px;margin-bottom:12px">Listo para grabar</div>
-          <button class="record-circle" id="oroRecBtn" onclick="toggleOroRecord()" style="width:90px;height:90px;font-size:36px;margin:0 auto 12px">🎙️</button>
+          <button class="record-circle" id="oroRecBtn" onclick="toggleOroRecord()" style="width:90px;height:90px;font-size:36px;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+            <div id="oroRecBtnIcon" style="width:44px;height:44px"></div>
+            <span style="font-size:11px;font-weight:900;font-family:'Nunito',sans-serif">GRABAR</span>
+          </button>
 
           <div id="oroRecPlayback" style="display:none">
             <div style="font-size:12px;font-weight:800;color:var(--accent3);margin-bottom:8px">✅ Grabación lista:</div>
@@ -2051,7 +2057,10 @@ textarea{resize:vertical;min-height:80px}
 
         <div class="timer-display" id="writeRecTimer" style="font-size:28px">0:00</div>
         <div class="rec-status" id="writeRecStatus" style="font-size:13px">¡Tocá para grabar!</div>
-        <button class="record-circle" id="writeRecBtn" onclick="toggleWriteRecord()" style="width:90px;height:90px;font-size:40px;margin:10px auto">🎙️</button>
+        <button class="record-circle" id="writeRecBtn" onclick="toggleWriteRecord()" style="width:90px;height:90px;font-size:40px;margin:10px auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <div id="writeRecBtnIcon" style="width:44px;height:44px"></div>
+          <span style="font-size:11px;font-weight:900;font-family:'Nunito',sans-serif">GRABAR</span>
+        </button>
 
         <div id="writeRecPlayback" style="display:none;margin-top:12px">
           <div style="font-size:12px;font-weight:800;color:var(--accent3);margin-bottom:8px">✅ ¡Grabaste! Escuchá:</div>
@@ -2818,6 +2827,11 @@ function injectNavSprites() {
     if(!el || !sprite) return;
     el.style.cssText = `display:block;width:${size}px;height:${size}px;` + spriteBg(sprite, size);
   });
+  // Record buttons — inject mic sprite
+  ['recBtnIcon','oroRecBtnIcon','writeRecBtnIcon'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&ICON_SPRITES.mic) el.style.cssText=`width:100%;height:100%;${spriteBg(ICON_SPRITES.mic,el.offsetWidth||48)}`;
+  });
 }
 
 function buildParentVoicePills() {
@@ -2967,12 +2981,18 @@ async function toggleRecord() {
       if(avw&&appState.selectedVoice&&appState.selectedVoice!=='normal') avw.style.display='block';
       stopAutoAdvance();
     };
-    appState.mediaRecorder.start(100); // collect data every 100ms
+    appState.mediaRecorder.start(100);
     appState.isRecording=true;
     appState.recordSeconds=0;
     const btn=document.getElementById('recBtn');
-    if(btn){ btn.classList.add('recording'); btn.textContent='⏹️'; }
-    const rs=document.getElementById('recStatus'); if(rs) rs.textContent='🔴 Grabando...';
+    if(btn){
+      btn.classList.add('recording');
+      btn.style.background='linear-gradient(135deg,#ef4444,#dc2626)';
+      btn.style.boxShadow='0 8px 32px rgba(239,68,68,.6)';
+      const ic=document.getElementById('recBtnIcon'); if(ic) ic.style.cssText='width:60px;height:60px;font-size:44px;line-height:1;display:flex;align-items:center;justify-content:center';ic&&(ic.textContent='⏹️');
+      const sp=btn.querySelector('span'); if(sp) sp.textContent='PARAR';
+    }
+    const rs=document.getElementById('recStatus'); if(rs) rs.textContent='🔴 Grabando... tocá PARAR cuando termines';
     clearInterval(recordingInterval);
     recordingInterval=setInterval(()=>{
       appState.recordSeconds++;
@@ -2988,7 +3008,10 @@ function stopRecording() {
     appState.isRecording=false;
     clearInterval(recordingInterval);
     const btn=document.getElementById('recBtn');
-    if(btn){ btn.classList.remove('recording'); btn.textContent='🎙️'; }
+    if(btn){ btn.classList.remove('recording'); btn.style.background='linear-gradient(135deg,var(--coral),#ff8e53)'; btn.style.boxShadow='0 8px 32px rgba(255,107,107,.5)';
+      const ic=document.getElementById('recBtnIcon'); if(ic&&ICON_SPRITES.mic) ic.style.cssText=`width:60px;height:60px;${spriteBg(ICON_SPRITES.mic,60)}`;
+      const sp=btn.querySelector('span'); if(sp) sp.textContent='GRABAR';
+    }
     const rs=document.getElementById('recStatus'); if(rs) rs.textContent='✅ Grabación completa — escuchala ↓';
     stopAutoAdvance();
   }
