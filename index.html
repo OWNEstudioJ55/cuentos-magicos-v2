@@ -143,33 +143,35 @@ async function supaGetAudioUrl(filename) {
 const SPRITE_URL = '/sprites.png';
 const IMG_W = 1504; const IMG_H = 704;
 
+// Exact coordinates measured from actual pixel content
 const CHAR_SPRITES = {
-  'dragon':    { x:0,    y:0, w:188, h:234 },
-  'hada':      { x:188,  y:0, w:188, h:234 },
-  'leon':      { x:376,  y:0, w:188, h:234 },
-  'delfin':    { x:564,  y:0, w:188, h:234 },
-  'zorro':     { x:752,  y:0, w:188, h:234 },
-  'robot':     { x:940,  y:0, w:188, h:234 },
-  'unicornio': { x:1128, y:0, w:188, h:234 },
-  'mago':      { x:1316, y:0, w:188, h:234 },
+  'dragon':    { x:47,   y:49,  w:142, h:191 },
+  'hada':      { x:216,  y:49,  w:175, h:191 },
+  'leon':      { x:432,  y:49,  w:146, h:191 },
+  'delfin':    { x:621,  y:49,  w:127, h:191 },
+  'zorro':     { x:804,  y:49,  w:154, h:191 },
+  'robot':     { x:981,  y:49,  w:124, h:191 },
+  'unicornio': { x:1155, y:49,  w:146, h:191 },
+  'mago':      { x:1326, y:49,  w:141, h:191 },
 };
 
 const ICON_SPRITES = {
-  'home':     { x:0,    y:234, w:188, h:235 },
-  'mic':      { x:188,  y:234, w:188, h:235 },
-  'books':    { x:376,  y:234, w:188, h:235 },
-  'progress': { x:564,  y:234, w:188, h:235 },
-  'trophy':   { x:752,  y:234, w:188, h:235 },
-  'star':     { x:940,  y:234, w:188, h:235 },
-  'play':     { x:1128, y:234, w:188, h:235 },
-  'rocket':   { x:1316, y:234, w:188, h:235 },
-  'brain':    { x:0,    y:469, w:188, h:235 },
-  'book':     { x:188,  y:469, w:188, h:235 },
-  'pencil':   { x:564,  y:469, w:188, h:235 },
-  'camera':   { x:752,  y:469, w:188, h:235 },
-  'sparkles': { x:940,  y:469, w:188, h:235 },
-  'heart':    { x:1128, y:469, w:188, h:235 },
-  'music':    { x:1316, y:469, w:188, h:235 },
+  'home':     { x:40,   y:322, w:148, h:150 },
+  'mic':      { x:266,  y:322, w:73,  h:150 },
+  'books':    { x:416,  y:322, w:151, h:150 },
+  'progress': { x:609,  y:322, w:130, h:150 },
+  'trophy':   { x:788,  y:322, w:135, h:150 },
+  'star':     { x:976,  y:322, w:123, h:150 },
+  'play':     { x:1155, y:322, w:127, h:150 },
+  'rocket':   { x:1327, y:322, w:134, h:150 },
+  'brain':    { x:45,   y:539, w:140, h:127 },
+  'book':     { x:222,  y:539, w:164, h:127 },
+  'trophy2':  { x:423,  y:539, w:135, h:127 },
+  'pencil':   { x:613,  y:539, w:126, h:127 },
+  'camera':   { x:780,  y:539, w:152, h:127 },
+  'sparkles': { x:975,  y:539, w:120, h:127 },
+  'heart':    { x:1157, y:539, w:123, h:127 },
+  'music':    { x:1346, y:539, w:106, h:127 },
 };
 
 // Helper: render a sprite as a div with background-image crop
@@ -179,7 +181,7 @@ function spriteDiv(sprite, sizePx, extraStyle='') {
   const bgH = Math.round(IMG_H * scale);
   const bx  = -Math.round(sprite.x * scale);
   const by  = -Math.round(sprite.y * scale);
-  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;flex-shrink:0;${extraStyle}"></div>`;
+  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;flex-shrink:0;${extraStyle}"></div>`;
 }
 
 function spriteBg(sprite, sizePx) {
@@ -188,7 +190,7 @@ function spriteBg(sprite, sizePx) {
   const bgH = Math.round(IMG_H * scale);
   const bx  = -Math.round(sprite.x * scale);
   const by  = -Math.round(sprite.y * scale);
-  return `background:url('${SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;`;
+  return `background:url('${SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
 }
 function getFamiliaId() {
   return localStorage.getItem('ownFamiliaId') || null;
@@ -925,8 +927,8 @@ textarea{resize:vertical;min-height:80px}
 .kid-guide-step .gs-icon{font-size:26px;margin-bottom:3px}
 .kid-guide-step .gs-label{font-size:9px;font-weight:800;color:var(--lavender)}
 .nav-icon-sprite{display:block;margin:0 auto 2px;border-radius:8px}
-.nav-btn .nav-icon, .kid-nav-btn .nav-icon{display:block;width:28px;height:28px;margin:0 auto 2px;mix-blend-mode:multiply}
-.sprite-img{mix-blend-mode:multiply}
+.nav-btn .nav-icon, .kid-nav-btn .nav-icon{display:block;width:28px;height:28px;margin:0 auto 2px;}
+.sprite-img{}
 </style>
 </head>
 <body>
