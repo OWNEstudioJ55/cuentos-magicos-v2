@@ -2633,7 +2633,13 @@ async function loginConCodigo() {
     if(!data.activo){errEl.textContent='❌ Código no activado. Usá "Es mi primera vez".';errEl.style.display='block';return;}
 
     const hash=await hashPassword(pass);
-    if(hash!==data.password_hash){errEl.textContent='❌ Contraseña de padre incorrecta.';errEl.style.display='block';return;}
+    // Si password_hash es 'pendiente' — primera vez o reset — permitir entrada y guardar nueva contraseña
+    if(data.password_hash === 'pendiente') {
+      // Actualizar contraseña en Supabase
+      await supa.from('familias').update({ password_hash: hash }).eq('codigo', codigo);
+    } else if(hash!==data.password_hash){
+      errEl.textContent='❌ Contraseña de padre incorrecta.';errEl.style.display='block';return;
+    }
 
     if(data.vence_en){
       const dias=Math.ceil((new Date(data.vence_en)-new Date())/(1000*60*60*24));
@@ -2701,8 +2707,15 @@ async function setupVerificarCodigo() {
       errEl.style.display = 'block'; return;
     }
 
-    // Familia ya activada → mostrar campo de contraseña para login
+    // Familia ya activada
     if(data.activo) {
+      // Si password fue reseteado → permitir re-setup
+      if(data.password_hash === 'pendiente') {
+        localStorage.setItem('ownFamiliaId', data.id);
+        localStorage.setItem('ownCodigo', codigo);
+        goStep(1); // ir directo a crear contraseñas nuevas
+        return;
+      }
       localStorage.setItem('ownFamiliaId', data.id);
       localStorage.setItem('ownCodigo', codigo);
       localStorage.setItem('ownSupaData', JSON.stringify(data));
