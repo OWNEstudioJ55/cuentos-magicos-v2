@@ -1437,336 +1437,195 @@ textarea{resize:vertical;min-height:80px}
 
   <div class="prem-content">
 
-    <!-- MONEDAS + DIAMANTES SALDO -->
-    <div class="prem-card" style="background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(251,191,36,0.05))">
-      <div class="prem-title" style="margin-bottom:12px">💰 Tu saldo</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div style="background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.35);border-radius:14px;padding:14px;text-align:center">
-          <div style="font-size:36px;margin-bottom:4px">🪙</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:32px;color:var(--gold)" id="premCoinsDisplay">0</div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:8px">monedas</div>
-          <div style="font-size:10px;color:rgba(251,191,36,0.6);line-height:1.4">+10/día (gratis)<br>+100/día (premium)</div>
+    <!-- ══ 1. GENERACIÓN CON IA ══ -->
+    <div class="prem-card">
+      <div class="prem-title">🤖 Generación con IA</div>
+      <div class="ai-exclusive-badge" style="margin-bottom:12px">Solo Premium</div>
+      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">La IA genera el texto del cuento y lo narrás con la voz de tu personaje favorito.</p>
+
+      <div id="aiGenContent">
+        <!-- Contexto / prompt -->
+        <div class="prem-subtitle">📝 ¿De qué trata el cuento?</div>
+        <textarea id="aiStoryPrompt" rows="3" placeholder="Ej: Un dragón verde que tiene miedo a la oscuridad pero aprende a ser valiente..." style="margin-bottom:10px"></textarea>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <select id="aiStoryChar" style="flex:1;background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:13px">
+            <option value="dragon">🐉 Dragón</option>
+            <option value="hada">🧚 Hada</option>
+            <option value="leon">🦁 León</option>
+            <option value="delfin">🐬 Delfín</option>
+            <option value="zorro">🦊 Zorro</option>
+            <option value="robot">🤖 Robot</option>
+            <option value="unicornio">🦄 Unicornio</option>
+            <option value="mago">🧙 Mago</option>
+          </select>
+          <select id="aiStoryAge" style="flex:1;background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:13px">
+            <option value="3">3 años</option>
+            <option value="5" selected>4-5 años</option>
+            <option value="7">6-7 años</option>
+            <option value="9">8-9 años</option>
+          </select>
         </div>
-        <div style="background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.35);border-radius:14px;padding:14px;text-align:center">
-          <div style="font-size:36px;margin-bottom:4px">💎</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:32px;color:#a78bfa" id="premDiamondsDisplay">0</div>
-          <div style="font-size:11px;color:var(--text2);margin-bottom:8px">diamantes</div>
-          <div style="font-size:10px;color:rgba(167,139,250,0.7);line-height:1.4">Desbloquean funciones<br>IA y premium</div>
+        <button class="btn btn-premium btn-full" onclick="generateStoryTextAI()">🤖 Generar cuento con IA</button>
+
+        <!-- Texto generado -->
+        <div id="aiGeneratedTextWrap" style="display:none;margin-top:14px">
+          <div class="prem-subtitle">✅ Cuento generado — editalo si querés</div>
+          <textarea id="aiGeneratedText" rows="8" style="margin-bottom:10px"></textarea>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-accent btn-full" onclick="playAiGeneratedStory()">▶ Escuchar</button>
+            <button class="btn btn-green btn-full" onclick="sendAiStoryToKid()">📤 Enviar al niño</button>
+          </div>
+          <div id="aiStoryPlayback" style="display:none;margin-top:12px">
+            <div class="audio-player" style="background:var(--bg2);border-radius:14px;padding:14px">
+              <div class="audio-controls">
+                <button class="play-btn" id="aiPlayBtn" onclick="toggleAiPlay()">▶</button>
+                <div style="flex:1">
+                  <div class="audio-waveform" onclick="seekAiAudio(event)"><div class="audio-progress" id="aiProgress"></div></div>
+                  <div class="audio-time" id="aiTimeDisplay">0:00</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-gold btn-sm btn-full" onclick="claimDailyCoins()" id="dailyCoinBtn">🎁 Reclamar monedas del día</button>
+
+      <div id="aiGenLocked" style="display:none;text-align:center;padding:16px 0">
+        <div style="font-size:40px;margin-bottom:8px">🔒</div>
+        <div style="font-size:14px;font-weight:700;color:rgba(251,191,36,.8);margin-bottom:8px">Función exclusiva Premium</div>
+        <button class="btn btn-premium btn-sm" onclick="selectPlan('premium')">Activar Premium</button>
       </div>
-      <div style="font-size:11px;color:rgba(251,191,36,0.6);text-align:center;margin-top:8px">50 monedas = 1 ⭐ estrellita para tu hijo</div>
-      <button class="btn btn-ghost btn-sm btn-full" style="margin-top:8px" onclick="convertCoinsToStars()">⭐ Convertir monedas en estrellitas</button>
     </div>
 
-    <!-- PLANES — PRECIOS SEPARADOS -->
+    <!-- ══ 2. GRABACIÓN CON PERSONAJES PREMIUM ══ -->
+    <div class="prem-card">
+      <div class="prem-title">🎙️ Grabación con personajes premium</div>
+      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">Grabá el cuento con voces especiales desbloqueadas.</p>
+      <div class="voice-pills" id="premVoicePills" style="margin-bottom:14px"></div>
+      <div id="oroRecSection">
+        <div class="timer-display" id="oroRecTimer" style="font-size:28px">0:00</div>
+        <div class="rec-status" id="oroRecStatus" style="font-size:13px;margin-bottom:12px">Listo para grabar</div>
+        <button class="record-circle" id="oroRecBtn" onclick="toggleOroRecord()" style="width:90px;height:90px;font-size:36px;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
+          <span style="font-size:38px;line-height:1">🎙️</span>
+          <span style="font-size:11px;font-weight:900;font-family:Nunito,sans-serif">GRABAR</span>
+        </button>
+        <div id="oroRecPlayback" style="display:none">
+          <div style="font-size:12px;font-weight:800;color:var(--accent3);margin-bottom:8px">✅ Grabación lista:</div>
+          <div class="audio-player" style="background:var(--bg2);border-radius:12px;padding:12px">
+            <div class="audio-controls">
+              <button class="play-btn" style="width:44px;height:44px;font-size:18px" id="oroRecPlayBtn" onclick="toggleOroRecPlay()">▶</button>
+              <div style="flex:1">
+                <div class="audio-waveform" onclick="seekOroRecAudio(event)"><div class="audio-progress" id="oroRecProgress"></div></div>
+                <div class="audio-time" id="oroRecTimeDisplay">0:00</div>
+              </div>
+            </div>
+          </div>
+          <div id="oroRecActions" style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-accent btn-full btn-sm" onclick="applyVoiceToOroRecording()">✨ Aplicar voz</button>
+            <button class="btn btn-green btn-full btn-sm" onclick="sendOroRecToKid()">📤 Enviar</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteOroRecording()">🗑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 3. FOTO A DIBUJO CARTOON ══ -->
+    <div class="prem-card">
+      <div class="prem-title">📸 Foto a Dibujo Cartoon</div>
+      <div class="coming-soon-label" style="margin-bottom:12px">✅ Disponible</div>
+      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">Subí una foto y la convertimos en estilo caricatura Disney. Agregá un mensaje y enviásela al niño.</p>
+
+      <div class="photo-drop-zone" onclick="document.getElementById('photoUploadInput').click()" style="margin-bottom:12px">
+        <div style="font-size:40px;margin-bottom:8px">📷</div>
+        <div style="font-weight:700;margin-bottom:4px">Tocar para subir foto</div>
+        <div style="font-size:12px;color:var(--text2)">JPG o PNG, máx 5MB</div>
+      </div>
+      <input type="file" id="photoUploadInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+
+      <div id="photoPreviewZone" style="display:none">
+        <img id="photoPreviewImg" style="max-width:100%;border-radius:12px;max-height:220px;display:block;margin:0 auto 12px">
+        <button class="btn btn-premium btn-full btn-sm" onclick="convertPhotoToDrawing()">🎨 Convertir a cartoon</button>
+        <div id="drawingResult" style="margin-top:12px;display:none">
+          <img id="drawingResultImg" style="max-width:100%;border-radius:12px;display:block;margin:0 auto 12px">
+          <!-- Mensaje del padre -->
+          <div class="input-group" style="margin-top:10px">
+            <label>Mensaje para el niño</label>
+            <input type="text" id="photoDrawMessage" placeholder="Ej: ¡Mirá lo que hice para vos! 🎨">
+          </div>
+          <button class="btn btn-green btn-full" onclick="sendDrawingToKid()">📤 Enviar al niño</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 4. GENERACIÓN LIBRE DE IMÁGENES ══ -->
+    <div class="prem-card">
+      <div class="prem-title">🎨 Generación libre de imágenes</div>
+      <div class="ai-exclusive-badge" style="margin-bottom:12px">Solo Premium</div>
+      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">Describí lo que querés y la IA genera la imagen para usar en tus cuentos.</p>
+      <div class="input-group">
+        <label>Describí la imagen</label>
+        <textarea id="freeImgPrompt" rows="2" placeholder="Ej: Un castillo mágico entre nubes rosadas con un dragón amigable..."></textarea>
+      </div>
+      <button class="btn btn-premium btn-full" onclick="generateFreeImage()">✨ Generar imagen</button>
+      <div id="freeImgResult" style="display:none;margin-top:12px">
+        <img id="freeImgResultImg" style="max-width:100%;border-radius:12px;display:block;margin:0 auto 12px">
+        <button class="btn btn-gold btn-full btn-sm" onclick="addFreeImageToStory()">✅ Usar en el cuento</button>
+      </div>
+    </div>
+
+    <!-- ══ SALDO Y PLANES (al final) ══ -->
+    <div class="prem-card" style="background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.03))">
+      <div class="prem-title">💰 Tu saldo</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:14px;padding:14px;text-align:center">
+          <div style="font-size:30px;margin-bottom:4px">🪙</div>
+          <div style="font-family:Fredoka One,cursive;font-size:28px;color:var(--gold)" id="premCoinsDisplay">0</div>
+          <div style="font-size:11px;color:var(--text2)">monedas</div>
+        </div>
+        <div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.3);border-radius:14px;padding:14px;text-align:center">
+          <div style="font-size:30px;margin-bottom:4px">💎</div>
+          <div style="font-family:Fredoka One,cursive;font-size:28px;color:var(--lavender)" id="premDiamondsDisplay">0</div>
+          <div style="font-size:11px;color:var(--text2)">diamantes</div>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-sm btn-full" onclick="claimDailyCoins()" id="dailyCoinBtn">🎁 Reclamar monedas del día</button>
+    </div>
+
+    <!-- ══ PLANES (separado, al fondo) ══ -->
     <div class="prem-card">
       <div class="prem-title">🏆 Planes</div>
-      <p style="font-size:13px;color:rgba(251,191,36,0.7);margin-bottom:14px">Elegí el plan que mejor se adapta a tu familia:</p>
-
-      <!-- Plan Gratis -->
-      <div class="plan-card free-plan" id="planCardFree" onclick="selectPlan('free')" style="margin-bottom:10px">
+      <div class="plan-card free-plan" onclick="selectPlan('free')" style="margin-bottom:10px">
         <div class="plan-name" style="color:var(--text2)">🆓 Gratis</div>
-        <div class="plan-price" style="color:var(--text2);font-size:28px">$0<span style="font-size:14px;font-weight:400">/mes</span></div>
-        <div style="height:1px;background:rgba(255,255,255,0.1);margin:10px 0"></div>
+        <div class="plan-price" style="color:var(--text2);font-size:26px">/bin/sh<span style="font-size:13px;font-weight:400">/mes</span></div>
+        <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 0"></div>
         <div class="plan-feature">✅ 3 cuentos grabados</div>
-        <div class="plan-feature">✅ 🪙 +10 monedas diarias</div>
         <div class="plan-feature">✅ Imágenes de archivo</div>
         <div class="plan-feature">✅ Juegos y quiz</div>
         <div class="plan-feature disabled">❌ Generación con IA</div>
-        <div class="plan-feature disabled">❌ Diamantes</div>
+        <div class="plan-feature disabled">❌ Foto a dibujo</div>
         <div class="plan-feature disabled">❌ Voces premium</div>
       </div>
-
-      <!-- Plan Premium -->
-      <div class="plan-card premium-plan" id="planCardPremium" onclick="selectPlan('premium')">
+      <div class="plan-card premium-plan" onclick="selectPlan('premium')">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
           <div class="plan-name" style="color:var(--gold)">⭐ Premium</div>
           <div class="ai-exclusive-badge">Recomendado</div>
         </div>
-        <div class="plan-price" style="color:var(--gold);font-size:28px">$9.99<span style="font-size:14px;font-weight:400">/mes</span></div>
-        <div style="height:1px;background:rgba(251,191,36,0.2);margin:10px 0"></div>
-        <div class="plan-feature highlight">✅ 🪙 +100 monedas diarias</div>
-        <div class="plan-feature highlight">✅ 💎 Diamantes para IA</div>
+        <div class="plan-price" style="color:var(--gold);font-size:26px">.99<span style="font-size:13px;font-weight:400">/mes</span></div>
+        <div style="height:1px;background:rgba(251,191,36,.15);margin:8px 0"></div>
         <div class="plan-feature highlight">✨ Generación con IA</div>
-        <div class="plan-feature highlight">🎤 Texto → voz del personaje</div>
-        <div class="plan-feature highlight">🎙️ Grabación + clonación de voz</div>
-        <div class="plan-feature highlight">🖼️ Foto a dibujo</div>
-        <div class="plan-feature highlight">📥 Descarga audio + imágenes</div>
+        <div class="plan-feature highlight">📸 Foto a dibujo cartoon</div>
+        <div class="plan-feature highlight">🎙️ Voces premium desbloqueadas</div>
+        <div class="plan-feature highlight">🎨 Generación libre de imágenes</div>
         <div class="plan-feature highlight">♾️ Cuentos ilimitados</div>
-        <div class="plan-feature highlight">🤖 IA genera texto del cuento</div>
+        <div class="plan-feature highlight">📥 Descarga audio + imágenes</div>
       </div>
-
       <div id="activatePlanBtn" style="display:none;margin-top:12px">
         <button class="btn btn-premium btn-full" onclick="activateSelectedPlan()">✨ Activar (simulación)</button>
       </div>
     </div>
 
-    <!-- REGALO DIARIO DE TOKENS -->
-    <div class="prem-card" style="background:linear-gradient(135deg,rgba(52,211,153,0.12),rgba(16,185,129,0.05));border-color:rgba(52,211,153,0.3)">
-      <div class="prem-title" style="color:var(--accent3)">🎁 Regalos diarios</div>
-      <p style="font-size:13px;color:rgba(52,211,153,0.8);margin-bottom:14px">Cada día podés reclamar monedas y diamantes gratis:</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div style="background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px">
-          <div style="font-size:36px">🪙</div>
-          <div style="flex:1">
-            <div style="font-weight:800;font-size:14px">Monedas diarias</div>
-            <div style="font-size:12px;color:var(--text2)">Gratis: +10/día · Premium: +100/día</div>
-          </div>
-          <button class="btn btn-green btn-sm" onclick="claimDailyCoins()" id="dailyCoinBtn2">Reclamar</button>
-        </div>
-        <div style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.25);border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px">
-          <div style="font-size:36px">💎</div>
-          <div style="flex:1">
-            <div style="font-weight:800;font-size:14px">Diamantes diarios</div>
-            <div style="font-size:12px;color:var(--text2)">Solo Premium: +5 diamantes/día</div>
-          </div>
-          <button class="btn btn-accent btn-sm" onclick="claimDailyDiamonds()" id="dailyDiamondBtn">Reclamar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- AI GENERATION - EXCLUSIVE PREMIUM -->
-    <div id="premAiSection">
-      <div class="prem-ai-zone">
-        <div class="prem-title">🤖 Generación con IA — Exclusivo Premium</div>
-        <div class="ai-exclusive-badge">Solo para el padre</div>
-        <p style="font-size:13px;color:rgba(251,191,36,0.7);margin-bottom:14px;line-height:1.5">La IA genera imágenes únicas para el cuento. Los planes gratuitos usan imágenes de archivo de alta calidad.</p>
-
-        <div id="premAiContent">
-          <div class="prem-subtitle">🎨 Imágenes generadas</div>
-          <div class="prem-img-grid" id="premImgGrid"></div>
-          <button class="btn btn-premium btn-full btn-sm" style="margin-top:12px" onclick="premAddAiImage()">+ Agregar imagen con IA</button>
-          <div class="prem-divider"></div>
-          <div class="prem-subtitle">📝 Texto del cuento (IA)</div>
-          <textarea id="premStoryText" rows="5" placeholder="La IA puede generar el texto completo del cuento aquí..."></textarea>
-          <button class="btn btn-premium btn-full btn-sm" style="margin-top:8px" onclick="generateStoryTextAI()">🤖 Generar texto con IA</button>
-          <div class="prem-divider"></div>
-          <div class="prem-subtitle">📥 Exportar cuento completo</div>
-          <button class="btn btn-gold btn-full" onclick="exportPremiumZip()">📦 Descargar ZIP (imágenes + audio)</button>
-        </div>
-
-        <div id="premAiLocked" style="display:none">
-          <div style="text-align:center;padding:20px 0">
-            <div style="font-size:48px;margin-bottom:12px">🔒</div>
-            <div style="font-size:15px;font-weight:700;color:rgba(251,191,36,0.8);margin-bottom:8px">Función exclusiva Premium</div>
-            <p style="font-size:13px;color:var(--text2)">Activá Premium para desbloquear la generación con IA</p>
-            <button class="btn btn-premium btn-sm" style="margin-top:12px" onclick="selectPlan('premium');document.getElementById('activatePlanBtn').style.display='block'">Activar Premium</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Photo to drawing -->
-      <div class="photo-draw-zone prem-card">
-        <div class="prem-title">📸 Foto a Dibujo</div>
-        <div class="coming-soon-label">✅ Implementado</div>
-        <p style="font-size:13px;color:rgba(251,191,36,0.7);margin-bottom:14px;line-height:1.5">Subí una foto y la convertimos en un dibujo de cuento animado.</p>
-
-        <div id="photoToDrawContent">
-          <div class="photo-drop-zone" onclick="document.getElementById('photoUploadInput').click()">
-            <div style="font-size:40px;margin-bottom:8px">📷</div>
-            <div style="font-weight:700;margin-bottom:4px">Tocar para subir foto</div>
-            <div style="font-size:12px;color:var(--text2)">JPG o PNG, máx 5MB</div>
-          </div>
-          <input type="file" id="photoUploadInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
-          <div id="photoPreviewZone" style="display:none;margin-top:12px">
-            <img id="photoPreviewImg" style="max-width:100%;border-radius:12px;max-height:200px;display:block;margin-bottom:12px">
-            <button class="btn btn-premium btn-full btn-sm" onclick="convertPhotoToDrawing()">🎨 Convertir a dibujo</button>
-            <div id="drawingResult" style="margin-top:12px;display:none">
-              <img id="drawingResultImg" style="max-width:100%;border-radius:12px;display:block;margin-bottom:8px">
-              <button class="btn btn-gold btn-sm" onclick="addDrawingToStory()">✅ Usar en el cuento</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="photoToDrawLocked" style="display:none;text-align:center;padding:16px 0">
-          <div style="font-size:40px;margin-bottom:8px">🔒</div>
-          <div style="font-size:14px;font-weight:700;color:rgba(251,191,36,0.8)">Solo Premium</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== CUENTO DE ORO — AREA PREMIUM EXCLUSIVA PADRE ===== -->
-    <div class="prem-card" id="cuentoOroSection">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-        <div class="prem-title" style="margin-bottom:0">🌟 Cuento de Oro</div>
-        <div class="ai-exclusive-badge">Solo Premium</div>
-      </div>
-      <p style="font-size:13px;color:rgba(251,191,36,0.7);margin-bottom:16px;line-height:1.5">Todo lo del Studio normal + generación IA, texto con voz del personaje, y modo libre sin escenas.</p>
-
-      <div id="cuentoOroContent">
-
-        <!-- MODO: Escenas vs Libre -->
-        <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);border-radius:14px;padding:14px;margin-bottom:16px">
-          <div class="prem-subtitle" style="margin-bottom:10px">🎯 Modo de imágenes</div>
-          <div style="display:flex;gap:8px">
-            <button id="oroModeScenes" class="btn btn-premium btn-sm" style="flex:1" onclick="setOroMode('scenes')">🎬 Con escenas (5 imágenes)</button>
-            <button id="oroModeFree" class="btn btn-ghost btn-sm" style="flex:1" onclick="setOroMode('free')">🎨 Modo libre (IA)</button>
-          </div>
-          <div id="oroModeDesc" style="font-size:11px;color:rgba(251,191,36,0.6);margin-top:8px;text-align:center">Armá 5 escenas con personajes y acciones</div>
-        </div>
-
-        <!-- ESCENAS (se ocultan en modo libre) -->
-        <div id="oroScenesSection">
-          <div class="prem-subtitle">🎬 5 Escenas del Cuento de Oro</div>
-          <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:14px;margin-bottom:14px">
-            <div id="oroSequenceScenes"></div>
-            <button class="btn btn-premium btn-full btn-sm" style="margin-top:12px" onclick="generateOroSceneImages()" id="btnGenOroScenes">✨ Generar las 5 imágenes</button>
-            <div id="oroScenesThumbRow" style="display:none;margin-top:10px;display:none">
-              <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="oroScenesThumbGrid"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MODO LIBRE (se oculta en modo escenas) -->
-        <div id="oroFreeSection" style="display:none">
-          <div class="prem-subtitle">🎨 Generación libre con IA</div>
-          <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:14px;margin-bottom:14px">
-            <p style="font-size:12px;color:rgba(251,191,36,0.7);margin-bottom:10px">Describí cada imagen que querés. Necesitás al menos 5 para el cuento.</p>
-            <textarea id="oroAiPrompt" rows="3" placeholder="Describí la escena... Ej: Un dragón dorado volando sobre un castillo de nubes en el atardecer" style="margin-bottom:10px;resize:vertical"></textarea>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-              <button class="btn btn-premium btn-sm" onclick="generateOroAiImage()">✨ Generar imagen</button>
-              <button class="btn btn-ghost btn-sm" onclick="generateOroAiImage3()">📸 Generar 3</button>
-            </div>
-            <div class="prem-img-grid" id="oroAiImgGrid"></div>
-          </div>
-        </div>
-
-        <!-- GALERÍA UNIFICADA -->
-        <div class="prem-subtitle">🖼️ Imágenes del Cuento de Oro <span id="oroImgCount" style="font-size:11px;color:rgba(251,191,36,0.5)">(0 imágenes)</span></div>
-        <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:14px;margin-bottom:14px">
-          <div id="oroGallery" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;min-height:60px">
-            <div style="grid-column:1/-1;text-align:center;color:var(--text2);font-size:13px;padding:16px">Las imágenes del cuento aparecen aquí</div>
-          </div>
-          <!-- Subir imagen propia -->
-          <div style="margin-top:10px">
-            <button class="btn btn-ghost btn-sm btn-full" onclick="document.getElementById('oroImgUpload').click()">📷 Subir imagen propia</button>
-            <input type="file" id="oroImgUpload" accept="image/*" style="display:none" onchange="handleOroImgUpload(event)">
-          </div>
-        </div>
-
-        <!-- FOTO A DIBUJO -->
-        <div class="prem-subtitle">📸 Foto a dibujo de cuento</div>
-        <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:14px;margin-bottom:14px">
-          <div class="photo-drop-zone" onclick="document.getElementById('oroPhotoToDrawInput').click()" style="padding:16px">
-            <div style="font-size:32px;margin-bottom:6px">📷</div>
-            <div style="font-weight:700;margin-bottom:2px;color:var(--gold);font-size:13px">Subir foto para convertir</div>
-            <div style="font-size:11px;color:var(--text2)">Cualquier foto → estilo dibujo de cuento</div>
-          </div>
-          <input type="file" id="oroPhotoToDrawInput" accept="image/*" style="display:none" onchange="handleOroPhotoToDraw(event)">
-          <div id="oroPhotoDrawZone" style="display:none;margin-top:12px">
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <div style="flex:1;min-width:120px"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Original</div><img id="oroPhotoDrawOriginal" style="width:100%;border-radius:10px;max-height:130px;object-fit:cover"></div>
-              <div style="flex:1;min-width:120px" id="oroDrawingResultZone"><div style="font-size:11px;color:var(--text2);margin-bottom:4px">Dibujo</div><img id="oroDrawingResultImg" style="width:100%;border-radius:10px;max-height:130px;object-fit:cover"></div>
-            </div>
-            <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
-              <button class="btn btn-premium btn-sm" onclick="convertOroPhotoToDrawing()">🎨 Convertir</button>
-              <button class="btn btn-gold btn-sm" id="btnAddDrawingOro" style="display:none" onclick="addOroDrawingToStory()">✅ Agregar al cuento</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- GRABACIÓN + VOZ -->
-        <div class="prem-subtitle">🎙️ Grabar con voz del personaje</div>
-        <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:16px;margin-bottom:14px">
-          <!-- Slideshow oro mientras graba -->
-          <div id="oroRecSlideshowWrap" style="display:none;margin-bottom:12px">
-            <div class="slideshow-container" id="oroRecSlideshow" style="aspect-ratio:1;border-radius:14px">
-              <button class="slide-nav-btn" style="left:6px" onclick="slideOroRec(-1)">‹</button>
-              <button class="slide-nav-btn" style="right:6px" onclick="slideOroRec(1)">›</button>
-            </div>
-            <div class="slideshow-dots" id="oroRecSlideDots" style="margin-top:6px"></div>
-          </div>
-
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-            <div class="voice-pills" id="oroVoicePills" style="flex:1"></div>
-          </div>
-          <div class="timer-display" id="oroRecTimer" style="font-size:28px">0:00</div>
-          <div class="rec-status" id="oroRecStatus" style="font-size:13px;margin-bottom:12px">Listo para grabar</div>
-          <button class="record-circle" id="oroRecBtn" onclick="toggleOroRecord()" style="width:90px;height:90px;font-size:36px;margin:0 auto 12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px">
-            <span id="oroRecBtnIcon" style="font-size:38px;line-height:1">🎙️</span>
-            <span style="font-size:11px;font-weight:900;font-family:'Nunito',sans-serif">GRABAR</span>
-          </button>
-
-          <div id="oroRecPlayback" style="display:none">
-            <div style="font-size:12px;font-weight:800;color:var(--accent3);margin-bottom:8px">✅ Grabación lista:</div>
-            <div class="audio-player" style="background:rgba(0,0,0,0.2);border-radius:12px;padding:12px">
-              <div class="audio-controls">
-                <button class="play-btn" id="oroRecPlayBtn" onclick="toggleOroRecPlay()">▶</button>
-                <div class="audio-waveform" style="flex:1"><div class="audio-progress" id="oroRecProgress"></div></div>
-                <span class="audio-time" id="oroRecTimeDisplay">0:00</span>
-              </div>
-            </div>
-            <button class="btn btn-danger btn-sm" style="margin-top:8px" onclick="deleteOroRecording()">🗑 Borrar</button>
-          </div>
-        </div>
-
-        <!-- TEXTO + TTS con personaje -->
-        <div class="prem-subtitle">📝 Texto con voz del personaje</div>
-        <div style="background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:14px;padding:14px;margin-bottom:14px">
-          <textarea id="oroStoryText" rows="5" placeholder="Escribí el texto del cuento... o generalo con IA ↓" style="margin-bottom:10px;resize:vertical;line-height:1.6"></textarea>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-            <button class="btn btn-premium btn-sm" onclick="generateOroTextAI()">🤖 Generar con IA</button>
-            <button class="btn btn-accent btn-sm" onclick="speakOroText()" id="btnSpeakOro">🔊 Escuchar con personaje</button>
-            <button class="btn btn-ghost btn-sm" onclick="stopSpeakOro()" id="btnStopOro" style="display:none">⏹</button>
-          </div>
-          <div id="oroTtsStatus" style="font-size:12px;color:var(--gold);display:none"></div>
-        </div>
-
-        <!-- TÍTULO + GUARDAR -->
-        <div class="prem-subtitle">⭐ Guardar Cuento de Oro</div>
-        <input type="text" id="oroStoryTitle" placeholder="Título del Cuento de Oro..." style="margin-bottom:10px">
-        <button class="btn btn-premium btn-full" style="margin-bottom:8px" onclick="saveOroStory()">⭐ Guardar Cuento de Oro</button>
-        <div style="font-size:11px;color:rgba(251,191,36,0.5);text-align:center">El cuento queda guardado en la app — no hay descarga</div>
-
-      </div>
-
-      <div id="cuentoOroLocked" style="display:none;text-align:center;padding:24px 0">
-        <div style="font-size:52px;margin-bottom:12px">🔒</div>
-        <div style="font-size:16px;font-weight:800;color:rgba(251,191,36,0.8);margin-bottom:8px">Área exclusiva Premium</div>
-        <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Activá Premium para acceder al Cuento de Oro</p>
-        <button class="btn btn-premium btn-sm" onclick="selectPlan('premium');document.getElementById('activatePlanBtn').style.display='block';document.querySelector('.prem-content').scrollTo(0,0)">✨ Activar Premium</button>
-      </div>
-    </div>
-
-    <!-- Token purchase simulation -->
-    <div class="prem-card">
-      <div class="prem-title">🪙 Comprar Tokens</div>
-      <p style="font-size:13px;color:rgba(251,191,36,0.7);margin-bottom:14px">Los tokens se usan para generar imágenes, textos y funciones premium.</p>
-      <div class="token-packages">
-        <div class="token-pkg" onclick="simulatePurchase(100, 1.99)">
-          <div class="token-pkg-amount">100</div>
-          <div style="font-size:13px;color:var(--text2)">tokens</div>
-          <div class="token-pkg-price">$1.99</div>
-          <button class="btn btn-gold btn-full btn-sm" style="margin-top:8px">Comprar</button>
-        </div>
-        <div class="token-pkg best-value" onclick="simulatePurchase(500, 7.99)">
-          <div style="font-size:10px;font-weight:800;color:var(--gold);margin-bottom:4px">🔥 MEJOR VALOR</div>
-          <div class="token-pkg-amount">500</div>
-          <div style="font-size:13px;color:var(--text2)">tokens</div>
-          <div class="token-pkg-price">$7.99</div>
-          <button class="btn btn-premium btn-full btn-sm" style="margin-top:8px">Comprar</button>
-        </div>
-        <div class="token-pkg" onclick="simulatePurchase(1200, 14.99)">
-          <div class="token-pkg-amount">1200</div>
-          <div style="font-size:13px;color:var(--text2)">tokens</div>
-          <div class="token-pkg-price">$14.99</div>
-          <button class="btn btn-gold btn-full btn-sm" style="margin-top:8px">Comprar</button>
-        </div>
-        <div class="token-pkg" onclick="simulatePurchase(3000, 29.99)">
-          <div class="token-pkg-amount">3000</div>
-          <div style="font-size:13px;color:var(--text2)">tokens</div>
-          <div class="token-pkg-price">$29.99</div>
-          <button class="btn btn-gold btn-full btn-sm" style="margin-top:8px">Comprar</button>
-        </div>
-      </div>
-      <div style="margin-top:12px;font-size:11px;color:rgba(251,191,36,0.5);text-align:center">Mercado Pago · PayPal · Stripe · Payoneer (próximamente)</div>
-    </div>
-
   </div>
 </div>
+
 
 <!-- ============================================================ -->
 <!-- KID APP — UI COMPLETAMENTE DIFERENTE Y MÁGICA -->
@@ -3665,38 +3524,212 @@ function buildProgressFull() {
 }
 
 // ===================== PREMIUM SCREEN =====================
-let _selectedPlan=null, _purchaseTokens=0, _purchasePrice=0;
+let _selectedPlan=null;
 function showPremiumScreen() {
   const plan=getUserPlan();
-  document.getElementById('premPlanLabel').textContent=PLANS[plan]?.label||'Gratis';
-  document.getElementById('planCardFree').style.borderColor=plan==='free'?'var(--accent2)':'rgba(167,139,250,0.2)';
-  document.getElementById('planCardPremium').style.borderColor=plan==='premium'?'var(--gold)':'rgba(251,191,36,0.5)';
   const prem=isPremium();
-  document.getElementById('premAiContent').style.display=prem?'block':'none';
-  document.getElementById('premAiLocked').style.display=prem?'none':'block';
-  document.getElementById('photoToDrawContent').style.display=prem?'block':'none';
-  document.getElementById('photoToDrawLocked').style.display=prem?'none':'block';
-  document.getElementById('cuentoOroContent').style.display=prem?'block':'none';
-  document.getElementById('cuentoOroLocked').style.display=prem?'none':'block';
-  document.getElementById('activatePlanBtn').style.display='none';
+  const planLabel=document.getElementById('premPlanLabel');
+  if(planLabel) planLabel.textContent=PLANS[plan]?.label||'Gratis';
+
+  // Show/lock AI sections based on plan
+  const aiContent=document.getElementById('aiGenContent');
+  const aiLocked=document.getElementById('aiGenLocked');
+  if(aiContent) aiContent.style.display=prem?'block':'none';
+  if(aiLocked) aiLocked.style.display=prem?'none':'block';
+
+  const activateBtn=document.getElementById('activatePlanBtn');
+  if(activateBtn) activateBtn.style.display='none';
+
   updateCurrencyDisplay();
-  // Check daily claim state
+
+  // Daily claim state
   const today=new Date().toDateString();
   const coinClaimed=localStorage.getItem('ownLastCoinClaim')===today;
-  const diamondClaimed=localStorage.getItem('ownLastDiamondClaim')===today;
-  ['dailyCoinBtn','dailyCoinBtn2'].forEach(id=>{
-    const btn=document.getElementById(id);
-    if(btn) { btn.textContent=coinClaimed?'✅ Reclamado hoy':'🎁 Reclamar monedas del día'; btn.disabled=coinClaimed; }
-  });
-  const dBtn=document.getElementById('dailyDiamondBtn');
-  if(dBtn) { dBtn.textContent=diamondClaimed?'✅ Reclamado':'Reclamar'; dBtn.disabled=diamondClaimed||!prem; }
-  renderPremImgGrid();
-  if(prem) initOroSection();
+  const coinBtn=document.getElementById('dailyCoinBtn');
+  if(coinBtn){ coinBtn.textContent=coinClaimed?'✅ Reclamado hoy':'🎁 Reclamar monedas del día'; coinBtn.disabled=coinClaimed; }
+
+  // Init voice pills for premium recording
+  buildPremVoicePills();
+
   showScreen('premiumScreen');
 }
 
-function hidePremiumScreen() {
-  showScreen('parentApp');
+function buildPremVoicePills() {
+  const el=document.getElementById('premVoicePills'); if(!el) return;
+  el.innerHTML=VOICES.map(v=>{
+    const isActive=v.id===appState.selectedVoice;
+    return '<button class="voice-pill '+(isActive?'active':'')+'" onclick="selectParentVoice(\''+v.id+'\')">'
+      +v.label+'</button>';
+  }).join('');
+}
+
+// ── AI Story Generation ──
+async function generateStoryTextAI() {
+  const prompt = document.getElementById('aiStoryPrompt').value.trim();
+  const char = document.getElementById('aiStoryChar').value;
+  const age = document.getElementById('aiStoryAge').value;
+  if(!prompt){ showToast('❌ Escribí de qué trata el cuento'); return; }
+
+  showLoading('Generando cuento con IA...');
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:`Escribí un cuento corto para niños de ${age} años. 
+El personaje principal es un ${char}. 
+Tema: ${prompt}
+El cuento debe tener 3-4 párrafos cortos, lenguaje simple, final positivo.
+Solo escribí el cuento, sin título, sin introducción.`
+        }]
+      })
+    });
+    const data = await response.json();
+    hideLoading();
+    const text = data.content?.[0]?.text || '';
+    if(!text){ showToast('❌ Error generando el cuento'); return; }
+    document.getElementById('aiGeneratedText').value = text;
+    document.getElementById('aiGeneratedTextWrap').style.display = 'block';
+    appState.aiGeneratedText = text;
+    showToast('✅ Cuento generado');
+  } catch(e) {
+    hideLoading();
+    showToast('❌ Error de conexión');
+    console.error('generateStoryTextAI:', e);
+  }
+}
+
+async function playAiGeneratedStory() {
+  const text = document.getElementById('aiGeneratedText').value.trim();
+  if(!text){ showToast('❌ No hay texto para escuchar'); return; }
+  // Use browser speech synthesis
+  if('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = 'es-AR'; utt.rate = 0.9;
+    window.speechSynthesis.speak(utt);
+    showToast('🔊 Escuchando cuento...');
+  } else {
+    showToast('❌ Tu navegador no soporta texto a voz');
+  }
+}
+
+async function sendAiStoryToKid() {
+  const text = document.getElementById('aiGeneratedText').value.trim();
+  if(!text){ showToast('❌ Generá el cuento primero'); return; }
+  const title = 'Cuento IA — ' + new Date().toLocaleDateString('es-AR');
+  const id = Date.now().toString();
+  const familiaId = getFamiliaId();
+  const msg = {
+    id, title, text,
+    images: [], date: new Date().toLocaleDateString('es-AR'),
+    type: 'ai_story', isAI: true
+  };
+  // Save locally
+  const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
+  msgs.unshift(msg);
+  localStorage.setItem('ownKidMessages', JSON.stringify(msgs.slice(0,20)));
+  // Save to Supabase
+  if(supa && familiaId) {
+    supa.from('mensajes_nino').insert({
+      id, familia_id: familiaId,
+      titulo: title, texto: text,
+      tipo: 'ai_story', imagenes: [],
+      tiene_audio: false
+    }).then(({error})=>{ if(error) console.warn('Supabase msg:', error.message); });
+  }
+  showToast('✅ Cuento enviado al niño');
+  document.getElementById('aiGeneratedTextWrap').style.display='none';
+  document.getElementById('aiStoryPrompt').value='';
+}
+
+// ── Photo to Drawing ──
+function handlePhotoUpload(e) {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const img = document.getElementById('photoPreviewImg');
+    img.src = ev.target.result;
+    appState.uploadedPhotoData = ev.target.result;
+    document.getElementById('photoPreviewZone').style.display = 'block';
+    document.getElementById('drawingResult').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function convertPhotoToDrawing() {
+  if(!appState.uploadedPhotoData){ showToast('❌ Subí una foto primero'); return; }
+  showLoading('Convirtiendo a cartoon...');
+  // CSS filter simulation — instant, no API needed
+  setTimeout(() => {
+    hideLoading();
+    const resultImg = document.getElementById('drawingResultImg');
+    // Apply cartoon CSS filter via canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width; canvas.height = img.height;
+      ctx.filter = 'saturate(200%) contrast(150%) brightness(110%)';
+      ctx.drawImage(img, 0, 0);
+      // Edge detection overlay for cartoon look
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.filter = 'none';
+      resultImg.src = canvas.toDataURL('image/jpeg', 0.9);
+      appState.cartoonPhotoData = canvas.toDataURL('image/jpeg', 0.9);
+      document.getElementById('drawingResult').style.display = 'block';
+    };
+    img.src = appState.uploadedPhotoData;
+  }, 1200);
+}
+
+async function sendDrawingToKid() {
+  if(!appState.cartoonPhotoData){ showToast('❌ Convertí la foto primero'); return; }
+  const message = document.getElementById('photoDrawMessage').value.trim() || '¡Mirá lo que hice para vos! 🎨';
+  const id = Date.now().toString();
+  const familiaId = getFamiliaId();
+  const msg = {
+    id, title: '🎨 Dibujo especial de Papá/Mamá',
+    text: message,
+    images: [appState.cartoonPhotoData],
+    date: new Date().toLocaleDateString('es-AR'),
+    type: 'drawing', isDrawing: true
+  };
+  const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
+  msgs.unshift(msg);
+  localStorage.setItem('ownKidMessages', JSON.stringify(msgs.slice(0,20)));
+  showToast('✅ Dibujo enviado al niño');
+  document.getElementById('photoPreviewZone').style.display = 'none';
+  document.getElementById('photoDrawMessage').value = '';
+  appState.cartoonPhotoData = null;
+  appState.uploadedPhotoData = null;
+}
+
+// ── Free Image Generation ──
+async function generateFreeImage() {
+  const prompt = document.getElementById('freeImgPrompt').value.trim();
+  if(!prompt){ showToast('❌ Describí la imagen primero'); return; }
+  showLoading('Generando imagen...');
+  try {
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt+', children book illustration, cartoon, colorful, cute')}?width=512&height=512&nologo=true&seed=${Date.now()}`;
+    const img = document.getElementById('freeImgResultImg');
+    img.src = url;
+    img.onload = () => { hideLoading(); document.getElementById('freeImgResult').style.display='block'; appState.freeGeneratedImg=url; };
+    img.onerror = () => { hideLoading(); showToast('❌ Error generando imagen'); };
+  } catch(e) { hideLoading(); showToast('❌ Error'); }
+}
+
+function addFreeImageToStory() {
+  if(!appState.freeGeneratedImg){ showToast('❌ Generá una imagen primero'); return; }
+  appState.currentStoryImages = appState.currentStoryImages || [];
+  appState.currentStoryImages.push(appState.freeGeneratedImg);
+  showToast('✅ Imagen agregada al cuento');
+  hidePremiumScreen();
+  switchParentTab('record');
 }
 
 function selectPlan(plan) {
