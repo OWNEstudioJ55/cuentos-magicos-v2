@@ -945,6 +945,57 @@ textarea{resize:vertical;min-height:80px}
 <!-- ============================================================ -->
 <!-- SETUP SCREEN -->
 <!-- ============================================================ -->
+<div class="screen" id="welcomeScreen">
+  <div class="setup-box">
+    <div class="login-logo">
+      <h1><span class="logo-o">O</span><span class="logo-w">W</span><span class="logo-n">N</span></h1>
+      <p>✨ Cuentos Mágicos ✨</p>
+    </div>
+
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="font-size:48px;margin-bottom:8px">🎙️</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:20px;color:var(--text);margin-bottom:6px">¡Bienvenido!</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">¿Es tu primera vez o ya tenés una cuenta?</div>
+    </div>
+
+    <!-- OPCIÓN 1: Ya tengo cuenta -->
+    <button onclick="showWelcomeLogin()" style="width:100%;padding:18px;border-radius:18px;border:2px solid rgba(6,214,160,.4);background:rgba(6,214,160,.08);color:var(--mint);font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;gap:12px;text-align:left;transition:all .2s">
+      <span style="font-size:32px">🔑</span>
+      <div>
+        <div style="font-size:16px;font-weight:800">Ya tengo una cuenta</div>
+        <div style="font-size:12px;font-weight:400;color:var(--text2);margin-top:2px">Entrá con tu código OWN</div>
+      </div>
+    </button>
+
+    <!-- OPCIÓN 2: Primera vez -->
+    <button onclick="showWelcomeSetup()" style="width:100%;padding:18px;border-radius:18px;border:2px solid rgba(255,107,107,.4);background:rgba(255,107,107,.08);color:var(--coral);font-family:'Nunito',sans-serif;font-size:16px;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:12px;text-align:left;transition:all .2s">
+      <span style="font-size:32px">🆕</span>
+      <div>
+        <div style="font-size:16px;font-weight:800">Es mi primera vez</div>
+        <div style="font-size:12px;font-weight:400;color:var(--text2);margin-top:2px">Activar mi código de acceso</div>
+      </div>
+    </button>
+
+    <!-- LOGIN CON CÓDIGO EXISTENTE -->
+    <div id="welcomeLoginWrap" style="display:none;margin-top:20px">
+      <div style="height:1px;background:rgba(255,255,255,.08);margin-bottom:20px"></div>
+      <div class="card-title" style="font-size:14px;color:var(--mint);margin-bottom:12px">🔑 Ingresá tu código de familia</div>
+      <div class="input-group">
+        <label>Código OWN</label>
+        <input type="text" id="loginCodigo" placeholder="Ej: OWN-1001" style="text-transform:uppercase;letter-spacing:2px;font-weight:800;font-size:18px;text-align:center" oninput="this.value=this.value.toUpperCase()">
+      </div>
+      <div class="input-group">
+        <label>Contraseña del padre/madre</label>
+        <input type="password" id="loginPass" placeholder="Tu contraseña">
+      </div>
+      <div id="loginError" style="display:none;background:rgba(248,113,113,.15);border:1px solid rgba(248,113,113,.3);border-radius:10px;padding:10px;font-size:13px;color:#f87171;margin-bottom:10px;text-align:center"></div>
+      <button class="btn-primary" onclick="loginConCodigo()">Entrar →</button>
+      <button onclick="hideWelcomeLogin()" style="width:100%;padding:12px;border:none;background:transparent;color:var(--text2);font-family:'Nunito',sans-serif;font-size:13px;cursor:pointer;margin-top:8px">← Volver</button>
+    </div>
+
+  </div>
+</div>
+
 <div class="screen" id="setupScreen">
   <div class="setup-box">
     <div class="login-logo">
@@ -2502,7 +2553,7 @@ function checkAchievements() {
 async function init() {
   await openDB();
   const settings = JSON.parse(localStorage.getItem('ownSettings') || '{}');
-  if (!settings.setupDone) { showScreen('setupScreen'); return; }
+  if (!settings.setupDone) { showScreen('welcomeScreen'); return; }
   appState.tokens = parseInt(localStorage.getItem('ownTokens') || '0');
   appState.stars = parseInt(localStorage.getItem('ownStars') || '0');
   appState.parentName = settings.parentName || 'Papá';
@@ -2538,6 +2589,66 @@ async function init() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+}
+
+// ===================== WELCOME SCREEN =====================
+function showWelcomeLogin() {
+  document.getElementById('welcomeLoginWrap').style.display='block';
+  document.getElementById('loginCodigo').focus();
+}
+function hideWelcomeLogin() {
+  document.getElementById('welcomeLoginWrap').style.display='none';
+  document.getElementById('loginError').style.display='none';
+  document.getElementById('loginCodigo').value='';
+  document.getElementById('loginPass').value='';
+}
+function showWelcomeSetup() {
+  showScreen('setupScreen');
+  goStep(0);
+}
+
+async function loginConCodigo() {
+  const codigo = document.getElementById('loginCodigo').value.trim().toUpperCase();
+  const pass   = document.getElementById('loginPass').value;
+  const errEl  = document.getElementById('loginError');
+  errEl.style.display='none';
+
+  if(!codigo||codigo.length<4){errEl.textContent='❌ Ingresá tu código OWN';errEl.style.display='block';return;}
+  if(!pass){errEl.textContent='❌ Ingresá tu contraseña';errEl.style.display='block';return;}
+  if(!supa){errEl.textContent='❌ Sin conexión al servidor';errEl.style.display='block';return;}
+
+  showLoading('Verificando...');
+  try {
+    const {data,error}=await supa.from('familias').select('*').eq('codigo',codigo).single();
+    hideLoading();
+
+    if(error||!data){errEl.textContent='❌ Código no encontrado.';errEl.style.display='block';return;}
+    if(!data.activo){errEl.textContent='❌ Código no activado. Usá "Es mi primera vez".';errEl.style.display='block';return;}
+
+    const hash=await hashPassword(pass);
+    if(hash!==data.password_hash){errEl.textContent='❌ Contraseña incorrecta.';errEl.style.display='block';return;}
+
+    if(data.vence_en){
+      const dias=Math.ceil((new Date(data.vence_en)-new Date())/(1000*60*60*24));
+      if(dias<=0){errEl.textContent='⏳ Tu acceso venció. Escribinos por WhatsApp.';errEl.style.display='block';return;}
+      localStorage.setItem('ownDiasRestantes',dias);
+    }
+
+    localStorage.setItem('ownFamiliaId',data.id);
+    localStorage.setItem('ownCodigo',codigo);
+    localStorage.setItem('ownParentName',data.nombre_padre||'Papá');
+    localStorage.setItem('ownKidName',data.nombre_nino||'Niño');
+    localStorage.setItem('ownParentPass',data.password_hash);
+    localStorage.setItem('ownVenceEn',data.vence_en||'');
+    localStorage.setItem('ownSettings',JSON.stringify({setupDone:true,parentName:data.nombre_padre||'Papá',kidName:data.nombre_nino||'Niño'}));
+
+    showToast('✅ ¡Bienvenido de vuelta, '+(data.nombre_padre||'Papá')+'!');
+    showScreen('loginScreen');
+  } catch(e){
+    hideLoading();
+    errEl.textContent='❌ Error de conexión. Intentá de nuevo.';
+    errEl.style.display='block';
+  }
 }
 
 // ===================== SETUP =====================
@@ -2765,8 +2876,8 @@ function doFullReset() {
   appState.recordedBlob = null;
   if(appState.kidAudio){ try{ appState.kidAudio.pause(); }catch(e){} appState.kidAudio=null; }
   if(appState.recAudio){ try{ appState.recAudio.pause(); }catch(e){} appState.recAudio=null; }
-  showScreen('setupScreen');
-  goStep(0);
+  showScreen('welcomeScreen');
+
 }
 
 async function doResetPassword() {
