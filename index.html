@@ -3777,20 +3777,22 @@ function buildProgressFull() {
 }
 
 // ===================== TEXT GENERATION HELPER =====================
-async function fetchPollinationsText(prompt, retries=2) {
-  for(let i=0; i<retries; i++) {
-    try {
-      const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?seed=${Date.now()}&model=openai`;
-      const response = await fetch(url);
-      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+async function fetchPollinationsText(prompt) {
+  // Mostrar fallback inmediato
+  const fallback = getCuentoFallback();
+  // Intentar Pollinations en paralelo con prompt corto
+  try {
+    const shortPrompt = prompt.substring(0, 200);
+    const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
+    const response = await fetch(url);
+    if(response.ok) {
       const text = await response.text();
-      if(text && text.length > 50 && !text.toLowerCase().includes('error')) return text;
-    } catch(e) {
-      console.warn(`Pollinations intento ${i+1}:`, e.message);
-      if(i < retries-1) await new Promise(r=>setTimeout(r,1500));
+      if(text && text.length > 80 && !text.toLowerCase().includes('error')) return text;
     }
+  } catch(e) {
+    console.warn('Pollinations no disponible, usando fallback');
   }
-  return getCuentoFallback();
+  return fallback;
 }
 
 function getCuentoFallback() {
@@ -3847,65 +3849,23 @@ async function generarCuentoAhoraManual() {
 }
 
 async function generarYEnviarCuentoAuto(temas, personaje, kidName) {
-  if(!supa) { showToast('❌ Sin conexión'); return; }
-  showLoading('Generando cuento automático...');
+  showLoading('Preparando cuento...');
+  const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
+  const charName = charNames[personaje] || 'personaje mágico';
+  // Fallback inmediato
+  let text = getCuentoFallback();
+  hideLoading();
+  // Intentar mejorar con Pollinations
   try {
-    const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
-    const charName = charNames[personaje] || 'personaje mágico';
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:800,
-        messages:[{role:'user', content:`Escribí un cuento corto para niños de 4-8 años.
-El personaje principal es ${charName}.
-Los temas favoritos del niño son: ${temas}.
-El nombre del niño es ${kidName}.
-Incluí el nombre del niño en la historia.
-El cuento debe tener 3-4 párrafos cortos, lenguaje simple, final positivo y feliz.
-Solo escribí el cuento, sin título, sin explicaciones.`}]
-      })
-    });
-    const data = await response.json();
-    hideLoading();
-    const text = data.content?.[0]?.text || '';
-    if(!text){ showToast('❌ Error generando el cuento'); return; }
-
-    // Save as story
-    const id = 'auto_'+Date.now();
-    const title = `Cuento de ${charName} para ${kidName}`;
-    const story = {id, title, type:'parent', char:personaje,
-      storyText:text, images:[], created:new Date().toLocaleDateString('es-AR'),
-      hasAudio:false, isAuto:true};
-    await dbPut('stories', story);
-
-    // Sync to Supabase
-    const familiaId = getFamiliaId();
-    if(supa && familiaId) {
-      supa.from('cuentos').upsert({id, titulo:title, familia_id:familiaId,
-        personaje:personaje, texto:text, tiene_audio:false,
-        imagenes:[], portada:null}).catch(e=>console.warn(e));
+    const shortPrompt = `Cuento infantil en español para ${kidName}, personaje ${charName}, tema: ${temas.substring(0,80)}. 3 párrafos, final feliz.`;
+    const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
+    const response = await fetch(url);
+    if(response.ok) {
+      const t = await response.text();
+      if(t && t.length > 80) text = t;
     }
-
-    // Notify parent
-    notifyParent(`📖 Cuento automático enviado a ${kidName}: "${title}"`);
-    updateParentNotifBadge();
-    showCelebration(`📖 Cuento enviado a ${kidName}!`);
-    showToast(`✅ Cuento automático generado y enviado`);
-
-    // Update last sent time
-    const rutina = JSON.parse(localStorage.getItem('ownRutina')||'{}');
-    if(rutina.activa) {
-      rutina.ultimoEnvio = Date.now();
-      rutina.proxEnvio = calcProxEnvio(rutina.dias, rutina.hora);
-      localStorage.setItem('ownRutina', JSON.stringify(rutina));
-    }
-  } catch(e) {
-    hideLoading();
-    showToast('❌ Error al generar el cuento. Intentá de nuevo.');
-    console.error('generarYEnviarCuentoAuto:', e);
-  }
+  } catch(e) { /* usar fallback */ }
+  showAutoStoryPreview(text, charName, personaje, kidName);
 }
 
 // Check rutina on app load
@@ -4041,14 +4001,30 @@ async function generateStoryTextAI() {
   if(!prompt){ showToast('❌ Escribí de qué trata el cuento'); return; }
   const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
   const charName = charNames[char] || char;
-  showLoading('Generando cuento...');
-  const fullPrompt = `Escribí un cuento corto en español para niños de ${age} años. El personaje principal es un ${charName}. Tema: ${prompt}. El cuento debe tener 3-4 párrafos cortos, lenguaje simple para niños, final positivo y feliz. Solo escribí el cuento, sin título.`;
-  const text = await fetchPollinationsText(fullPrompt);
-  hideLoading();
-  document.getElementById('aiGeneratedText').value = text;
+
+  // Mostrar fallback inmediato
+  const fallback = getCuentoFallback();
+  document.getElementById('aiGeneratedText').value = fallback;
   document.getElementById('aiGeneratedTextWrap').style.display = 'block';
-  appState.aiGeneratedText = text;
-  showToast('✅ Cuento generado');
+  appState.aiGeneratedText = fallback;
+  showToast('✅ Cuento listo — mejorando con IA...');
+
+  // Intentar mejorar con Pollinations en segundo plano
+  try {
+    const shortPrompt = `Cuento infantil en español, ${age} años, personaje ${charName}, tema: ${prompt.substring(0,80)}. 3 párrafos cortos, final feliz.`;
+    const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
+    const response = await fetch(url);
+    if(response.ok) {
+      const text = await response.text();
+      if(text && text.length > 80 && !text.toLowerCase().includes('error')) {
+        document.getElementById('aiGeneratedText').value = text;
+        appState.aiGeneratedText = text;
+        showToast('✨ Cuento personalizado con IA listo');
+      }
+    }
+  } catch(e) {
+    // Fallback ya mostrado — no hacer nada
+  }
 }
 
 async function playAiGeneratedStory() {
