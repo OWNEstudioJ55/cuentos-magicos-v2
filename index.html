@@ -1509,7 +1509,8 @@ textarea{resize:vertical;min-height:80px}
           <div class="prem-subtitle">✅ Cuento listo — revisalo y envialo</div>
           <textarea id="aiGeneratedText" rows="8" style="margin-bottom:10px"></textarea>
           <div style="display:flex;gap:8px;margin-bottom:8px">
-            <button class="btn btn-accent btn-full" onclick="playAiGeneratedStory()">▶ Escuchar</button>
+            <button class="btn btn-accent btn-full" id="aiPlayBtn2" onclick="playAiGeneratedStory()">▶ Escuchar</button>
+            <button class="btn btn-ghost btn-full" id="aiStopBtn2" onclick="stopAiStory()" style="display:none">⏹ Detener</button>
             <button class="btn btn-green btn-full" onclick="sendAiStoryToKid()">📤 Enviar al niño</button>
           </div>
           <button class="btn btn-ghost btn-sm btn-full" onclick="generateStoryTextAI()">🔄 Generar otro</button>
@@ -3999,47 +4000,66 @@ async function generateStoryTextAI() {
   const char = document.getElementById('aiStoryChar').value;
   const age = document.getElementById('aiStoryAge').value;
   if(!prompt){ showToast('❌ Escribí de qué trata el cuento'); return; }
+
+  // Detener TTS si está corriendo
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+
   const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
   const charName = charNames[char] || char;
+  const kidName = appState.kidName || 'el niño';
 
-  // Mostrar fallback inmediato
-  const fallback = getCuentoFallback();
-  document.getElementById('aiGeneratedText').value = fallback;
+  // Limpiar y mostrar fallback inmediato con tema del padre
+  const ta = document.getElementById('aiGeneratedText');
+  if(ta) ta.value = '';
   document.getElementById('aiGeneratedTextWrap').style.display = 'block';
+  const fallback = getCuentoFallback(charName, prompt, kidName);
+  if(ta) ta.value = fallback;
   appState.aiGeneratedText = fallback;
-  showToast('✅ Cuento listo — mejorando con IA...');
+  showToast('✅ Cuento listo');
 
   // Intentar mejorar con Pollinations en segundo plano
   try {
-    const shortPrompt = `Cuento infantil en español, ${age} años, personaje ${charName}, tema: ${prompt.substring(0,80)}. 3 párrafos cortos, final feliz.`;
+    const shortPrompt = `Cuento infantil en español, personaje ${charName}, tema: ${prompt.substring(0,80)}, niño llamado ${kidName}. 3 párrafos cortos, final feliz.`;
     const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
     const response = await fetch(url);
     if(response.ok) {
       const text = await response.text();
       if(text && text.length > 80 && !text.toLowerCase().includes('error')) {
-        document.getElementById('aiGeneratedText').value = text;
+        if(ta) ta.value = text;
         appState.aiGeneratedText = text;
-        showToast('✨ Cuento personalizado con IA listo');
+        showToast('✨ Cuento mejorado con IA');
       }
     }
-  } catch(e) {
-    // Fallback ya mostrado — no hacer nada
-  }
+  } catch(e) { /* fallback ya mostrado */ }
 }
 
 async function playAiGeneratedStory() {
   const text = document.getElementById('aiGeneratedText').value.trim();
   if(!text){ showToast('❌ No hay texto para escuchar'); return; }
-  // Use browser speech synthesis
   if('speechSynthesis' in window) {
     window.speechSynthesis.cancel();
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang = 'es-AR'; utt.rate = 0.9;
+    const playBtn = document.getElementById('aiPlayBtn2');
+    const stopBtn = document.getElementById('aiStopBtn2');
+    if(playBtn) playBtn.style.display='none';
+    if(stopBtn) stopBtn.style.display='inline-flex';
+    utt.onend = utt.onerror = () => {
+      if(playBtn) playBtn.style.display='inline-flex';
+      if(stopBtn) stopBtn.style.display='none';
+    };
     window.speechSynthesis.speak(utt);
-    showToast('🔊 Escuchando cuento...');
   } else {
     showToast('❌ Tu navegador no soporta texto a voz');
   }
+}
+
+function stopAiStory() {
+  if('speechSynthesis' in window) window.speechSynthesis.cancel();
+  const playBtn = document.getElementById('aiPlayBtn2');
+  const stopBtn = document.getElementById('aiStopBtn2');
+  if(playBtn) playBtn.style.display='inline-flex';
+  if(stopBtn) stopBtn.style.display='none';
 }
 
 async function sendAiStoryToKid() {
