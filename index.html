@@ -3934,6 +3934,7 @@ async function sendAiStoryToKid() {
 // ── Photo to Drawing ──
 function handlePhotoUpload(e) {
   const file = e.target.files[0]; if(!file) return;
+  if(file.size>5*1024*1024) { showToast('❌ Imagen demasiado grande (máx 5MB)'); return; }
   const reader = new FileReader();
   reader.onload = (ev) => {
     const img = document.getElementById('photoPreviewImg');
@@ -3945,30 +3946,43 @@ function handlePhotoUpload(e) {
   reader.readAsDataURL(file);
 }
 
-function convertPhotoToDrawing() {
+async function convertPhotoToDrawing() {
   if(!appState.uploadedPhotoData){ showToast('❌ Subí una foto primero'); return; }
-  showLoading('Convirtiendo a cartoon...');
-  // CSS filter simulation — instant, no API needed
-  setTimeout(() => {
-    hideLoading();
+  showLoading('Convirtiendo a dibujo cartoon...');
+  try {
+    const prompt = 'cartoon illustration, disney pixar style, children book art, colorful, cute, friendly, soft lighting, hand drawn look, vibrant colors, no text, no watermark';
+    const seed = Date.now();
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${seed}&enhance=true`;
     const resultImg = document.getElementById('drawingResultImg');
-    // Apply cartoon CSS filter via canvas
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.width; canvas.height = img.height;
-      ctx.filter = 'saturate(200%) contrast(150%) brightness(110%)';
-      ctx.drawImage(img, 0, 0);
-      // Edge detection overlay for cartoon look
-      ctx.globalCompositeOperation = 'multiply';
-      ctx.filter = 'none';
-      resultImg.src = canvas.toDataURL('image/jpeg', 0.9);
-      appState.cartoonPhotoData = canvas.toDataURL('image/jpeg', 0.9);
+    resultImg.onload = () => {
+      hideLoading();
+      appState.cartoonPhotoData = url;
       document.getElementById('drawingResult').style.display = 'block';
+      showToast('✅ ¡Foto convertida a cartoon!');
     };
-    img.src = appState.uploadedPhotoData;
-  }, 1200);
+    resultImg.onerror = () => {
+      hideLoading();
+      // Fallback: CSS cartoon filter
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.filter = 'saturate(300%) contrast(200%) brightness(120%)';
+        ctx.drawImage(img, 0, 0);
+        const cartoonUrl = canvas.toDataURL('image/jpeg', 0.9);
+        resultImg.src = cartoonUrl;
+        appState.cartoonPhotoData = cartoonUrl;
+        document.getElementById('drawingResult').style.display = 'block';
+        showToast('✅ ¡Foto con efecto cartoon!');
+      };
+      img.src = appState.uploadedPhotoData;
+    };
+    resultImg.src = url;
+  } catch(e) {
+    hideLoading();
+    showToast('❌ Error al convertir. Intentá de nuevo.');
+  }
 }
 
 async function sendDrawingToKid() {
@@ -4105,60 +4119,6 @@ async function exportPremiumZip() {
 }
 
 // Photo to drawing
-function handlePhotoUpload(e) {
-  const file=e.target.files[0];
-  if(!file) return;
-  if(file.size>5*1024*1024) { showToast('❌ Imagen demasiado grande (máx 5MB)'); return; }
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    document.getElementById('photoPreviewImg').src=ev.target.result;
-    document.getElementById('photoPreviewZone').style.display='block';
-    document.getElementById('drawingResult').style.display='none';
-  };
-  reader.readAsDataURL(file);
-}
-
-async function convertPhotoToDrawing() {
-  if(!appState.uploadedPhotoData){ showToast('❌ Subí una foto primero'); return; }
-  showLoading('Convirtiendo a dibujo cartoon...');
-  try {
-    // Use Pollinations AI with a strong cartoon prompt
-    const prompt = 'cartoon illustration, disney pixar style, children book art, colorful, cute, friendly, soft lighting, hand drawn look, vibrant colors, no text, no watermark';
-    const seed = Date.now();
-    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${seed}&enhance=true`;
-    const resultImg = document.getElementById('drawingResultImg');
-    resultImg.onload = () => {
-      hideLoading();
-      appState.cartoonPhotoData = url;
-      document.getElementById('drawingResult').style.display = 'block';
-      showToast('✅ ¡Foto convertida a cartoon!');
-    };
-    resultImg.onerror = () => {
-      hideLoading();
-      // Fallback: apply CSS cartoon filter to the original photo
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        canvas.width = img.width; canvas.height = img.height;
-        ctx.filter = 'saturate(300%) contrast(200%) brightness(120%)';
-        ctx.drawImage(img, 0, 0);
-        const cartoonUrl = canvas.toDataURL('image/jpeg', 0.9);
-        resultImg.src = cartoonUrl;
-        appState.cartoonPhotoData = cartoonUrl;
-        document.getElementById('drawingResult').style.display = 'block';
-        showToast('✅ ¡Foto con efecto cartoon!');
-      };
-      img.src = appState.uploadedPhotoData;
-    };
-    resultImg.src = url;
-  } catch(e) {
-    hideLoading();
-    showToast('❌ Error al convertir. Intentá de nuevo.');
-  }
-}
-
 function addDrawingToStory() {
   const url=document.getElementById('drawingResultImg').src;
   if(!appState.currentStoryImages) appState.currentStoryImages=[];
