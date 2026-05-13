@@ -1149,44 +1149,65 @@ textarea{resize:vertical;min-height:80px}
 
     <!-- HOME TAB -->
     <div id="pTab-home">
-      <div class="section-title">¡Hola, <span id="parentName">Papá</span>! 👋</div>
 
-      <!-- Quick actions -->
-      <div class="card" style="background:linear-gradient(135deg,rgba(255,111,216,0.15),rgba(167,139,250,0.1));border-color:rgba(255,111,216,0.3)">
-        <div style="font-size:20px;margin-bottom:6px">🎙️ Grabar nuevo cuento</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Dale la magia de escuchar tu voz</div>
-        <button class="btn btn-accent btn-sm" onclick="switchParentTab('record')">Grabar ahora →</button>
+      <!-- Saludo personalizado -->
+      <div style="text-align:center;padding:20px 0 8px">
+        <div style="font-family:'Fredoka One',cursive;font-size:26px;color:var(--text);margin-bottom:4px">
+          Hola, <span id="parentName">Papá</span> 👋
+        </div>
+        <div style="font-size:13px;color:var(--text2)" id="homeSubtitle">¿Le mandás un cuento hoy a <span id="homeKidName">tu hijo</span>?</div>
       </div>
 
-      <div class="card" style="background:linear-gradient(135deg,rgba(251,191,36,0.12),rgba(245,158,11,0.06));border-color:rgba(251,191,36,0.3)">
-        <div style="font-size:20px;margin-bottom:6px">✨ Área Premium</div>
-        <div style="font-size:13px;color:rgba(251,191,36,0.8);margin-bottom:14px">IA exclusiva · Foto a dibujo · Audio descargable</div>
-        <button class="btn btn-premium btn-sm" onclick="showPremiumScreen()">Abrir Premium →</button>
+      <!-- BOTÓN PRINCIPAL — la acción del puente -->
+      <button onclick="switchParentTab('record')" style="width:100%;padding:24px;border-radius:24px;border:none;background:linear-gradient(135deg,var(--coral),#ff8e53);color:white;font-family:'Fredoka One',cursive;font-size:22px;cursor:pointer;box-shadow:0 8px 32px rgba(255,107,107,.4);margin-bottom:16px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+        <span style="font-size:48px">🎙️</span>
+        Mandarle un cuento
+        <span style="font-size:13px;font-weight:400;opacity:.85">Tu voz llega directo a su corazón</span>
+      </button>
+
+      <!-- Notificación del niño si existe -->
+      <div id="kidActivityAlert" style="display:none;background:rgba(6,214,160,.1);border:1.5px solid rgba(6,214,160,.3);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="switchParentTab('library')">
+        <span style="font-size:28px">👶</span>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:var(--mint)" id="kidActivityMsg">Tu hijo abrió la app</div>
+          <div style="font-size:12px;color:var(--text2)">Tocá para ver sus mensajes →</div>
+        </div>
       </div>
 
-      <!-- Gift stars to kid -->
-      <div class="card" style="background:linear-gradient(135deg,rgba(52,211,153,0.1),rgba(16,185,129,0.05));border-color:rgba(52,211,153,0.25)">
-        <div class="card-title">🌟 Regalar estrellitas a <span id="homeKidName">tu hijo</span></div>
+      <!-- Premium acceso rápido -->
+      <button onclick="showPremiumScreen()" style="width:100%;padding:16px;border-radius:18px;border:1.5px solid rgba(251,191,36,.3);background:rgba(251,191,36,.06);color:var(--warm);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;gap:12px;text-align:left">
+        <span style="font-size:28px">✨</span>
+        <div>
+          <div>Cuento automático con IA</div>
+          <div style="font-size:11px;font-weight:400;color:rgba(251,191,36,.6)">Generá y enviá con tu voz — Premium</div>
+        </div>
+      </button>
+
+      <!-- Regalar estrellas -->
+      <div class="card" style="background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.2);margin-bottom:14px">
+        <div class="card-title">⭐ Recompensar a <span id="homeKidName">tu hijo</span></div>
         <div class="star-gift-input">
           <button class="star-amount-btn" onclick="adjustGiftStars(-1)">−</button>
           <div class="star-amount-display" id="giftStarAmount">5</div>
           <button class="star-amount-btn" onclick="adjustGiftStars(1)">+</button>
         </div>
-        <div style="font-size:12px;color:var(--text2);text-align:center;margin:8px 0">Validá una acción del niño con estrellitas</div>
-        <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin-bottom:10px;font-size:13px">
+        <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:10px 0;font-size:13px">
         <button class="btn btn-gold btn-full btn-sm" onclick="giftStarsToKid()">⭐ Regalar estrellitas</button>
       </div>
 
-      <!-- Progress summary -->
-      <div class="section-title" style="margin-top:8px">📊 Progreso de <span id="homeKidName2">tu hijo</span></div>
-      <div id="parentProgressSummary"></div>
-
-      <div class="section-title" style="margin-top:8px">📨 Mensajes de <span id="homeKidName3">tu hijo</span></div>
+      <!-- Mensajes del niño -->
+      <div class="section-title">📩 Mensajes de <span id="homeKidName3">tu hijo</span></div>
       <div id="parentKidMessages"></div>
 
-      <div class="section-title" style="margin-top:8px">📚 Mis cuentos</div>
+      <!-- Cuentos recientes -->
+      <div class="section-title" style="margin-top:8px">📚 Cuentos recientes</div>
       <div id="parentHomeStories"></div>
       <button class="btn btn-ghost btn-full" onclick="switchParentTab('library')">Ver todos →</button>
+
+      <!-- Progreso -->
+      <div class="section-title" style="margin-top:8px">📊 Crecimiento de <span id="homeKidName2">tu hijo</span></div>
+      <div id="parentProgressSummary"></div>
+
     </div>
 
     <!-- RECORD TAB -->
@@ -1426,10 +1447,8 @@ textarea{resize:vertical;min-height:80px}
 
   <div class="bottom-nav">
     <button class="nav-btn active" id="pnav-home" onclick="switchParentTab('home')"><span class="nav-icon" id="picon-home"></span>Inicio</button>
-    <button class="nav-btn" id="pnav-record" onclick="switchParentTab('record')"><span class="nav-icon" id="picon-record"></span>Grabar</button>
-    <button class="nav-btn" id="pnav-library" onclick="switchParentTab('library')"><span class="nav-icon" id="picon-library"></span>Cuentos</button>
-    <button class="nav-btn" id="pnav-progress" onclick="switchParentTab('progress')"><span class="nav-icon" id="picon-progress"></span>Progreso</button>
-    <button class="nav-btn" id="pnav-tokens" onclick="switchParentTab('tokens')"><span class="nav-icon" id="picon-tokens"></span>Tokens</button>
+    <button class="nav-btn" id="pnav-record" onclick="switchParentTab('record')"><span class="nav-icon" id="picon-record"></span>Crear</button>
+    <button class="nav-btn" id="pnav-library" onclick="switchParentTab('library')"><span class="nav-icon" id="picon-library"></span>Ver</button>
   </div>
 </div>
 
@@ -1673,29 +1692,30 @@ textarea{resize:vertical;min-height:80px}
 
     <!-- HOME TAB KID -->
     <div id="kTab-home">
-      <!-- Daily story -->
-      <div class="daily-story-banner" onclick="openDailyStory()">
-        <div style="font-size:40px">📖</div>
-        <div>
-          <div style="font-weight:800;font-size:16px;font-family:'Baloo 2',cursive">Cuento del día</div>
-          <div style="font-size:13px;color:var(--text2)" id="dailyStoryLabel">¡Un cuento nuevo te espera!</div>
-        </div>
+
+      <!-- Hero — cuento del padre -->
+      <div id="kidNewStoryHero" style="display:none;background:linear-gradient(135deg,rgba(255,107,107,.2),rgba(255,142,83,.1));border:2px solid rgba(255,107,107,.4);border-radius:24px;padding:20px;margin-bottom:16px;text-align:center;cursor:pointer;animation:fadeIn .5s ease" onclick="openFirstNewStory()">
+        <div style="font-size:56px;margin-bottom:8px">🎙️</div>
+        <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:900;color:var(--coral);margin-bottom:4px">¡Papá/Mamá te mandó un cuento!</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:14px">Tocá para escucharlo</div>
+        <div style="background:var(--coral);color:white;border:none;border-radius:14px;padding:12px 28px;font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;display:inline-block">▶ Escuchar ahora</div>
       </div>
 
-      <!-- Bedtime mode -->
-      <div class="bedtime-banner" onclick="openBedtimeMode()">
-        <div style="font-size:40px">🌙</div>
-        <div>
-          <div style="font-weight:800;font-size:16px;font-family:'Baloo 2',cursive">Hora de dormir</div>
-          <div style="font-size:13px;color:var(--text2)">Música suave + cuento tranquilo</div>
-        </div>
+      <!-- Sin cuentos nuevos -->
+      <div id="kidNoStoryHero" style="background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.1);border-radius:24px;padding:24px;margin-bottom:16px;text-align:center">
+        <div style="font-size:48px;margin-bottom:8px">🌟</div>
+        <div style="font-family:'Baloo 2',cursive;font-size:16px;color:var(--text2);margin-bottom:4px">Hola, <span id="kidHeroName">amigo</span>!</div>
+        <div style="font-size:13px;color:var(--text3)">Papá/Mamá te mandará un cuento pronto</div>
       </div>
 
-      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--accent2)">📚 Mis Cuentos</div>
+      <!-- Cuentos del padre -->
+      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--coral)">🎙️ Cuentos de Papá/Mamá</div>
       <div id="kidHomeStories"></div>
 
-      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--accent3)">📖 Cuentos Clásicos</div>
+      <!-- Cuentos clásicos -->
+      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin:16px 0 12px;color:var(--accent3)">📖 Cuentos Clásicos</div>
       <div id="kidClassicStories"></div>
+
     </div>
 
     <!-- PLAYER TAB KID -->
@@ -2087,11 +2107,9 @@ textarea{resize:vertical;min-height:80px}
   </div>
 
   <div class="kid-bottom-nav">
-    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')"><span class="nav-icon" id="kicon-home"></span>Inicio</button>
-    <button class="kid-nav-btn" id="knav-player" onclick="switchKidTab('player')"><span class="nav-icon" id="kicon-player"></span>Cuento</button>
-    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()"><span class="nav-icon" id="kicon-draw"></span>Dibujar</button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')"><span class="nav-icon" id="kicon-play"></span>Jugar</button>
-    <button class="kid-nav-btn" id="knav-stars" onclick="switchKidTab('stars')"><span class="nav-icon" id="kicon-stars"></span>Logros</button>
+    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-home" style="font-size:28px">🎧</span>Escuchar</button>
+    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-draw" style="font-size:28px">🎨</span>Dibujar</button>
+    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-play" style="font-size:28px">⭐</span>Jugar</button>
   </div>
 </div>
 
@@ -2967,9 +2985,25 @@ function showParentApp() {
   switchParentTab('home');
   showScreen('parentApp');
   injectNavSprites();
+  // Show kid activity alert
+  setTimeout(()=>{
+    const lastKidActivity = localStorage.getItem('ownKidLastActivity');
+    const lastParentCheck = localStorage.getItem('ownParentLastCheck') || '0';
+    const alert = document.getElementById('kidActivityAlert');
+    const alertMsg = document.getElementById('kidActivityMsg');
+    if(alert && lastKidActivity && lastKidActivity > lastParentCheck) {
+      const kidName = appState.kidName || 'Tu hijo';
+      if(alertMsg) alertMsg.textContent = kidName + ' abrió la app — ¡mandále un cuento!';
+      alert.style.display = 'flex';
+    } else if(alert) {
+      alert.style.display = 'none';
+    }
+  }, 500);
 }
 
 function switchParentTab(tab) {
+  // Map old tabs to new 3-tab structure
+  if(tab==='progress'||tab==='tokens') tab='library';
   // Si está grabando o tiene grabación no guardada, preguntar
   if(tab !== 'record' && (appState.isRecording || appState.recordedBlob)) {
     showSaveBeforeLeaveDialog(tab);
@@ -2995,46 +3029,36 @@ function showSaveBeforeLeaveDialog(targetTab) {
 }
 
 function _doSwitchParentTab(tab) {
+  if(tab==='progress'||tab==='tokens') tab='library';
   ['home','record','library','tokens','progress'].forEach(t=>{
-    document.getElementById('pTab-'+t).style.display=t===tab?'block':'none';
+    const el=document.getElementById('pTab-'+t);
+    if(el) el.style.display=t===tab||((t==='tokens'||t==='progress')&&tab==='library')?'none':'none';
+  });
+  ['home','record','library'].forEach(t=>{
+    const el=document.getElementById('pTab-'+t);
+    if(el) el.style.display=t===tab?'block':'none';
     const nav=document.getElementById('pnav-'+t);
     if(nav) nav.classList.toggle('active',t===tab);
   });
-  if(tab==='library') loadParentLibrary();
+  if(tab==='library') { loadParentLibrary(); loadParentKidMessages(); }
   if(tab==='home') { loadParentHomeStories(); buildProgressSummary(); loadParentKidMessages(); }
-  if(tab==='progress') buildProgressFull();
   if(tab==='record') showRecTab();
 }
 
 function injectNavSprites() {
-  // Parent nav
+  // Parent nav — 3 tabs
   const pNav = [
-    ['picon-home',     ICON_SPRITES.home,     28],
-    ['picon-record',   ICON_SPRITES.mic,      28],
-    ['picon-library',  ICON_SPRITES.books,    28],
-    ['picon-progress', ICON_SPRITES.progress, 28],
-    ['picon-tokens',   ICON_SPRITES.trophy,   28],
+    ['picon-home',    ICON_SPRITES.home,   28],
+    ['picon-record',  ICON_SPRITES.mic,    28],
+    ['picon-library', ICON_SPRITES.books,  28],
   ];
   pNav.forEach(([id, sprite, size]) => {
     const el = document.getElementById(id);
     if(!el || !sprite) return;
-    const scale = size / Math.max(sprite.w, sprite.h);
     el.style.cssText = `display:block;width:${size}px;height:${size}px;` + spriteBg(sprite, size);
   });
-  // Kid nav
-  const kNav = [
-    ['kicon-home',   ICON_SPRITES.home,   28],
-    ['kicon-player', ICON_SPRITES.play,   28],
-    ['kicon-draw',   ICON_SPRITES.pencil, 28],
-    ['kicon-play',   ICON_SPRITES.star,   28],
-    ['kicon-stars',  ICON_SPRITES.trophy, 28],
-  ];
-  kNav.forEach(([id, sprite, size]) => {
-    const el = document.getElementById(id);
-    if(!el || !sprite) return;
-    el.style.cssText = `display:block;width:${size}px;height:${size}px;` + spriteBg(sprite, size);
-  });
-  // Record buttons usan emoji 🎙️ directamente
+  // Kid nav uses emoji — no sprites needed
+  // Record buttons use emoji 🎙️
 }
 
 function buildParentVoicePills() {
@@ -4788,6 +4812,14 @@ function switchKidTab(tab) {
   if(tab==='draw') setTimeout(initKidDraw, 80);
 }
 
+function openFirstNewStory() {
+  const lastSeen = parseInt(localStorage.getItem('ownKidLastSeenStories')||'0');
+  const stories = appState._kidStories || [];
+  const newOne = stories.find(s => new Date(s.created||0).getTime() > lastSeen || s.supaSync);
+  if(newOne) openKidStory(newOne.id);
+  else if(stories.length) openKidStory(stories[0].id);
+}
+
 async function loadKidHomeStories() {
   const el=document.getElementById('kidHomeStories');
   if(!el) return;
@@ -4820,18 +4852,35 @@ async function loadKidHomeStories() {
   // Cargar desde IndexedDB (local + sincronizado)
   const stories=await dbGetAll('stories');
   const userStories=stories.filter(s=>s.type==='parent'||!s.type);
+  appState._kidStories = userStories;
+
+  // Update kid name in hero
+  const heroName = document.getElementById('kidHeroName');
+  if(heroName) heroName.textContent = appState.kidName || 'amigo';
+
+  const newHero = document.getElementById('kidNewStoryHero');
+  const noHero = document.getElementById('kidNoStoryHero');
+
   if(!userStories.length) {
-    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><p>Papá/Mamá no grabó ningún cuento aún</p></div>`;
+    el.innerHTML=`<div class="empty-state"><div class="empty-icon">📖</div><p>Papá/Mamá va a mandarte un cuento pronto</p></div>`;
+    if(newHero) newHero.style.display='none';
+    if(noHero) noHero.style.display='block';
     return;
   }
+
+  // Show hero if there are stories
+  if(newHero) newHero.style.display='block';
+  if(noHero) noHero.style.display='none';
+
+  const lastSeen = parseInt(localStorage.getItem('ownKidLastSeenStories')||'0');
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>{
     const img=s.images&&s.images[0];
     const sprite=CHAR_SPRITES[s.char];
     const thumbBg=sprite?spriteBg(sprite,70):'';
-    return `<div class="kid-story-card" onclick="openKidStory('${s.id}')">
-      ${img
-        ? `<img class="kid-story-card-img" src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : ''}
+    const isNew = s.supaSync && new Date(s.created||0).getTime() > lastSeen;
+    return `<div class="kid-story-card" onclick="openKidStory('${s.id}')" style="position:relative">
+      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:var(--coral);color:white;font-size:10px;font-weight:900;padding:3px 8px;border-radius:20px;z-index:2;font-family:Nunito,sans-serif">¡NUEVO!</div>`:''}
+      ${img ? `<img class="kid-story-card-img" src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
       <div class="kid-story-card-img-placeholder" style="${img?'display:none':'display:flex'};${thumbBg}${!sprite?'font-size:32px':''}">
         ${!sprite?(s.char||'📖'):''}
       </div>
