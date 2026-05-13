@@ -3781,17 +3781,20 @@ function buildProgressFull() {
 async function fetchPollinationsText(prompt) {
   // Mostrar fallback inmediato
   const fallback = getCuentoFallback(null, null, appState.kidName);
-  // Intentar Pollinations en paralelo con prompt corto
+  // Intentar via Edge Function (evita CORS/bloqueos en móvil)
   try {
     const shortPrompt = prompt.substring(0, 200);
-    const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
-    const response = await fetch(url);
+    const response = await fetch('/api/generar-cuento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: shortPrompt }),
+    });
     if(response.ok) {
-      const text = await response.text();
-      if(text && text.length > 80 && !text.toLowerCase().includes('error')) return text;
+      const data = await response.json();
+      if(data.ok && data.texto && data.texto.length > 80) return data.texto;
     }
   } catch(e) {
-    console.warn('Pollinations no disponible, usando fallback');
+    console.warn('API generar-cuento no disponible, usando fallback');
   }
   return fallback;
 }
@@ -3909,14 +3912,17 @@ async function generarYEnviarCuentoAuto(temas, personaje, kidName) {
   // Fallback inmediato
   let text = getCuentoFallback(null, null, appState.kidName);
   hideLoading();
-  // Intentar mejorar con Pollinations
+  // Intentar mejorar via Edge Function
   try {
     const shortPrompt = `Cuento infantil en español para ${kidName}, personaje ${charName}, tema: ${temas.substring(0,80)}. 3 párrafos, final feliz.`;
-    const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
-    const response = await fetch(url);
+    const response = await fetch('/api/generar-cuento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: shortPrompt }),
+    });
     if(response.ok) {
-      const t = await response.text();
-      if(t && t.length > 80) text = t;
+      const data = await response.json();
+      if(data.ok && data.texto && data.texto.length > 80) text = data.texto;
     }
   } catch(e) { /* usar fallback */ }
   showAutoStoryPreview(text, charName, personaje, kidName);
@@ -4070,16 +4076,19 @@ async function generateStoryTextAI() {
   appState.aiGeneratedText = fallback;
   showToast('✅ Cuento listo');
 
-  // Intentar mejorar con Pollinations en segundo plano
+  // Intentar mejorar via Edge Function en segundo plano
   try {
     const shortPrompt = `Cuento infantil en español, personaje ${charName}, tema: ${prompt.substring(0,80)}, niño llamado ${kidName}. 3 párrafos cortos, final feliz.`;
-    const url = `https://text.pollinations.ai/${encodeURIComponent(shortPrompt)}?seed=${Date.now()}`;
-    const response = await fetch(url);
+    const response = await fetch('/api/generar-cuento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: shortPrompt }),
+    });
     if(response.ok) {
-      const text = await response.text();
-      if(text && text.length > 80 && !text.toLowerCase().includes('error')) {
-        if(ta) ta.value = text;
-        appState.aiGeneratedText = text;
+      const data = await response.json();
+      if(data.ok && data.texto && data.texto.length > 80) {
+        if(ta) ta.value = data.texto;
+        appState.aiGeneratedText = data.texto;
         showToast('✨ Cuento mejorado con IA');
       }
     }
