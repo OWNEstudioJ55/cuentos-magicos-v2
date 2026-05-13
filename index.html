@@ -3776,6 +3776,34 @@ function buildProgressFull() {
     </div>`;
 }
 
+// ===================== TEXT GENERATION HELPER =====================
+async function fetchPollinationsText(prompt, retries=2) {
+  for(let i=0; i<retries; i++) {
+    try {
+      const url = `https://text.pollinations.ai/${encodeURIComponent(prompt)}?seed=${Date.now()}&model=openai`;
+      const response = await fetch(url);
+      if(!response.ok) throw new Error(`HTTP ${response.status}`);
+      const text = await response.text();
+      if(text && text.length > 50 && !text.toLowerCase().includes('error')) return text;
+    } catch(e) {
+      console.warn(`Pollinations intento ${i+1}:`, e.message);
+      if(i < retries-1) await new Promise(r=>setTimeout(r,1500));
+    }
+  }
+  return getCuentoFallback();
+}
+
+function getCuentoFallback() {
+  const cuentos = [
+    'Érase una vez, en un bosque encantado donde los árboles cantaban melodías mágicas, vivía un pequeño dragón llamado Flamas. Flamas tenía un problema: no podía hacer fuego como el resto de los dragones. En cambio, cuando abría la boca, salían pequeñas estrellas brillantes.\n\nAl principio se sentía triste y diferente. Pero un día, un viajero se perdió en el bosque oscuro y Flamas lo iluminó con sus estrellas hasta llevarlo a casa.\n\nEl viajero lo abrazó con alegría. Así Flamas aprendió que ser diferente puede ser el regalo más especial del mundo.',
+    'En el reino de las nubes vivía una pequeña hada llamada Luna con alas tan brillantes que iluminaban toda la noche. Un día las nubes se pusieron muy grises y la lluvia no paraba.\n\nLos animales del bosque estaban tristes y mojados. Luna decidió usar su magia para crear un arcoíris gigante que cubriera todo el cielo.\n\nTodos los animales bailaron bajo los colores del arcoíris. Y desde ese día, cada vez que llueve, Luna crea un arcoíris para recordar que después de la tormenta siempre viene la alegría.',
+    'Había una vez un pequeño robot llamado Bip que vivía en una ciudad del futuro. Bip quería tener amigos pero no sabía cómo hacerlos. Un día encontró a un gatito perdido y lo ayudó a volver a casa.\n\nEl gatito le presentó a todos sus amigos. ¡Bip ya no estaba solo!\n\nAprendió que la mejor manera de hacer amigos es ayudar a los demás con el corazón.',
+    'En un mar de aguas turquesas vivía un delfín llamado Marino que soñaba con volar. Un pez dorado le concedió un deseo mágico y Marino pudo saltar tan alto que tocó las nubes.\n\nDesde arriba vio lo hermoso que era su océano: los corales, las estrellas de mar, sus amigos nadando.\n\nVolvió feliz al agua. Comprendió que su hogar era el lugar más maravilloso del mundo.',
+    'En el bosque de los sueños vivía un zorro curioso llamado Cobre. Con mucho valor comenzó un largo viaje. En el camino ayudó a una mariposa, compartió su merienda con un erizo y cantó con los pájaros.\n\nCuando llegó a la cima de la montaña vio otro bosque igual al suyo. El verdadero tesoro había sido el camino: los amigos que hizo y la bondad que dio.'
+  ];
+  return cuentos[Math.floor(Math.random() * cuentos.length)];
+}
+
 // ===================== RUTINA AUTOMÁTICA =====================
 function activarRutina() {
   const dias = document.getElementById('rutinaDias').value;
@@ -4011,38 +4039,16 @@ async function generateStoryTextAI() {
   const char = document.getElementById('aiStoryChar').value;
   const age = document.getElementById('aiStoryAge').value;
   if(!prompt){ showToast('❌ Escribí de qué trata el cuento'); return; }
-
-  showLoading('Generando cuento con IA...');
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
-        messages:[{
-          role:'user',
-          content:`Escribí un cuento corto para niños de ${age} años. 
-El personaje principal es un ${char}. 
-Tema: ${prompt}
-El cuento debe tener 3-4 párrafos cortos, lenguaje simple, final positivo.
-Solo escribí el cuento, sin título, sin introducción.`
-        }]
-      })
-    });
-    const data = await response.json();
-    hideLoading();
-    const text = data.content?.[0]?.text || '';
-    if(!text){ showToast('❌ Error generando el cuento'); return; }
-    document.getElementById('aiGeneratedText').value = text;
-    document.getElementById('aiGeneratedTextWrap').style.display = 'block';
-    appState.aiGeneratedText = text;
-    showToast('✅ Cuento generado');
-  } catch(e) {
-    hideLoading();
-    showToast('❌ Error de conexión');
-    console.error('generateStoryTextAI:', e);
-  }
+  const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
+  const charName = charNames[char] || char;
+  showLoading('Generando cuento...');
+  const fullPrompt = `Escribí un cuento corto en español para niños de ${age} años. El personaje principal es un ${charName}. Tema: ${prompt}. El cuento debe tener 3-4 párrafos cortos, lenguaje simple para niños, final positivo y feliz. Solo escribí el cuento, sin título.`;
+  const text = await fetchPollinationsText(fullPrompt);
+  hideLoading();
+  document.getElementById('aiGeneratedText').value = text;
+  document.getElementById('aiGeneratedTextWrap').style.display = 'block';
+  appState.aiGeneratedText = text;
+  showToast('✅ Cuento generado');
 }
 
 async function playAiGeneratedStory() {
@@ -4255,26 +4261,6 @@ async function premAddAiImage() {
 }
 
 function removePremImg(i) { premState.images.splice(i,1); premState.prompts.splice(i,1); renderPremImgGrid(); }
-
-async function generateStoryTextAI() {
-  if(!isPremium()) { showToast('🔒 Función exclusiva Premium'); return; }
-  showLoading('Generando texto con IA...');
-  await new Promise(r=>setTimeout(r,1500));
-  const texts=[
-    'Érase una vez, en un bosque encantado donde los árboles cantaban melodías mágicas, vivía un pequeño dragón llamado Flamas. Flamas tenía un problema: no podía hacer fuego como el resto de los dragones. En cambio, cuando abría la boca, salían pequeñas estrellas brillantes. Al principio se sentía diferente, pero pronto descubrió que sus estrellas iluminaban los caminos oscuros y guiaban a los viajeros perdidos. Así aprendió que ser diferente puede ser un regalo especial.',
-    'En el reino de Nubelandia, donde las casas flotaban entre las nubes, la pequeña Lúa soñaba con tocar las estrellas. Un día, encontró un pájaro dorado que le prometió llevarla al cielo si compartía su merienda con él. Sin dudar, Lúa partió su sándwich y el pájaro, agradecido, la llevó a volar entre constelaciones brillantes. Aprendió que la generosidad siempre trae recompensas inesperadas.',
-  ];
-  document.getElementById('premStoryText').value=texts[Math.floor(Math.random()*texts.length)];
-  hideLoading();
-  useToken(10);
-}
-
-async function exportPremiumZip() {
-  if(!isPremium()) { showToast('🔒 Función exclusiva Premium'); return; }
-  showToast('⏳ Preparando descarga...');
-  await new Promise(r=>setTimeout(r,800));
-  showToast('✅ Función disponible — integrar con JSZip en producción');
-}
 
 // Photo to drawing
 function addDrawingToStory() {
