@@ -433,6 +433,7 @@ textarea{resize:vertical;min-height:80px}
   color:#1a1100;font-weight:900;
   box-shadow:0 4px 16px rgba(255,209,102,0.3);
 }
+.btn-purple{background:linear-gradient(135deg,var(--lavender),#8b5cf6);color:white;border:none;font-weight:800}
 .btn-ghost{
   background:rgba(255,255,255,0.06);color:var(--text2);
   border:1px solid rgba(255,255,255,0.1);
@@ -1371,23 +1372,30 @@ textarea{resize:vertical;min-height:80px}
       <!-- ========== STEP 4: VOZ + GUARDAR/ENVIAR ========== -->
       <div id="recStep-4" style="display:none">
         <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:4px;background:linear-gradient(135deg,var(--accent3),#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent">4️⃣ Elegir voz y enviar</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Elegí la voz del narrador y mandá el cuento a <span id="recStep4KidName">tu hijo</span>.</p>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Revisá el título y mandá el cuento a <span id="recStep4KidName">tu hijo</span>.</p>
 
-        <!-- Vista previa portada -->
-        <div style="display:flex;gap:12px;align-items:center;background:var(--bg2);border-radius:14px;padding:12px;margin-bottom:14px">
-          <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;background:var(--card);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:32px" id="recFinalPortadaThumb">🐉</div>
-          <div>
-            <div style="font-weight:800;font-size:15px" id="recFinalTitle">Sin título</div>
-            <div style="font-size:12px;color:var(--text2)" id="recFinalSceneCount">0 escenas · 0:00</div>
+        <!-- Vista previa portada + título editable -->
+        <div style="background:var(--bg2);border-radius:14px;padding:12px;margin-bottom:14px">
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
+            <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;background:var(--card);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:32px" id="recFinalPortadaThumb">🐉</div>
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:800;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px">Título del cuento</div>
+              <input type="text" id="recFinalTitleInput" placeholder="Título del cuento..." style="font-size:15px;font-weight:800;padding:8px 12px;width:100%" oninput="document.getElementById('storyTitle').value=this.value">
+            </div>
           </div>
+          <div style="font-size:12px;color:var(--text2)" id="recFinalSceneCount">0 escenas · 0:00</div>
+          <div style="font-weight:800;font-size:15px;display:none" id="recFinalTitle">Sin título</div>
         </div>
 
         <!-- Voz del narrador -->
         <div class="card" style="margin-bottom:14px">
           <div class="card-title">🎭 Voz del narrador</div>
           <div class="voice-pills" id="parentVoicePills"></div>
-          <div id="recApplyVoiceWrap" style="display:none;margin-top:10px">
-            <button class="btn btn-accent btn-sm btn-full" onclick="applyVoiceToRecording()">🎭 Aplicar voz a la grabación</button>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn btn-accent btn-sm btn-full" onclick="previewVoiceWithChar()" id="btnPreviewVoice">👂 Probar voz</button>
+            <div id="recApplyVoiceWrap" style="display:none;flex:1">
+              <button class="btn btn-purple btn-sm btn-full" onclick="applyVoiceToRecording()">✨ Aplicar voz</button>
+            </div>
           </div>
         </div>
 
@@ -1402,7 +1410,7 @@ textarea{resize:vertical;min-height:80px}
           <div id="ttsStatus" style="font-size:12px;color:var(--text2);margin-top:6px;display:none"></div>
         </div>
 
-        <!-- GUARDAR Y ENVIAR — sin descargar -->
+        <!-- GUARDAR Y ENVIAR -->
         <button class="btn btn-accent btn-full" onclick="saveStory()" style="font-size:17px;padding:18px;margin-bottom:8px">
           🚀 Guardar y enviar al niño
         </button>
@@ -3075,6 +3083,21 @@ function injectNavSprites() {
   // Record buttons use emoji 🎙️
 }
 
+function previewVoiceWithChar() {
+  if(!('speechSynthesis' in window)) { showToast('❌ Tu navegador no soporta preview de voz'); return; }
+  const voice = VOICES.find(v=>v.id===appState.selectedVoice)||VOICES[0];
+  const char = appState.selectedChar || 'dragon';
+  const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
+  const charName = charNames[char] || 'personaje';
+  const text = `Hola! Soy ${charName} y voy a contarte un cuento mágico. Había una vez...`;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'es-AR'; utter.pitch = voice.pitch; utter.rate = voice.rate;
+  utter.onstart = () => { const btn=document.getElementById('btnPreviewVoice'); if(btn) btn.textContent='🔊 Escuchando...'; };
+  utter.onend = utter.onerror = () => { const btn=document.getElementById('btnPreviewVoice'); if(btn) btn.textContent='👂 Probar voz'; };
+  window.speechSynthesis.speak(utter);
+}
+
 function buildParentVoicePills() {
   const el=document.getElementById('parentVoicePills');
   if(!el) return;
@@ -3162,18 +3185,44 @@ function goRecStep(n) {
 
 function updateRecStep4Summary() {
   const title=document.getElementById('storyTitle')?.value||'Sin título';
-  document.getElementById('recFinalTitle').textContent=title||'Sin título';
+  // Update editable title input
+  const titleInput=document.getElementById('recFinalTitleInput');
+  if(titleInput) titleInput.value=title;
+  // Also update legacy element if exists
+  const legacyTitle=document.getElementById('recFinalTitle');
+  if(legacyTitle) legacyTitle.textContent=title;
   document.getElementById('recStep4KidName').textContent=appState.kidName||'tu hijo';
   const imgs=appState.currentStoryImages||[];
   const dur=appState.recordSeconds||0;
-  document.getElementById('recFinalSceneCount').textContent=`${imgs.length} escena${imgs.length!==1?'s':''} · ${formatTime(dur)} de audio`;
+  const sceneEl=document.getElementById('recFinalSceneCount');
+  if(sceneEl) sceneEl.textContent=`${imgs.length} escena${imgs.length!==1?'s':''} · ${formatTime(dur)} de audio`;
   // Update portada thumb
   const thumb=document.getElementById('recFinalPortadaThumb');
   if(thumb) {
-    if(appState.portadaUrl) { thumb.innerHTML=`<img src="${appState.portadaUrl}" style="width:100%;height:100%;object-fit:cover">`; }
-    else { thumb.textContent=appState.selectedChar||'🐉'; }
+    if(appState.portadaUrl) {
+      thumb.innerHTML=`<img src="${appState.portadaUrl}" style="width:100%;height:100%;object-fit:cover">`;
+    } else {
+      const sprite=CHAR_SPRITES[appState.selectedChar];
+      thumb.innerHTML=sprite?`<div style="width:100%;height:100%;${spriteBg(sprite,64)}"></div>`:`<span style="font-size:36px">${appState.selectedChar||'📖'}</span>`;
+    }
   }
   buildParentVoicePills();
+  hideLoading();
+}
+
+function previewVoiceWithChar() {
+  if(!('speechSynthesis' in window)) { showToast('❌ Tu navegador no soporta preview'); return; }
+  const voice = VOICES.find(v=>v.id===appState.selectedVoice)||VOICES[0];
+  const char = appState.selectedChar || 'dragon';
+  const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
+  const charName = charNames[char] || 'personaje';
+  const text = `Hola! Soy el ${charName} y voy a contarte un cuento mágico. Había una vez...`;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'es-AR'; utter.pitch = voice.pitch||1; utter.rate = voice.rate||1;
+  utter.onstart = () => { const btn=document.getElementById('btnPreviewVoice'); if(btn) btn.textContent='🔊 Escuchando...'; };
+  utter.onend = utter.onerror = () => { const btn=document.getElementById('btnPreviewVoice'); if(btn) btn.textContent='👂 Probar voz'; };
+  window.speechSynthesis.speak(utter);
 }
 
 // ===================== RECORDING =====================
@@ -3406,8 +3455,8 @@ async function saveStory() {
     appState.recordedBlob=null;
     appState.recAudio=null;
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
-    showToast('✅ Cuento guardado!');
-    _doSwitchParentTab('library');
+    showCelebration('🎉 ¡Cuento enviado a ' + (appState.kidName||'tu hijo') + '!');
+    setTimeout(()=>_doSwitchParentTab('library'), 2000);
   } catch(err) {
     const msg = err?.message || err?.name || String(err);
     console.error('saveStory REAL error:', msg, err);
@@ -4070,15 +4119,44 @@ function handlePhotoUpload(e) {
 }
 
 async function convertPhotoToDrawing() {
-  if(!isPremium()) { showToast('🔒 Función exclusiva Premium'); return; }
-  showLoading('Convirtiendo a dibujo...');
-  await new Promise(r=>setTimeout(r,2000));
-  // Simulate with a cartoon-style image from archive
-  const url=getArchiveImage('cartoon illustration children');
-  document.getElementById('drawingResultImg').src=url;
-  document.getElementById('drawingResult').style.display='block';
-  hideLoading();
-  useToken(8);
+  if(!appState.uploadedPhotoData){ showToast('❌ Subí una foto primero'); return; }
+  showLoading('Convirtiendo a dibujo cartoon...');
+  try {
+    // Use Pollinations AI with a strong cartoon prompt
+    const prompt = 'cartoon illustration, disney pixar style, children book art, colorful, cute, friendly, soft lighting, hand drawn look, vibrant colors, no text, no watermark';
+    const seed = Date.now();
+    const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true&seed=${seed}&enhance=true`;
+    const resultImg = document.getElementById('drawingResultImg');
+    resultImg.onload = () => {
+      hideLoading();
+      appState.cartoonPhotoData = url;
+      document.getElementById('drawingResult').style.display = 'block';
+      showToast('✅ ¡Foto convertida a cartoon!');
+    };
+    resultImg.onerror = () => {
+      hideLoading();
+      // Fallback: apply CSS cartoon filter to the original photo
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        canvas.width = img.width; canvas.height = img.height;
+        ctx.filter = 'saturate(300%) contrast(200%) brightness(120%)';
+        ctx.drawImage(img, 0, 0);
+        const cartoonUrl = canvas.toDataURL('image/jpeg', 0.9);
+        resultImg.src = cartoonUrl;
+        appState.cartoonPhotoData = cartoonUrl;
+        document.getElementById('drawingResult').style.display = 'block';
+        showToast('✅ ¡Foto con efecto cartoon!');
+      };
+      img.src = appState.uploadedPhotoData;
+    };
+    resultImg.src = url;
+  } catch(e) {
+    hideLoading();
+    showToast('❌ Error al convertir. Intentá de nuevo.');
+  }
 }
 
 function addDrawingToStory() {
