@@ -1474,14 +1474,14 @@ textarea{resize:vertical;min-height:80px}
 
   <div class="prem-content">
 
-    <!-- ══ 1. GENERACIÓN CON IA ══ -->
+    <!-- ══ 1. GENERACIÓN CON IA + RUTINA AUTOMÁTICA ══ -->
     <div class="prem-card">
       <div class="prem-title">🤖 Generación con IA</div>
       <div class="ai-exclusive-badge" style="margin-bottom:12px">Solo Premium</div>
-      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">La IA genera el texto del cuento y lo narrás con la voz de tu personaje favorito.</p>
+      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">La IA genera el cuento y lo enviás al niño. Activá la rutina para que llegue automático.</p>
 
       <div id="aiGenContent">
-        <!-- Contexto / prompt -->
+        <!-- Prompt -->
         <div class="prem-subtitle">📝 ¿De qué trata el cuento?</div>
         <textarea id="aiStoryPrompt" rows="3" placeholder="Ej: Un dragón verde que tiene miedo a la oscuridad pero aprende a ser valiente..." style="margin-bottom:10px"></textarea>
         <div style="display:flex;gap:8px;margin-bottom:12px">
@@ -1502,27 +1502,55 @@ textarea{resize:vertical;min-height:80px}
             <option value="9">8-9 años</option>
           </select>
         </div>
-        <button class="btn btn-premium btn-full" onclick="generateStoryTextAI()">🤖 Generar cuento con IA</button>
+        <button class="btn btn-premium btn-full" onclick="generateStoryTextAI()">🤖 Generar cuento ahora</button>
 
         <!-- Texto generado -->
         <div id="aiGeneratedTextWrap" style="display:none;margin-top:14px">
-          <div class="prem-subtitle">✅ Cuento generado — editalo si querés</div>
+          <div class="prem-subtitle">✅ Cuento listo — revisalo y envialo</div>
           <textarea id="aiGeneratedText" rows="8" style="margin-bottom:10px"></textarea>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:8px;margin-bottom:8px">
             <button class="btn btn-accent btn-full" onclick="playAiGeneratedStory()">▶ Escuchar</button>
             <button class="btn btn-green btn-full" onclick="sendAiStoryToKid()">📤 Enviar al niño</button>
           </div>
-          <div id="aiStoryPlayback" style="display:none;margin-top:12px">
-            <div class="audio-player" style="background:var(--bg2);border-radius:14px;padding:14px">
-              <div class="audio-controls">
-                <button class="play-btn" id="aiPlayBtn" onclick="toggleAiPlay()">▶</button>
-                <div style="flex:1">
-                  <div class="audio-waveform" onclick="seekAiAudio(event)"><div class="audio-progress" id="aiProgress"></div></div>
-                  <div class="audio-time" id="aiTimeDisplay">0:00</div>
-                </div>
-              </div>
+          <button class="btn btn-ghost btn-sm btn-full" onclick="generateStoryTextAI()">🔄 Generar otro</button>
+        </div>
+
+        <!-- Separador rutina -->
+        <div style="height:1px;background:rgba(255,255,255,.08);margin:20px 0"></div>
+
+        <!-- Rutina automática -->
+        <div class="prem-subtitle">⏰ Rutina automática</div>
+        <p style="font-size:12px;color:rgba(251,191,36,.6);margin-bottom:12px;line-height:1.5">La app genera y envía un cuento automáticamente usando el tema y personaje de arriba.</p>
+
+        <!-- Estado activo -->
+        <div id="rutinaEstado" style="display:none;background:rgba(6,214,160,.08);border:1.5px solid rgba(6,214,160,.25);border-radius:14px;padding:14px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:800;font-size:14px;color:var(--mint)">✅ Rutina activa</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px" id="rutinaDescripcion">Cada 7 días a las 20:00</div>
             </div>
+            <button onclick="cancelarRutina()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">Cancelar</button>
           </div>
+        </div>
+
+        <!-- Config rutina -->
+        <div id="rutinaConfig">
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <select id="rutinaDias" style="flex:1;background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:13px">
+              <option value="1">Todos los días</option>
+              <option value="3">Cada 3 días</option>
+              <option value="7" selected>Cada semana</option>
+              <option value="14">Cada 2 semanas</option>
+            </select>
+            <select id="rutinaHora" style="flex:1;background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:13px">
+              <option value="8">8:00 AM</option>
+              <option value="12">12:00 PM</option>
+              <option value="18">6:00 PM</option>
+              <option value="20" selected>8:00 PM ⭐</option>
+              <option value="21">9:00 PM</option>
+            </select>
+          </div>
+          <button class="btn btn-premium btn-full btn-sm" onclick="activarRutina()">⏰ Activar rutina automática</button>
         </div>
       </div>
 
@@ -1606,72 +1634,6 @@ textarea{resize:vertical;min-height:80px}
       <div id="freeImgResult" style="display:none;margin-top:12px">
         <img id="freeImgResultImg" style="max-width:100%;border-radius:12px;display:block;margin:0 auto 12px">
         <button class="btn btn-gold btn-full btn-sm" onclick="addFreeImageToStory()">✅ Usar en el cuento</button>
-      </div>
-    </div>
-
-    <!-- ══ 5. RUTINA AUTOMÁTICA ══ -->
-    <div class="prem-card">
-      <div class="prem-title">⏰ Rutina automática de cuentos</div>
-      <div class="ai-exclusive-badge" style="margin-bottom:12px">Solo Premium</div>
-      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">
-        La IA genera y envía un cuento automáticamente. Tu voz llega aunque no estés.
-      </p>
-
-      <!-- Estado actual de la rutina -->
-      <div id="rutinaEstado" style="background:rgba(6,214,160,.08);border:1.5px solid rgba(6,214,160,.25);border-radius:14px;padding:14px;margin-bottom:14px;display:none">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:800;font-size:14px;color:var(--mint)">✅ Rutina activa</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:2px" id="rutinaDescripcion">Cada 7 días a las 20:00</div>
-          </div>
-          <button onclick="cancelarRutina()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">Cancelar</button>
-        </div>
-      </div>
-
-      <!-- Configuración -->
-      <div id="rutinaConfig">
-        <div class="input-group">
-          <label>¿Cada cuántos días?</label>
-          <select id="rutinaDias" style="background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:14px;width:100%">
-            <option value="1">Todos los días</option>
-            <option value="3">Cada 3 días</option>
-            <option value="7" selected>Cada semana</option>
-            <option value="14">Cada 2 semanas</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label>¿A qué hora? (hora local)</label>
-          <select id="rutinaHora" style="background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:14px;width:100%">
-            <option value="8">8:00 AM — Buenos días</option>
-            <option value="12">12:00 PM — Mediodía</option>
-            <option value="18">6:00 PM — Tarde</option>
-            <option value="20" selected>8:00 PM — Antes de dormir ⭐</option>
-            <option value="21">9:00 PM — Hora del cuento</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label>¿Qué temas le gustan?</label>
-          <input type="text" id="rutinaTemasInput" placeholder="Ej: aventuras, dinosaurios, princesas, magia...">
-        </div>
-        <div class="input-group">
-          <label>Personaje favorito</label>
-          <select id="rutinaPersonaje" style="background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:14px;width:100%">
-            <option value="dragon">🐉 Dragón</option>
-            <option value="hada">🧚 Hada</option>
-            <option value="leon">🦁 León</option>
-            <option value="delfin">🐬 Delfín</option>
-            <option value="zorro">🦊 Zorro</option>
-            <option value="robot">🤖 Robot</option>
-            <option value="unicornio">🦄 Unicornio</option>
-            <option value="mago">🧙 Mago</option>
-          </select>
-        </div>
-        <button class="btn btn-premium btn-full" onclick="activarRutina()" style="font-size:16px;padding:16px">
-          ⏰ Activar rutina automática
-        </button>
-        <button class="btn btn-ghost btn-sm btn-full" style="margin-top:8px" onclick="generarCuentoAhoraManual()">
-          ▶ Generar y enviar un cuento ahora
-        </button>
       </div>
     </div>
 
@@ -3818,8 +3780,8 @@ function buildProgressFull() {
 function activarRutina() {
   const dias = document.getElementById('rutinaDias').value;
   const hora = document.getElementById('rutinaHora').value;
-  const temas = document.getElementById('rutinaTemasInput').value.trim() || 'aventuras y magia';
-  const personaje = document.getElementById('rutinaPersonaje').value;
+  const personaje = document.getElementById('aiStoryChar').value;
+  const temas = document.getElementById('aiStoryPrompt').value.trim() || 'aventuras y magia';
 
   const rutina = { activa:true, dias:parseInt(dias), hora:parseInt(hora), temas, personaje,
     ultimoEnvio: null, proxEnvio: calcProxEnvio(parseInt(dias), parseInt(hora)) };
@@ -3827,9 +3789,11 @@ function activarRutina() {
 
   const descripciones = {1:'Todos los días',3:'Cada 3 días',7:'Cada semana',14:'Cada 2 semanas'};
   const horas = {8:'8:00 AM',12:'12:00 PM',18:'6:00 PM',20:'8:00 PM',21:'9:00 PM'};
-  document.getElementById('rutinaDescripcion').textContent = `${descripciones[dias]} a las ${horas[hora]}`;
-  document.getElementById('rutinaEstado').style.display = 'block';
-  showToast(`✅ Rutina activada — próximo cuento: ${new Date(rutina.proxEnvio).toLocaleDateString('es-AR')}`);
+  const desc = document.getElementById('rutinaDescripcion');
+  if(desc) desc.textContent = `${descripciones[dias]} a las ${horas[hora]} — ${temas.substring(0,30)}`;
+  const estado = document.getElementById('rutinaEstado');
+  if(estado) estado.style.display = 'block';
+  showToast(`✅ Rutina activada — próximo cuento el ${new Date(rutina.proxEnvio).toLocaleDateString('es-AR')} a las ${horas[hora]}`);
 }
 
 function cancelarRutina() {
