@@ -1067,7 +1067,7 @@ textarea{resize:vertical;min-height:80px}
     <div class="step" id="step2">
       <div class="card-title" style="font-size:16px;color:var(--text);margin-bottom:8px">🧒 Cuenta del Niño/a</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:18px">El niño usará esta contraseña para acceder a sus cuentos.</p>
-      <div class="input-group"><label>Nombre del niño</label><input type="text" id="setupKidName" placeholder="Ej: Sofía"></div>
+      <div class="input-group"><label>Nombre del niño</label><input type="text" id="setupKidName" placeholder="Ej: Candela, Jesús, Esteban..."></div>
       <div class="input-group"><label>Contraseña simple</label><input type="password" id="setupKidPass" placeholder="Ej: 1234"></div>
       <button class="btn-primary" onclick="setupStep3()">Siguiente →</button>
       <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="goStep(1)">← Volver</button>
@@ -1483,7 +1483,7 @@ textarea{resize:vertical;min-height:80px}
       <div id="aiGenContent">
         <!-- Prompt -->
         <div class="prem-subtitle">📝 ¿De qué trata el cuento?</div>
-        <textarea id="aiStoryPrompt" rows="3" placeholder="Ej: Un dragón verde que tiene miedo a la oscuridad pero aprende a ser valiente..." style="margin-bottom:10px"></textarea>
+        <textarea id="aiStoryPrompt" rows="2" placeholder="Ej: dinosaurio que vuela" style="margin-bottom:10px"></textarea>
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <select id="aiStoryChar" style="flex:1;background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:13px">
             <option value="dragon">🐉 Dragón</option>
@@ -3780,7 +3780,7 @@ function buildProgressFull() {
 // ===================== TEXT GENERATION HELPER =====================
 async function fetchPollinationsText(prompt) {
   // Mostrar fallback inmediato
-  const fallback = getCuentoFallback();
+  const fallback = getCuentoFallback(null, null, appState.kidName);
   // Intentar Pollinations en paralelo con prompt corto
   try {
     const shortPrompt = prompt.substring(0, 200);
@@ -3796,15 +3796,68 @@ async function fetchPollinationsText(prompt) {
   return fallback;
 }
 
-function getCuentoFallback() {
-  const cuentos = [
-    'Érase una vez, en un bosque encantado donde los árboles cantaban melodías mágicas, vivía un pequeño dragón llamado Flamas. Flamas tenía un problema: no podía hacer fuego como el resto de los dragones. En cambio, cuando abría la boca, salían pequeñas estrellas brillantes.\n\nAl principio se sentía triste y diferente. Pero un día, un viajero se perdió en el bosque oscuro y Flamas lo iluminó con sus estrellas hasta llevarlo a casa.\n\nEl viajero lo abrazó con alegría. Así Flamas aprendió que ser diferente puede ser el regalo más especial del mundo.',
-    'En el reino de las nubes vivía una pequeña hada llamada Luna con alas tan brillantes que iluminaban toda la noche. Un día las nubes se pusieron muy grises y la lluvia no paraba.\n\nLos animales del bosque estaban tristes y mojados. Luna decidió usar su magia para crear un arcoíris gigante que cubriera todo el cielo.\n\nTodos los animales bailaron bajo los colores del arcoíris. Y desde ese día, cada vez que llueve, Luna crea un arcoíris para recordar que después de la tormenta siempre viene la alegría.',
-    'Había una vez un pequeño robot llamado Bip que vivía en una ciudad del futuro. Bip quería tener amigos pero no sabía cómo hacerlos. Un día encontró a un gatito perdido y lo ayudó a volver a casa.\n\nEl gatito le presentó a todos sus amigos. ¡Bip ya no estaba solo!\n\nAprendió que la mejor manera de hacer amigos es ayudar a los demás con el corazón.',
-    'En un mar de aguas turquesas vivía un delfín llamado Marino que soñaba con volar. Un pez dorado le concedió un deseo mágico y Marino pudo saltar tan alto que tocó las nubes.\n\nDesde arriba vio lo hermoso que era su océano: los corales, las estrellas de mar, sus amigos nadando.\n\nVolvió feliz al agua. Comprendió que su hogar era el lugar más maravilloso del mundo.',
-    'En el bosque de los sueños vivía un zorro curioso llamado Cobre. Con mucho valor comenzó un largo viaje. En el camino ayudó a una mariposa, compartió su merienda con un erizo y cantó con los pájaros.\n\nCuando llegó a la cima de la montaña vio otro bosque igual al suyo. El verdadero tesoro había sido el camino: los amigos que hizo y la bondad que dio.'
+function getCuentoFallback(charName, tema, kidName) {
+  charName = charName || 'Dragón';
+  tema = (tema || 'aventuras').toLowerCase().trim();
+  kidName = kidName || 'el niño';
+
+  const words = tema.split(/[\s,]+/).filter(w=>w.length>2);
+  const mainWord = words[0] || 'aventura';
+  const extraWord = words[1] || words[0] || 'magia';
+
+  // Detectar contexto del tema
+  const esMar = /mar|ocean|pez|peces|delfin|tiburon|ballena|sirena/.test(tema);
+  const esEspacio = /espaci|planet|estrell|cohete|astronaut|luna|galaxia/.test(tema);
+  const esBosque = /bosque|selva|arbol|flor|mariposa|insecto|hongo/.test(tema);
+  const esCielo = /vuela|vuelo|nube|cielo|pajaro|alas|viento/.test(tema);
+  const esCiudad = /ciudad|calle|casa|edificio|auto|moto|tienda/.test(tema);
+  const esDino = /dinosaurio|dino|rex|tiranosaurio|velociraptor/.test(tema);
+  const esAnimal = /animal|vaca|perro|gato|caballo|conejo|oso|lobo|zorro|elefante/.test(tema);
+
+  const lugar = esMar ? ['el fondo del mar más colorido','las olas gigantes del océano','un arrecife lleno de peces brillantes'] :
+    esEspacio ? ['una galaxia muy lejana','un planeta de colores imposibles','entre las estrellas más brillantes'] :
+    esBosque ? ['un bosque encantado','la selva de los secretos','entre los árboles más altos del mundo'] :
+    esCielo ? ['el cielo entre las nubes','un castillo entre las nubes rosadas','sobre los arcoíris'] :
+    esCiudad ? ['una ciudad llena de colores','el barrio más mágico del mundo','las calles llenas de sorpresas'] :
+    esDino ? ['el tiempo de los dinosaurios','un valle prehistórico lleno de plantas gigantes','la era más antigua del mundo'] :
+    ['un reino mágico y colorido','el mundo de las aventuras','un lugar donde todo es posible'];
+
+  const r = (arr) => arr[Math.floor(Math.random()*arr.length)];
+  const lugarElegido = r(lugar);
+
+  // Rasgos especiales del personaje según el tema
+  const rasgos = tema.includes('sin dientes') ? `no tenía dientes pero tenía una sonrisa enorme` :
+    tema.includes('tres patas') || tema.includes('3 patas') ? `tenía tres patas y saltaba de una manera muy especial` :
+    tema.includes('violeta') || tema.includes('morad') ? `era de color violeta brillante, diferente a todos los demás` :
+    tema.includes('pequeñ') || tema.includes('chiquit') ? `era el más pequeño de todos pero el más valiente` :
+    tema.includes('gigante') || tema.includes('grand') ? `era enorme pero tenía un corazón muy tierno` :
+    tema.includes('vuela') || tema.includes('vuelo') ? `podía volar pero nunca había llegado muy alto` :
+    tema.includes('corre') ? `corría tan rápido que dejaba un rastro de chispas` :
+    tema.includes('cant') ? `tenía una voz tan hermosa que hacía bailar a los árboles` :
+    `tenía algo muy especial que lo hacía diferente a todos`;
+
+  const inicios = [
+    `Érase una vez, en ${lugarElegido}, vivía un ${charName} que ${rasgos}. Nadie entendía su secreto... hasta que llegó ${kidName}.`,
+    `En ${lugarElegido} había un ${charName} muy especial que ${rasgos}. Un día, ${kidName} apareció y cambió todo para siempre.`,
+    `${kidName} nunca había visto nada igual. En ${lugarElegido} encontró a un ${charName} que ${rasgos}. Desde el primer momento se hicieron amigos.`,
+    `Todo comenzó en ${lugarElegido}, donde un ${charName} ${rasgos}. Nadie lo comprendía, hasta que ${kidName} llegó con una sonrisa enorme.`,
   ];
-  return cuentos[Math.floor(Math.random() * cuentos.length)];
+
+  const medios = [
+    `${kidName} y el ${charName} formaron el equipo más increíble que el mundo había visto. Juntos exploraron ${lugarElegido} de punta a punta. Cuando uno se cansaba, el otro le daba fuerzas. Descubrieron lugares secretos, resolvieron acertijos mágicos y ayudaron a todos los que encontraban en el camino.`,
+    `La aventura fue emocionante desde el primer momento. ${kidName} tenía ideas brillantes y el ${charName} tenía la fuerza y la valentía necesarias. Juntos cruzaron ${lugarElegido} enfrentando todo tipo de desafíos, siempre riendo y apoyándose mutuamente.`,
+    `Nadie los podía detener. ${kidName} y el ${charName} descubrieron que ${lugarElegido} guardaba secretos increíbles. En cada rincón había una sorpresa nueva, y los dos amigos la vivían con alegría y asombro.`,
+    `El viaje estuvo lleno de momentos mágicos. ${kidName} y el ${charName} se convirtieron en inseparables. Cada obstáculo que encontraban en ${lugarElegido} se convertía en una oportunidad para aprender algo nuevo y crecer juntos.`,
+  ];
+
+  const finales = [
+    `Al final del día, ${kidName} y el ${charName} se abrazaron con fuerza. Habían aprendido que ser diferente es el regalo más especial del mundo, y que la verdadera amistad no tiene límites. Esa noche, ${kidName} se durmió sonriendo, soñando con la próxima aventura.`,
+    `Y así fue como todo cambió. El ${charName} encontró en ${kidName} al mejor amigo que jamás hubiera imaginado. Los dos supieron que juntos podían con todo. ${kidName} llegó a casa con el corazón lleno de alegría y la cabeza llena de recuerdos mágicos.`,
+    `Cuando el sol se puso, los dos amigos prometieron volver a ${lugarElegido} algún día. Aprendieron que el amor y la amistad son la magia más poderosa del universo. Esa noche, ${kidName} se durmió feliz, sabiendo que tenía el mejor amigo del mundo.`,
+    `El ${charName} nunca olvidó ese día. Aprendió que lo que lo hacía diferente era exactamente lo que lo hacía especial. Y ${kidName}, cada vez que miraba las estrellas, recordaba esa aventura y sonreía con el corazón lleno de amor.`,
+  ];
+
+  return `${r(inicios)}\n\n${r(medios)}\n\n${r(finales)}`;
 }
 
 // ===================== RUTINA AUTOMÁTICA =====================
@@ -3854,7 +3907,7 @@ async function generarYEnviarCuentoAuto(temas, personaje, kidName) {
   const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
   const charName = charNames[personaje] || 'personaje mágico';
   // Fallback inmediato
-  let text = getCuentoFallback();
+  let text = getCuentoFallback(null, null, appState.kidName);
   hideLoading();
   // Intentar mejorar con Pollinations
   try {
