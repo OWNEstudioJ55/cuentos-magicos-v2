@@ -3914,11 +3914,13 @@ async function generarYEnviarCuentoAuto(temas, personaje, kidName) {
   hideLoading();
   // Intentar mejorar via Edge Function
   try {
-    const shortPrompt = `Cuento infantil en español para ${kidName}, personaje ${charName}, tema: ${temas.substring(0,80)}. 3 párrafos, final feliz.`;
+    const age = appState.kidAge || 7;
+    const longitud = age <= 5 ? '4 párrafos medianos' : age <= 8 ? '5 párrafos desarrollados' : '6 párrafos largos';
+    const aiPrompt = `Escribí un cuento infantil en español para ${kidName}, que tiene ${age} años. El cuento debe tener ${longitud}. El personaje principal es ${charName}. El tema central (MUY IMPORTANTE, el cuento debe girar completamente alrededor de esto): "${temas}". Final feliz y emotivo. Solo el texto del cuento, sin título ni explicaciones.`;
     const response = await fetch('/api/generar-cuento', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: shortPrompt }),
+      body: JSON.stringify({ prompt: aiPrompt }),
     });
     if(response.ok) {
       const data = await response.json();
@@ -4078,11 +4080,19 @@ async function generateStoryTextAI() {
 
   // Intentar mejorar via Edge Function en segundo plano
   try {
-    const shortPrompt = `Cuento infantil en español, personaje ${charName}, tema: ${prompt.substring(0,80)}, niño llamado ${kidName}. 3 párrafos cortos, final feliz.`;
+    const ageDesc = age <= 4 ? 'muy simple, frases cortas, vocabulario de bebé' :
+                    age <= 6 ? 'simple y emotivo, frases claras, vocabulario de jardín' :
+                    age <= 8 ? 'con aventura y detalle, vocabulario escolar' :
+                    age <= 10 ? 'con suspenso, descripción rica, vocabulario de primaria' :
+                    'elaborado, con giros narrativos, vocabulario amplio';
+    const longitud = age <= 5 ? '4 párrafos medianos' :
+                     age <= 8 ? '5 párrafos desarrollados' :
+                     '6 párrafos largos y detallados';
+    const aiPrompt = `Escribí un cuento infantil en español para ${kidName}, que tiene ${age} años. El cuento debe tener exactamente ${longitud}. El personaje principal es ${charName}. El tema central del cuento (MUY IMPORTANTE, el cuento debe girar completamente alrededor de esto): "${prompt}". Nivel de lenguaje: ${ageDesc}. El cuento debe comenzar presentando el tema "${prompt}" desde la primera oración. Final feliz y emotivo. Solo el texto del cuento, sin título ni explicaciones.`;
     const response = await fetch('/api/generar-cuento', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: shortPrompt }),
+      body: JSON.stringify({ prompt: aiPrompt }),
     });
     if(response.ok) {
       const data = await response.json();
