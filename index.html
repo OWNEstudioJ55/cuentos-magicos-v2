@@ -1609,6 +1609,72 @@ textarea{resize:vertical;min-height:80px}
       </div>
     </div>
 
+    <!-- ══ 5. RUTINA AUTOMÁTICA ══ -->
+    <div class="prem-card">
+      <div class="prem-title">⏰ Rutina automática de cuentos</div>
+      <div class="ai-exclusive-badge" style="margin-bottom:12px">Solo Premium</div>
+      <p style="font-size:13px;color:rgba(251,191,36,.7);margin-bottom:14px;line-height:1.5">
+        La IA genera y envía un cuento automáticamente. Tu voz llega aunque no estés.
+      </p>
+
+      <!-- Estado actual de la rutina -->
+      <div id="rutinaEstado" style="background:rgba(6,214,160,.08);border:1.5px solid rgba(6,214,160,.25);border-radius:14px;padding:14px;margin-bottom:14px;display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:800;font-size:14px;color:var(--mint)">✅ Rutina activa</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px" id="rutinaDescripcion">Cada 7 días a las 20:00</div>
+          </div>
+          <button onclick="cancelarRutina()" style="background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:Nunito,sans-serif">Cancelar</button>
+        </div>
+      </div>
+
+      <!-- Configuración -->
+      <div id="rutinaConfig">
+        <div class="input-group">
+          <label>¿Cada cuántos días?</label>
+          <select id="rutinaDias" style="background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:14px;width:100%">
+            <option value="1">Todos los días</option>
+            <option value="3">Cada 3 días</option>
+            <option value="7" selected>Cada semana</option>
+            <option value="14">Cada 2 semanas</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>¿A qué hora? (hora local)</label>
+          <select id="rutinaHora" style="background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:14px;width:100%">
+            <option value="8">8:00 AM — Buenos días</option>
+            <option value="12">12:00 PM — Mediodía</option>
+            <option value="18">6:00 PM — Tarde</option>
+            <option value="20" selected>8:00 PM — Antes de dormir ⭐</option>
+            <option value="21">9:00 PM — Hora del cuento</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>¿Qué temas le gustan?</label>
+          <input type="text" id="rutinaTemasInput" placeholder="Ej: aventuras, dinosaurios, princesas, magia...">
+        </div>
+        <div class="input-group">
+          <label>Personaje favorito</label>
+          <select id="rutinaPersonaje" style="background:var(--bg2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;color:var(--text);padding:10px;font-family:Nunito,sans-serif;font-size:14px;width:100%">
+            <option value="dragon">🐉 Dragón</option>
+            <option value="hada">🧚 Hada</option>
+            <option value="leon">🦁 León</option>
+            <option value="delfin">🐬 Delfín</option>
+            <option value="zorro">🦊 Zorro</option>
+            <option value="robot">🤖 Robot</option>
+            <option value="unicornio">🦄 Unicornio</option>
+            <option value="mago">🧙 Mago</option>
+          </select>
+        </div>
+        <button class="btn btn-premium btn-full" onclick="activarRutina()" style="font-size:16px;padding:16px">
+          ⏰ Activar rutina automática
+        </button>
+        <button class="btn btn-ghost btn-sm btn-full" style="margin-top:8px" onclick="generarCuentoAhoraManual()">
+          ▶ Generar y enviar un cuento ahora
+        </button>
+      </div>
+    </div>
+
     <!-- ══ SALDO Y PLANES (al final) ══ -->
     <div class="prem-card" style="background:linear-gradient(135deg,rgba(251,191,36,.1),rgba(251,191,36,.03))">
       <div class="prem-title">💰 Tu saldo</div>
@@ -3007,6 +3073,7 @@ function showParentApp() {
   switchParentTab('home');
   showScreen('parentApp');
   injectNavSprites();
+  checkRutinaAutomatica();
   // Show kid activity alert
   setTimeout(()=>{
     const lastKidActivity = localStorage.getItem('ownKidLastActivity');
@@ -3481,16 +3548,18 @@ async function loadParentLibrary() {
     el.innerHTML=`<div class="empty-state"><div class="empty-icon">📚</div><p>Aún no grabaste ningún cuento</p></div>`;
     return;
   }
+  const readStories = JSON.parse(localStorage.getItem('ownKidOpenedStories')||'[]');
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>{
     const sprite=CHAR_SPRITES[s.char];
     const thumbContent=sprite
       ? `<div style="width:100%;height:100%;${spriteBg(sprite,60)}border-radius:12px"></div>`
       : `<span style="font-size:28px">${s.char||'📖'}</span>`;
+    const isRead = readStories.includes(s.id);
     return `<div class="story-card" onclick="openEditStory('${s.id}')">
       <div class="story-thumb">${thumbContent}</div>
       <div class="story-info">
         <div class="story-title">${s.title}</div>
-        <div class="story-meta">${s.created||''} ${s.hasAudio?'🔊':'📝'}</div>
+        <div class="story-meta">${s.created||''} ${s.hasAudio?'🔊':'📝'} ${isRead?'<span style="color:var(--mint);font-weight:800">✅ Leído</span>':'<span style="color:var(--text3)">⏳ Sin leer</span>'}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editStory('${s.id}')">✏️</button>
@@ -3745,7 +3814,132 @@ function buildProgressFull() {
     </div>`;
 }
 
-// ===================== PREMIUM SCREEN =====================
+// ===================== RUTINA AUTOMÁTICA =====================
+function activarRutina() {
+  const dias = document.getElementById('rutinaDias').value;
+  const hora = document.getElementById('rutinaHora').value;
+  const temas = document.getElementById('rutinaTemasInput').value.trim() || 'aventuras y magia';
+  const personaje = document.getElementById('rutinaPersonaje').value;
+
+  const rutina = { activa:true, dias:parseInt(dias), hora:parseInt(hora), temas, personaje,
+    ultimoEnvio: null, proxEnvio: calcProxEnvio(parseInt(dias), parseInt(hora)) };
+  localStorage.setItem('ownRutina', JSON.stringify(rutina));
+
+  const descripciones = {1:'Todos los días',3:'Cada 3 días',7:'Cada semana',14:'Cada 2 semanas'};
+  const horas = {8:'8:00 AM',12:'12:00 PM',18:'6:00 PM',20:'8:00 PM',21:'9:00 PM'};
+  document.getElementById('rutinaDescripcion').textContent = `${descripciones[dias]} a las ${horas[hora]}`;
+  document.getElementById('rutinaEstado').style.display = 'block';
+  showToast(`✅ Rutina activada — próximo cuento: ${new Date(rutina.proxEnvio).toLocaleDateString('es-AR')}`);
+}
+
+function cancelarRutina() {
+  localStorage.removeItem('ownRutina');
+  document.getElementById('rutinaEstado').style.display = 'none';
+  showToast('🔕 Rutina cancelada');
+}
+
+function calcProxEnvio(dias, hora) {
+  const now = new Date();
+  const proxima = new Date();
+  proxima.setHours(hora, 0, 0, 0);
+  if(proxima <= now) proxima.setDate(proxima.getDate() + dias);
+  return proxima.getTime();
+}
+
+async function generarCuentoAhoraManual() {
+  const rutina = JSON.parse(localStorage.getItem('ownRutina')||'{}');
+  const temas = rutina.temas || document.getElementById('rutinaTemasInput')?.value || 'aventuras y magia';
+  const personaje = rutina.personaje || document.getElementById('rutinaPersonaje')?.value || 'dragon';
+  const kidName = appState.kidName || 'el niño';
+  await generarYEnviarCuentoAuto(temas, personaje, kidName);
+}
+
+async function generarYEnviarCuentoAuto(temas, personaje, kidName) {
+  if(!supa) { showToast('❌ Sin conexión'); return; }
+  showLoading('Generando cuento automático...');
+  try {
+    const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
+    const charName = charNames[personaje] || 'personaje mágico';
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:800,
+        messages:[{role:'user', content:`Escribí un cuento corto para niños de 4-8 años.
+El personaje principal es ${charName}.
+Los temas favoritos del niño son: ${temas}.
+El nombre del niño es ${kidName}.
+Incluí el nombre del niño en la historia.
+El cuento debe tener 3-4 párrafos cortos, lenguaje simple, final positivo y feliz.
+Solo escribí el cuento, sin título, sin explicaciones.`}]
+      })
+    });
+    const data = await response.json();
+    hideLoading();
+    const text = data.content?.[0]?.text || '';
+    if(!text){ showToast('❌ Error generando el cuento'); return; }
+
+    // Save as story
+    const id = 'auto_'+Date.now();
+    const title = `Cuento de ${charName} para ${kidName}`;
+    const story = {id, title, type:'parent', char:personaje,
+      storyText:text, images:[], created:new Date().toLocaleDateString('es-AR'),
+      hasAudio:false, isAuto:true};
+    await dbPut('stories', story);
+
+    // Sync to Supabase
+    const familiaId = getFamiliaId();
+    if(supa && familiaId) {
+      supa.from('cuentos').upsert({id, titulo:title, familia_id:familiaId,
+        personaje:personaje, texto:text, tiene_audio:false,
+        imagenes:[], portada:null}).catch(e=>console.warn(e));
+    }
+
+    // Notify parent
+    notifyParent(`📖 Cuento automático enviado a ${kidName}: "${title}"`);
+    updateParentNotifBadge();
+    showCelebration(`📖 Cuento enviado a ${kidName}!`);
+    showToast(`✅ Cuento automático generado y enviado`);
+
+    // Update last sent time
+    const rutina = JSON.parse(localStorage.getItem('ownRutina')||'{}');
+    if(rutina.activa) {
+      rutina.ultimoEnvio = Date.now();
+      rutina.proxEnvio = calcProxEnvio(rutina.dias, rutina.hora);
+      localStorage.setItem('ownRutina', JSON.stringify(rutina));
+    }
+  } catch(e) {
+    hideLoading();
+    showToast('❌ Error al generar el cuento. Intentá de nuevo.');
+    console.error('generarYEnviarCuentoAuto:', e);
+  }
+}
+
+// Check rutina on app load
+function checkRutinaAutomatica() {
+  const rutina = JSON.parse(localStorage.getItem('ownRutina')||'{}');
+  if(!rutina.activa || !rutina.proxEnvio) return;
+  const now = Date.now();
+  if(now >= rutina.proxEnvio) {
+    const kidName = appState.kidName || 'el niño';
+    console.log('🤖 Ejecutando rutina automática...');
+    generarYEnviarCuentoAuto(rutina.temas, rutina.personaje, kidName);
+  }
+}
+
+// Load rutina state in premium screen
+function loadRutinaState() {
+  const rutina = JSON.parse(localStorage.getItem('ownRutina')||'{}');
+  if(rutina.activa) {
+    const descripciones = {1:'Todos los días',3:'Cada 3 días',7:'Cada semana',14:'Cada 2 semanas'};
+    const horas = {8:'8:00 AM',12:'12:00 PM',18:'6:00 PM',20:'8:00 PM',21:'9:00 PM'};
+    const desc = document.getElementById('rutinaDescripcion');
+    if(desc) desc.textContent = `${descripciones[rutina.dias]||''} a las ${horas[rutina.hora]||''}`;
+    const estado = document.getElementById('rutinaEstado');
+    if(estado) estado.style.display = 'block';
+  }
+}
 let _selectedPlan=null;
 function hidePremiumScreen() {
   showScreen('parentApp');
@@ -3834,7 +4028,7 @@ function showPremiumScreen() {
 
   // Init voice pills for premium recording
   buildPremVoicePills();
-
+  loadRutinaState();
   showScreen('premiumScreen');
 }
 
@@ -5063,6 +5257,10 @@ async function openKidStory(id) {
     openedStories.push(id);
     localStorage.setItem('ownKidOpenedStories', JSON.stringify(openedStories));
     setTimeout(()=>showKidReceiveCelebration(story.title||'Cuento'), 500);
+    // Notify parent that kid read the story
+    const kidName = appState.kidName || 'Tu hijo';
+    notifyParent(`✅ ${kidName} leyó "${story.title||'el cuento'}"`);
+    updateParentNotifBadge();
   }
 
   document.getElementById('kidStoryTitle').textContent=story.title||'Cuento';
