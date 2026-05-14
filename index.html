@@ -865,15 +865,19 @@
 <!-- ============================================================ -->
 <!-- KID APP — UI COMPLETAMENTE DIFERENTE Y MÁGICA -->
 <!-- ============================================================ -->
-<div class="screen" id="kidApp">
-  <div class="kid-header">
-    <h1>
-      <span style="color:#ff6fd8">O</span><span style="color:#f97316">W</span><span style="color:#a78bfa">N</span>
-      <span style="font-size:16px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text2)">✨ <span id="kidNameHeader">Hola!</span></span>
-    </h1>
+<div class="screen" id="kidApp" style="background:#F5EDE0;">
+
+  <!-- HEADER NIÑO -->
+  <div class="kid-header own-kid-header">
+    <div style="display:flex;align-items:center;gap:8px">
+      <img src="/logooso.png" alt="OWN" style="height:36px;object-fit:contain;mix-blend-mode:multiply">
+    </div>
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033">
+      ¡Hola, <span id="kidNameHeader">amigo</span>! 👋
+    </div>
     <div style="display:flex;gap:8px;align-items:center">
-      <div class="kid-stars-badge">⭐ <span id="kidStars">0</span></div>
-      <button class="btn-logout" onclick="doLogout()">Salir</button>
+      <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none">⭐ <span id="kidStars">0</span></div>
+      <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2)">Salir</button>
     </div>
   </div>
 
@@ -882,28 +886,32 @@
     <!-- HOME TAB KID -->
     <div id="kTab-home">
 
-      <!-- Hero — cuento del padre -->
-      <div id="kidNewStoryHero" style="display:none;background:linear-gradient(135deg,rgba(255,107,107,.2),rgba(255,142,83,.1));border:2px solid rgba(255,107,107,.4);border-radius:24px;padding:20px;margin-bottom:16px;text-align:center;cursor:pointer;animation:fadeIn .5s ease" onclick="openFirstNewStory()">
-        <div style="font-size:56px;margin-bottom:8px">🎙️</div>
-        <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:900;color:var(--coral);margin-bottom:4px">¡Papá/Mamá te mandó un cuento!</div>
-        <div style="font-size:14px;color:var(--text2);margin-bottom:14px">Tocá para escucharlo</div>
-        <div style="background:var(--coral);color:white;border:none;border-radius:14px;padding:12px 28px;font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;display:inline-block">▶ Escuchar ahora</div>
+      <!-- Hero — cuento nuevo del padre -->
+      <div id="kidNewStoryHero" style="display:none" onclick="openFirstNewStory()" class="own-kid-hero-new">
+        <div class="own-kid-hero-icon">🎙️</div>
+        <div class="own-kid-hero-title">¡Papá/Mamá te mandó un cuento!</div>
+        <div class="own-kid-hero-sub">Tocá para escucharlo</div>
+        <div class="own-kid-hero-btn">▶ Escuchar ahora</div>
       </div>
 
       <!-- Sin cuentos nuevos -->
-      <div id="kidNoStoryHero" style="background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.1);border-radius:24px;padding:24px;margin-bottom:16px;text-align:center">
+      <div id="kidNoStoryHero" class="own-kid-hero-empty">
         <div style="font-size:48px;margin-bottom:8px">🌟</div>
-        <div style="font-family:'Baloo 2',cursive;font-size:16px;color:var(--text2);margin-bottom:4px">Hola, <span id="kidHeroName">amigo</span>!</div>
-        <div style="font-size:13px;color:var(--text3)">Papá/Mamá te mandará un cuento pronto</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">¡Hola, <span id="kidHeroName">amigo</span>!</div>
+        <div style="font-size:13px;color:#9B7B6B">Papá/Mamá te mandará un cuento pronto</div>
       </div>
 
       <!-- Cuentos del padre -->
-      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--coral)">🎙️ Cuentos de Papá/Mamá</div>
-      <div id="kidHomeStories"></div>
+      <div class="own-kid-sh">
+        <span class="own-kid-st">🎙️ Cuentos de Papá/Mamá</span>
+      </div>
+      <div id="kidHomeStories" class="own-kid-stories-grid"></div>
 
       <!-- Cuentos clásicos -->
-      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin:16px 0 12px;color:var(--accent3)">📖 Cuentos Clásicos</div>
-      <div id="kidClassicStories"></div>
+      <div class="own-kid-sh" style="margin-top:8px">
+        <span class="own-kid-st">📖 Cuentos Clásicos</span>
+      </div>
+      <div id="kidClassicStories" class="own-kid-stories-grid"></div>
 
     </div>
 
@@ -1307,10 +1315,19 @@
 
   </div>
 
-  <div class="kid-bottom-nav">
-    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-home" style="font-size:28px">🎧</span>Escuchar</button>
-    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-draw" style="font-size:28px">🎨</span>Dibujar</button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-play" style="font-size:28px">⭐</span>Jugar</button>
+  <div class="kid-bottom-nav own-kid-nav">
+    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')">
+      <span style="font-size:26px">🎧</span>
+      <span class="own-kid-nav-label">Escuchar</span>
+    </button>
+    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()">
+      <span style="font-size:26px">🎨</span>
+      <span class="own-kid-nav-label">Crear</span>
+    </button>
+    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')">
+      <span style="font-size:26px">⭐</span>
+      <span class="own-kid-nav-label">Jugar</span>
+    </button>
   </div>
 </div>
 

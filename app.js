@@ -3324,17 +3324,19 @@ async function loadKidHomeStories() {
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map(s=>{
     const img=s.images&&s.images[0];
     const sprite=CHAR_SPRITES[s.char];
-    const thumbBg=sprite?spriteBg(sprite,70):'';
+    const thumbBg=sprite?spriteBg(sprite,80):'';
     const isNew = s.supaSync && new Date(s.created||0).getTime() > lastSeen;
-    return `<div class="kid-story-card" onclick="openKidStory('${s.id}')" style="position:relative">
-      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:var(--coral);color:white;font-size:10px;font-weight:900;padding:3px 8px;border-radius:20px;z-index:2;font-family:Nunito,sans-serif">¡NUEVO!</div>`:''}
-      ${img ? `<img class="kid-story-card-img" src="${img}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
-      <div class="kid-story-card-img-placeholder" style="${img?'display:none':'display:flex'};${thumbBg}${!sprite?'font-size:32px':''}">
-        ${!sprite?(s.char||'📖'):''}
+    return `<div class="own-kid-story-card" onclick="openKidStory('${s.id}')">
+      ${isNew?`<div class="own-kid-new-badge">¡NUEVO!</div>`:''}
+      <div class="own-kid-story-thumb">
+        ${img ? `<img src="${img}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover">` : ''}
+        <div style="${thumbBg}${!sprite?'font-size:42px;display:flex;align-items:center;justify-content:center;width:100%;height:100%':'width:80px;height:80px;'+thumbBg}">
+          ${!sprite?(s.char||'📖'):''}
+        </div>
       </div>
-      <div class="kid-story-card-body">
-        <div class="kid-story-card-title">${s.title}</div>
-        <div class="kid-story-card-meta">por Papá/Mamá · ${s.created||''}</div>
+      <div class="own-kid-story-info">
+        <div class="own-kid-story-title">${s.title}</div>
+        <div class="own-kid-story-date">${s.created||''}</div>
       </div>
     </div>`;
   }).join('');
