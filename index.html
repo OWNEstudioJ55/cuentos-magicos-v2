@@ -251,32 +251,24 @@
     <!-- HOME TAB -->
     <div id="pTab-home">
 
-      <!-- HEADER OWN -->
-      <div class="own-header">
-        <!-- Logo chico izquierda -->
-        <img src="/logo_120x120_01.png" alt="OWN" style="width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4))">
-        <!-- Logo grande centrado -->
-        <img src="/logo.png" alt="OWN Cuentos que Conectan" style="height:52px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(201,168,76,0.35));position:absolute;left:50%;transform:translateX(-50%)">
-        <!-- Íconos derecha -->
-        <div class="own-hdr-icons">
-          <div class="own-hic" onclick="switchParentTab('library')" title="Biblioteca">
-            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          </div>
-          <div class="own-hic" id="notifBtn" onclick="showParentNotifs()" title="Notificaciones">
-            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          </div>
+      <!-- LOGO HEADER — estilo mockup -->
+      <div class="own-logo-header">
+        <div class="own-logo-bear-wrap">
+          <img src="/logo_120x120_01.png" alt="OWN" id="own-logo-img" style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(201,168,76,0.5))">
+        </div>
+        <div class="own-logo-letters">
+          <span class="logo-w" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(201,168,76,0.8))">W</span><span class="logo-n" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(135,180,212,0.8))">N</span>
         </div>
       </div>
+      <div class="own-logo-tagline">CUENTOS QUE CONECTAN</div>
 
       <!-- CARD SALUDO -->
       <div class="pad">
         <div class="own-greet-card">
-          <div class="own-gavatar" id="own-avatar-sprite" style="position:relative">
-            <div style="position:absolute;inset:-4px;border-radius:18px;background:radial-gradient(circle,rgba(201,168,76,0.3),transparent 70%);filter:blur(6px)"></div>
-          </div>
+          <div class="own-gavatar" id="own-avatar-sprite"></div>
           <div class="own-gtext">
-            <h2>¡Hola, <span id="parentName">Papá</span>! 👋</h2>
-            <p>¿Le mandás un cuento hoy a <span id="homeKidName">tu hijo</span>?</p>
+            <h2>¡Hola, <span id="parentName">Papá</span>!</h2>
+            <p>¿Qué historia crearemos hoy?</p>
           </div>
           <button class="own-gcta" onclick="switchParentTab('record')">🎙️ Crear</button>
         </div>
@@ -293,33 +285,12 @@
         </div>
       </div>
 
-      <!-- ACCIONES RÁPIDAS -->
-      <div class="own-sh"><span class="own-st">⚡ Acciones rápidas</span></div>
-      <div class="own-qgrid">
-        <div class="own-qc g" onclick="switchParentTab('record')">
-          <span class="own-qi" id="own-qc-mic"></span>
-          <span class="own-ql">Grabar<br>cuento</span>
-        </div>
-        <div class="own-qc b" onclick="switchParentTab('library')">
-          <span class="own-qi" id="own-qc-book"></span>
-          <span class="own-ql">Ver<br>biblioteca</span>
-        </div>
-        <div class="own-qc p" onclick="showPremiumScreen()">
-          <span class="own-qi">✨</span>
-          <span class="own-ql">Cuento<br>con IA</span>
-          <span class="own-qbadge">PRO</span>
-        </div>
-      </div>
-
-      <!-- SEPARADOR COSTURA -->
-      <div class="own-stitch"></div>
-
-      <!-- CUENTOS RECIENTES -->
+      <!-- TUS HISTORIAS -->
       <div class="own-sh">
-        <span class="own-st">📚 Cuentos recientes</span>
+        <span class="own-st">Tus Historias</span>
         <span class="own-sl" onclick="switchParentTab('library')">Ver todo →</span>
       </div>
-      <div id="parentHomeStories" class="own-stories-row"></div>
+      <div id="parentHomeStories" class="own-stories-grid"></div>
 
       <!-- SEPARADOR COSTURA -->
       <div class="own-stitch"></div>
@@ -605,6 +576,10 @@
     <button class="nav-btn" id="pnav-library" onclick="switchParentTab('library')">
       <span class="nav-icon own-nav-icon" id="picon-library"></span>
       <span class="own-nav-label">Ver</span>
+    </button>
+    <button class="nav-btn" id="pnav-settings" onclick="showToast('⚙️ Ajustes próximamente')">
+      <span style="font-size:24px">⚙️</span>
+      <span class="own-nav-label">Ajustes</span>
     </button>
   </div>
 </div>

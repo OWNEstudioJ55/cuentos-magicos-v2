@@ -1610,20 +1610,35 @@ async function loadParentLibrary() {
   }).join('');
 }
 
+function playStoryFromHome(id) {
+  // Va a la biblioteca y abre el cuento
+  switchParentTab('library');
+  setTimeout(()=>{ const el=document.querySelector(`[data-story-id="${id}"]`); if(el) el.scrollIntoView({behavior:'smooth'}); },300);
+}
+
 async function loadParentHomeStories() {
   const el=document.getElementById('parentHomeStories');
   if(!el) return;
   const stories=await dbGetAll('stories');
-  const userStories=stories.filter(s=>s.type==='parent'||!s.type).sort((a,b)=>b.id-a.id).slice(0,3);
-  if(!userStories.length) { el.innerHTML=`<div style="color:var(--text2);font-size:14px;padding:12px 0">Aún no hay cuentos. ¡Grabá el primero!</div>`; return; }
-  el.innerHTML=userStories.map(s=>`
-    <div class="story-card">
-      <div class="story-thumb">${s.char||'📖'}</div>
-      <div class="story-info">
-        <div class="story-title">${s.title}</div>
-        <div class="story-meta">${s.created||''}</div>
-      </div>
-    </div>`).join('');
+  const userStories=stories.filter(s=>s.type==='parent'||!s.type).sort((a,b)=>b.id-a.id);
+  if(!userStories.length) {
+    el.innerHTML=`<div style="color:rgba(255,255,255,0.4);font-size:13px;padding:12px 16px;text-align:center">Aún no hay cuentos. ¡Grabá el primero! 🎙️</div>`;
+    return;
+  }
+  el.innerHTML=userStories.map(s=>{
+    const sprite=CHAR_SPRITES[s.char];
+    const iconHtml=sprite
+      ? `<div style="width:64px;height:64px;border-radius:14px;${spriteBg(sprite,64)}"></div>`
+      : `<div style="width:64px;height:64px;border-radius:14px;background:rgba(201,168,76,0.1);display:flex;align-items:center;justify-content:center;font-size:32px">${s.char||'📖'}</div>`;
+    const fecha=s.created ? `<span class="own-story-date">${s.created}</span>` : '';
+    const unread=s.unread ? `<div class="own-story-unread"></div>` : '';
+    return `<div class="own-story-card" onclick="playStoryFromHome(${s.id})">
+      ${unread}
+      <div class="own-story-icon">${iconHtml}</div>
+      <div class="own-story-title">${s.title||'Sin título'}</div>
+      ${fecha}
+    </div>`;
+  }).join('');
 }
 
 async function editStory(id) {
