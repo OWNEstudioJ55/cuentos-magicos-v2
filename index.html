@@ -187,24 +187,28 @@
 <!-- ============================================================ -->
 <!-- LOGIN SCREEN -->
 <!-- ============================================================ -->
-<div class="screen" id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">
-      <h1><span class="logo-o">O</span><span class="logo-w">W</span><span class="logo-n">N</span></h1>
-      <p>✨ Cuentos Mágicos ✨</p>
+<div class="screen" id="loginScreen" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#0a1628;">
+  <div class="login-box" style="background:rgba(10,22,40,0.88);border:1px solid rgba(201,168,76,0.2);backdrop-filter:blur(20px)">
+
+    <!-- Logo completo -->
+    <div class="login-logo" style="margin-bottom:24px">
+      <img src="/logo.png" alt="OWN" style="width:220px;object-fit:contain;filter:drop-shadow(0 4px 20px rgba(201,168,76,0.4))">
     </div>
+
+    <!-- Tabs papá / niño -->
     <div class="login-tab-bar">
       <button class="login-tab active" id="tabParent" onclick="switchLoginTab('parent')">👨 Papá/Mamá</button>
       <button class="login-tab" id="tabKid" onclick="switchLoginTab('kid')">🧒 Niño/a</button>
     </div>
+
     <div class="input-group"><label>Contraseña</label><input type="password" id="loginPass" placeholder="Tu contraseña secreta" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar ✨</button>
     <div class="login-error" id="loginError">❌ Contraseña incorrecta</div>
     <div style="margin-top:18px;text-align:center">
-      <button onclick="document.getElementById('resetModal').classList.add('open')" style="background:none;border:none;color:var(--text2);font-family:'Nunito',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline">🔑 ¿Olvidaste la contraseña?</button>
+      <button onclick="document.getElementById('resetModal').classList.add('open')" style="background:none;border:none;color:rgba(201,168,76,0.6);font-family:'Nunito',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline">🔑 ¿Olvidaste la contraseña?</button>
     </div>
     <div style="margin-top:10px;text-align:center">
-      <button onclick="doFullReset()" style="background:none;border:none;color:var(--text3);font-family:'Nunito',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ Reconfigurar desde cero</button>
+      <button onclick="doFullReset()" style="background:none;border:none;color:rgba(255,255,255,0.25);font-family:'Nunito',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ Reconfigurar desde cero</button>
     </div>
   </div>
 </div>
