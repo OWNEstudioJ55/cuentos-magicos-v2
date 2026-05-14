@@ -231,19 +231,21 @@
 <!-- PARENT APP -->
 <!-- ============================================================ -->
 <div class="screen" id="parentApp" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#0a1628;">
-  <div class="app-header" style="background:transparent;border-bottom:none;position:relative;z-index:10">
-    <div style="width:40px"></div>
-    <div class="header-right">
-      <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
-      <button onclick="showPremiumScreen()" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
-      <button onclick="showParentNotifs()" style="position:relative;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
-        🔔<span id="parentNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
-      </button>
-      <!-- Fecha -->
+  <div class="app-header" style="background:transparent;border-bottom:none;position:relative;z-index:10;justify-content:space-between">
+    <!-- IZQUIERDA: fecha + campanita -->
+    <div style="display:flex;align-items:center;gap:8px">
       <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:3px 8px;text-align:center;min-width:36px">
         <div style="font-family:'Fredoka One',cursive;font-size:16px;color:var(--own-gold2);line-height:1" id="headerDay"></div>
         <div style="font-size:8px;font-weight:800;color:rgba(201,168,76,0.6);text-transform:uppercase;letter-spacing:1px" id="headerMonth"></div>
       </div>
+      <button onclick="showParentNotifs()" style="position:relative;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
+        🔔<span id="parentNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
+      </button>
+    </div>
+    <!-- DERECHA: monedas + premium + salir -->
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
+      <button onclick="showPremiumScreen()" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -258,16 +260,14 @@
 
       <!-- LOGO HEADER — estilo mockup -->
       <div class="own-logo-header">
-        <!-- Espaciador izquierda -->
         <div style="width:40px"></div>
-        <!-- Logo centrado: oso + WN -->
         <div style="display:flex;align-items:center;gap:4px">
-          <img src="/logo_120x120_01.png" alt="OWN" style="width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(201,168,76,0.6))">
+          <img src="/logo_120x120_01.png" alt="OWN" style="width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(201,168,76,0.6))">
           <div class="own-logo-letters">
-            <span class="logo-w" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(201,168,76,0.8))">W</span><span class="logo-n" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(135,180,212,0.8))">N</span>
+            <span class="logo-w" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(201,168,76,0.8))">W</span>
+            <span class="logo-n" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(135,180,212,0.8))">N</span>
           </div>
         </div>
-        <!-- Espaciador derecha -->
         <div style="width:40px"></div>
       </div>
       <div class="own-logo-tagline">CUENTOS QUE CONECTAN</div>
