@@ -2665,7 +2665,6 @@ function openMsgDetail(i) {
       <div id="parentQuizArea${i}" style="display:none;padding-top:10px"></div>
     </div>`;
 }
-}
 
 // Message slideshow
 function slideMsgImg(msgIdx, dir) {
