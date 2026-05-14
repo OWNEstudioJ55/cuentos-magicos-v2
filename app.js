@@ -1168,7 +1168,7 @@ function injectNavSprites() {
   const pNav = [
     ['picon-home',    'nav_home',  36],
     ['picon-record',  'nav_mic',   36],
-    ['picon-library', 'nav_book',  36],
+    ['picon-library', 'reading2',  36],
   ];
   pNav.forEach(([id, key, size]) => {
     const el = document.getElementById(id);

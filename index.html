@@ -230,9 +230,10 @@
 <!-- ============================================================ -->
 <!-- PARENT APP -->
 <!-- ============================================================ -->
-<div class="screen" id="parentApp" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;">
-  <div class="app-header" style="background:transparent;border-bottom:none">
-    <div class="header-right" style="margin-left:auto">
+<div class="screen" id="parentApp" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#0a1628;">
+  <div class="app-header" style="background:transparent;border-bottom:none;position:relative;z-index:10">
+    <div style="width:40px"></div>
+    <div class="header-right">
       <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
       <button onclick="showPremiumScreen()" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
       <button onclick="showParentNotifs()" style="position:relative;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
@@ -252,9 +253,11 @@
 
       <!-- HEADER OWN -->
       <div class="own-header">
-        <div class="own-home-logo">
-          <img src="/logo.png" alt="OWN" style="height:54px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(201,168,76,0.4))">
-        </div>
+        <!-- Logo chico izquierda -->
+        <img src="/logo_120x120_01.png" alt="OWN" style="width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(201,168,76,0.4))">
+        <!-- Logo grande centrado -->
+        <img src="/logo.png" alt="OWN Cuentos que Conectan" style="height:52px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(201,168,76,0.35));position:absolute;left:50%;transform:translateX(-50%)">
+        <!-- Íconos derecha -->
         <div class="own-hdr-icons">
           <div class="own-hic" onclick="switchParentTab('library')" title="Biblioteca">
             <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>

@@ -1138,3 +1138,11 @@ textarea{resize:vertical;min-height:80px}
 #parentApp .own-stitch{
   opacity:0.8;
 }
+
+/* ── Header home padre v3 ── */
+.own-header{
+  position:relative;
+}
+#parentApp .content{
+  background:transparent !important;
+}
