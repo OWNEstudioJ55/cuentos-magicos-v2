@@ -1,64 +1,46 @@
-// api/generar-cuento.js
-// Vercel Edge Function — OWN Cuentos Mágicos
-// Llama a Pollinations desde el servidor para evitar bloqueos CORS/timeout en móvil
-
 export const config = { runtime: 'edge' };
 
 export default async function handler(req) {
-  // CORS headers para que el front pueda llamar
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Content-Type': 'application/json',
-  };
-
-  // Preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers });
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+      }
+    });
   }
 
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Método no permitido' }), { status: 405, headers });
+    return new Response('Method not allowed', { status: 405 });
   }
 
   try {
     const body = await req.json();
-    const { prompt, charName, kidName, temas } = body;
+    const { tema, personaje, kidName, edad, prompt } = body;
 
-    if (!prompt && !temas) {
-      return new Response(JSON.stringify({ error: 'Falta el prompt' }), { status: 400, headers });
-    }
+    const fullPrompt = prompt ||
+      `Escribí un cuento corto en español para niños de ${edad||5} años. El personaje principal es ${personaje||'un dragón'}. Tema: ${tema||'aventuras'}. El protagonista se llama ${kidName||'el niño'}. Incluí el nombre en la historia. 3 párrafos cortos, lenguaje simple, final feliz. Solo el cuento, sin título.`;
 
-    // Construir el prompt para el cuento
-    const promptFinal = prompt ||
-      `Cuento infantil en español para ${kidName || 'el niño'}, personaje ${charName || 'Dragón'}, tema: ${(temas || 'aventuras y magia').substring(0, 100)}. 3 párrafos cortos, final feliz.`;
+    const url = `https://text.pollinations.ai/${encodeURIComponent(fullPrompt.substring(0, 300))}?seed=${Date.now()}&model=openai`;
 
-    // Llamar a Pollinations desde el servidor (sin restricciones CORS)
-    const pollinationsUrl = `https://text.pollinations.ai/${encodeURIComponent(promptFinal)}?seed=${Date.now()}`;
-
-    const response = await fetch(pollinationsUrl, {
-      signal: AbortSignal.timeout(12000), // 12 segundos máximo
+    const response = await fetch(url, {
+      headers: { 'User-Agent': 'OWN-Cuentos/1.0' }
     });
 
-    if (!response.ok) {
-      throw new Error(`Pollinations respondió ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`Pollinations: ${response.status}`);
 
-    const text = await response.text();
+    const cuento = await response.text();
+    if (!cuento || cuento.length < 50) throw new Error('Cuento vacío');
 
-    if (!text || text.length < 80 || text.toLowerCase().includes('error')) {
-      throw new Error('Respuesta inválida de Pollinations');
-    }
-
-    return new Response(JSON.stringify({ texto: text.trim(), ok: true }), { status: 200, headers });
+    return new Response(JSON.stringify({ cuento, ok: true }), {
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
 
   } catch (e) {
-    console.error('generar-cuento error:', e.message);
-    // Devolver error para que el front use el fallback local
-    return new Response(
-      JSON.stringify({ ok: false, error: e.message }),
-      { status: 200, headers } // 200 para que el front pueda leer el body
-    );
+    return new Response(JSON.stringify({ ok: false, error: e.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    });
   }
 }
