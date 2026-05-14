@@ -161,14 +161,14 @@ const OWN_SPRITES = {
   reading2:   { x:1310, y:506, w:261, h:229 },
   listening:  { x:1572, y:506, w:261, h:224 },
   nostalgic:  { x:1834, y:350, w:261, h:364 },
-  // FILA 3 — Nav icons padre
-  nav_home:   { x:100, y:883, w:56,  h:116 },
-  nav_mic:    { x:157, y:883, w:75,  h:116 },
-  nav_book:   { x:338, y:892, w:103, h:107 },
-  nav_audio:  { x:545, y:899, w:82,  h:100 },
-  nav_draw:   { x:628, y:899, w:156, h:100 },
-  nav_game:   { x:785, y:891, w:119, h:108 },
-  nav_mail:   { x:988, y:899, w:110, h:100 },
+  // FILA 3 — Nav icons (coordenadas exactas medidas)
+  nav_home:   { x:100,  y:883, w:132, h:138 }, // oso 3D
+  nav_mic:    { x:338,  y:892, w:103, h:117 }, // micrófono
+  nav_book:   { x:545,  y:899, w:135, h:107 }, // libro
+  nav_audio:  { x:769,  y:891, w:135, h:116 }, // ondas audio
+  nav_draw:   { x:988,  y:899, w:149, h:109 }, // mano dibujando
+  nav_game:   { x:1210, y:886, w:149, h:121 }, // joystick
+  nav_mail:   { x:1467, y:895, w:141, h:99  }, // carta
   // FILA 4 — Elementos textiles
   estrella:   { x:99,  y:1000, w:116, h:288 },
   luna:       { x:216, y:1000, w:215, h:268 },
