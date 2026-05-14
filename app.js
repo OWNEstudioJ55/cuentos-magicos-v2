@@ -1176,11 +1176,15 @@ function injectNavSprites() {
     el.style.cssText = `display:block;width:${size}px;height:${size}px;` + sprite2Bg(key, size);
   });
 
-  // Home padre — logo y micrófono
+  // Home padre — logo, avatar, acciones rápidas
   const logoEl = document.getElementById('own-logo-sprite');
-  if(logoEl) logoEl.style.cssText = `width:54px;height:54px;` + sprite2Bg('oso_nav', 54);
-  const micEl = document.getElementById('own-mic-sprite');
-  if(micEl) micEl.style.cssText = `width:52px;height:52px;` + sprite2Bg('nav_mic', 52);
+  if(logoEl) logoEl.style.cssText = `width:46px;height:46px;` + sprite2Bg('oso_nav', 46);
+  const avatarEl = document.getElementById('own-avatar-sprite');
+  if(avatarEl) avatarEl.style.cssText = `width:46px;height:46px;border-radius:11px;` + sprite2Bg('happy', 46);
+  const micQc = document.getElementById('own-qc-mic');
+  if(micQc) micQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_mic', 36);
+  const bookQc = document.getElementById('own-qc-book');
+  if(bookQc) bookQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_book', 36);
 }
 
 function previewVoiceWithChar() {

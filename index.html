@@ -251,73 +251,105 @@
     <!-- HOME TAB -->
     <div id="pTab-home">
 
-      <!-- HEADER OWN — Logo + saludo -->
-      <div class="own-home-header">
+      <!-- HEADER OWN -->
+      <div class="own-header">
         <div class="own-home-logo">
-          <div id="own-logo-sprite" style="width:54px;height:54px;flex-shrink:0"></div>
-          <div>
-            <div class="own-logo-text" style="font-size:36px;line-height:1">
+          <div id="own-logo-sprite" style="width:46px;height:46px;flex-shrink:0"></div>
+          <div class="logo-txt">
+            <div class="own-logo-text" style="font-size:30px;line-height:1;letter-spacing:-1px">
               <span class="logo-w">W</span><span class="logo-n">N</span>
             </div>
-            <div class="logo-tagline" style="font-size:9px;margin-top:0">CUENTOS QUE CONECTAN</div>
+            <div class="logo-tagline" style="font-size:8px;margin-top:1px">CUENTOS QUE CONECTAN</div>
           </div>
         </div>
-        <div class="own-home-greeting">
-          <div class="own-home-greeting-title">¡Hola, <span id="parentName">Papá</span>! 👋</div>
-          <div class="own-home-greeting-sub">¿Qué historia crearemos hoy para <span id="homeKidName">tu hijo</span>?</div>
+        <div class="own-hdr-icons">
+          <div class="own-hic" onclick="switchParentTab('library')" title="Biblioteca">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </div>
+          <div class="own-hic" id="notifBtn" title="Notificaciones">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
         </div>
       </div>
 
-      <!-- BOTÓN PRINCIPAL — Mandar cuento -->
-      <button onclick="switchParentTab('record')" class="own-main-btn">
-        <div class="own-main-btn-icon" id="own-mic-sprite"></div>
-        <div class="own-main-btn-text">
-          <div class="own-main-btn-title">Mandarle un cuento</div>
-          <div class="own-main-btn-sub">Tu voz llega directo a su corazón ✨</div>
-        </div>
-      </button>
-
-      <!-- Notificación del niño -->
-      <div id="kidActivityAlert" style="display:none;background:rgba(201,168,76,.08);border:1.5px solid rgba(201,168,76,.3);border-radius:18px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="switchParentTab('library')">
-        <span style="font-size:28px">🐻</span>
-        <div>
-          <div style="font-weight:800;font-size:14px;color:var(--own-gold2)" id="kidActivityMsg">Tu hijo abrió la app</div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.45)">Tocá para ver sus mensajes →</div>
+      <!-- CARD SALUDO -->
+      <div class="pad">
+        <div class="own-greet-card">
+          <div class="own-gavatar" id="own-avatar-sprite"></div>
+          <div class="own-gtext">
+            <h2>¡Hola, <span id="parentName">Papá</span>! 👋</h2>
+            <p>¿Le mandás un cuento hoy a <span id="homeKidName">tu hijo</span>?</p>
+          </div>
+          <button class="own-gcta" onclick="switchParentTab('record')">🎙️ Crear</button>
         </div>
       </div>
 
-      <!-- SECCIÓN: Mensajes del niño -->
-      <div class="own-section-header">
-        <div class="own-section-title">📩 Mensajes de <span id="homeKidName3">tu hijo</span></div>
-      </div>
-      <div id="parentKidMessages"></div>
-
-      <!-- SECCIÓN: Cuentos recientes -->
-      <div class="own-section-header" style="margin-top:8px">
-        <div class="own-section-title">📚 Cuentos recientes</div>
-        <button class="own-section-link" onclick="switchParentTab('library')">Ver todos →</button>
-      </div>
-      <div id="parentHomeStories"></div>
-
-      <!-- SECCIÓN: Recompensar -->
-      <div class="own-section-header" style="margin-top:8px">
-        <div class="own-section-title">⭐ Recompensar a <span id="homeKidName">tu hijo</span></div>
-      </div>
-      <div class="own-card">
-        <div class="star-gift-input">
-          <button class="star-amount-btn" onclick="adjustGiftStars(-1)">−</button>
-          <div class="star-amount-display" id="giftStarAmount">5</div>
-          <button class="star-amount-btn" onclick="adjustGiftStars(1)">+</button>
+      <!-- NOTIFICACIÓN NIÑO -->
+      <div id="kidActivityAlert" style="display:none" class="pad">
+        <div class="own-alert-card" onclick="switchParentTab('library')">
+          <span style="font-size:24px">🐻</span>
+          <div>
+            <div id="kidActivityMsg" style="font-weight:800;font-size:13px;color:var(--own-gold2)">Tu hijo abrió la app</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4)">Tocá para ver sus mensajes →</div>
+          </div>
         </div>
-        <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:10px 0;font-size:13px">
-        <button class="btn btn-gold btn-full btn-sm" onclick="giftStarsToKid()">⭐ Regalar estrellitas</button>
       </div>
 
-      <!-- Progreso -->
-      <div class="own-section-header" style="margin-top:8px">
-        <div class="own-section-title">📊 Crecimiento de <span id="homeKidName2">tu hijo</span></div>
+      <!-- ACCIONES RÁPIDAS -->
+      <div class="own-sh"><span class="own-st">⚡ Acciones rápidas</span></div>
+      <div class="own-qgrid">
+        <div class="own-qc g" onclick="switchParentTab('record')">
+          <span class="own-qi" id="own-qc-mic"></span>
+          <span class="own-ql">Grabar<br>cuento</span>
+        </div>
+        <div class="own-qc b" onclick="switchParentTab('library')">
+          <span class="own-qi" id="own-qc-book"></span>
+          <span class="own-ql">Ver<br>biblioteca</span>
+        </div>
+        <div class="own-qc p" onclick="showPremiumScreen()">
+          <span class="own-qi">✨</span>
+          <span class="own-ql">Cuento<br>con IA</span>
+          <span class="own-qbadge">PRO</span>
+        </div>
       </div>
-      <div id="parentProgressSummary"></div>
+
+      <!-- SEPARADOR COSTURA -->
+      <div class="own-stitch"></div>
+
+      <!-- CUENTOS RECIENTES -->
+      <div class="own-sh">
+        <span class="own-st">📚 Cuentos recientes</span>
+        <span class="own-sl" onclick="switchParentTab('library')">Ver todo →</span>
+      </div>
+      <div id="parentHomeStories" class="own-stories-row"></div>
+
+      <!-- SEPARADOR COSTURA -->
+      <div class="own-stitch"></div>
+
+      <!-- MENSAJES DEL NIÑO -->
+      <div class="own-sh"><span class="own-st">📩 Mensajes de <span id="homeKidName3">tu hijo</span></span></div>
+      <div id="parentKidMessages" style="padding:0 16px"></div>
+
+      <!-- SEPARADOR COSTURA -->
+      <div class="own-stitch"></div>
+
+      <!-- RECOMPENSAR -->
+      <div class="own-sh"><span class="own-st">⭐ Recompensar a <span id="homeKidName">tu hijo</span></span></div>
+      <div class="pad">
+        <div class="own-card">
+          <div class="star-gift-input">
+            <button class="star-amount-btn" onclick="adjustGiftStars(-1)">−</button>
+            <div class="star-amount-display" id="giftStarAmount">5</div>
+            <button class="star-amount-btn" onclick="adjustGiftStars(1)">+</button>
+          </div>
+          <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:10px 0;font-size:13px">
+          <button class="btn btn-gold btn-full btn-sm" onclick="giftStarsToKid()">⭐ Regalar estrellitas</button>
+        </div>
+      </div>
+
+      <!-- PROGRESO -->
+      <div class="own-sh"><span class="own-st">📊 Crecimiento de <span id="homeKidName2">tu hijo</span></span></div>
+      <div id="parentProgressSummary" style="padding:0 16px 16px"></div>
 
     </div>
 
