@@ -239,6 +239,11 @@
       <button onclick="showParentNotifs()" style="position:relative;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
         🔔<span id="parentNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
       </button>
+      <!-- Fecha -->
+      <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:3px 8px;text-align:center;min-width:36px">
+        <div style="font-family:'Fredoka One',cursive;font-size:16px;color:var(--own-gold2);line-height:1" id="headerDay"></div>
+        <div style="font-size:8px;font-weight:800;color:rgba(201,168,76,0.6);text-transform:uppercase;letter-spacing:1px" id="headerMonth"></div>
+      </div>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -253,17 +258,16 @@
 
       <!-- LOGO HEADER — estilo mockup -->
       <div class="own-logo-header">
-        <div class="own-logo-date">
-          <div class="own-logo-date-day" id="headerDay"></div>
-          <div class="own-logo-date-month" id="headerMonth"></div>
+        <!-- Espaciador izquierda -->
+        <div style="width:40px"></div>
+        <!-- Logo centrado: oso + WN -->
+        <div style="display:flex;align-items:center;gap:4px">
+          <img src="/logo_120x120_01.png" alt="OWN" style="width:58px;height:58px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(201,168,76,0.6))">
+          <div class="own-logo-letters">
+            <span class="logo-w" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(201,168,76,0.8))">W</span><span class="logo-n" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(135,180,212,0.8))">N</span>
+          </div>
         </div>
-        <div class="own-logo-bear-wrap">
-          <img src="/logo_120x120_01.png" alt="OWN" id="own-logo-img" style="width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 4px 12px rgba(201,168,76,0.5))">
-        </div>
-        <div class="own-logo-letters">
-          <span class="logo-w" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(201,168,76,0.8))">W</span><span class="logo-n" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(135,180,212,0.8))">N</span>
-        </div>
-        <!-- Espaciador derecha para centrar logo -->
+        <!-- Espaciador derecha -->
         <div style="width:40px"></div>
       </div>
       <div class="own-logo-tagline">CUENTOS QUE CONECTAN</div>
@@ -271,7 +275,7 @@
       <!-- CARD SALUDO -->
       <div class="pad">
         <div class="own-greet-card">
-          <div class="own-gavatar" id="own-avatar-sprite"></div>
+          <div class="own-gavatar" id="own-avatar-sprite" style="margin-left:8px"></div>
           <div class="own-gtext">
             <h2>¡Hola, <span id="parentName">Papá</span>!</h2>
             <p>¿Qué historia crearemos hoy?</p>
@@ -311,27 +315,27 @@
       <!-- RECOMPENSAR -->
       <div class="own-sh">
         <div style="display:flex;align-items:center;gap:8px">
-          <div id="own-estrella-sprite" style="width:32px;height:32px;flex-shrink:0"></div>
+          <div id="own-estrella-sprite" style="width:36px;height:36px;flex-shrink:0"></div>
           <span class="own-recompensa-title">Recompensas</span>
         </div>
       </div>
       <div class="pad">
         <div class="own-recompensa-card">
           <div class="own-recompensa-header">
-            <div id="own-estrella-big" style="width:48px;height:48px;flex-shrink:0"></div>
+            <div id="own-estrella-big" style="width:56px;height:56px;flex-shrink:0"></div>
             <div>
-              <div class="own-recompensa-subtitle">Recompensar a <span id="homeKidName">tu hijo</span></div>
+              <div class="own-recompensa-subtitle">Para <span id="homeKidName">tu hijo</span></div>
               <div class="own-recompensa-hint">Elegí cuántas estrellitas regalar</div>
             </div>
           </div>
-          <div class="star-gift-input" style="margin:14px 0">
-            <button class="star-amount-btn" onclick="adjustGiftStars(-1)">−</button>
-            <div class="star-amount-display" id="giftStarAmount">5</div>
-            <button class="star-amount-btn" onclick="adjustGiftStars(1)">+</button>
+          <div class="star-gift-input" style="margin:16px auto;justify-content:center;gap:20px">
+            <button class="star-amount-btn" style="width:44px;height:44px;font-size:24px" onclick="adjustGiftStars(-1)">−</button>
+            <div class="star-amount-display" id="giftStarAmount" style="font-size:42px;min-width:60px;text-align:center">5</div>
+            <button class="star-amount-btn" style="width:44px;height:44px;font-size:24px" onclick="adjustGiftStars(1)">+</button>
           </div>
-          <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:0 0 12px;font-size:13px">
+          <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:0 0 14px;font-size:13px">
           <button class="btn btn-gold btn-full btn-sm own-recompensa-btn" onclick="giftStarsToKid()">
-            <span id="own-estrella-btn" style="display:inline-block;width:20px;height:20px;vertical-align:middle;margin-right:6px"></span>
+            <span id="own-estrella-btn" style="display:inline-block;width:22px;height:22px;vertical-align:middle;margin-right:8px"></span>
             Regalar estrellitas
           </button>
         </div>

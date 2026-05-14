@@ -1185,7 +1185,7 @@ function injectNavSprites() {
   }
   const micQc = document.getElementById('own-qc-mic');
   if(micQc) micQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_mic', 36);
-  // Fecha en header
+  // Fecha en header superior
   const now = new Date();
   const dayEl = document.getElementById('headerDay');
   const monthEl = document.getElementById('headerMonth');
@@ -1194,7 +1194,7 @@ function injectNavSprites() {
 
   // Sección recompensas — estrella sprite
   ['own-estrella-sprite','own-estrella-big','own-estrella-btn'].forEach((id,idx)=>{
-    const sizes=[32,48,20];
+    const sizes=[36,56,22];
     const el=document.getElementById(id);
     if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
   });
