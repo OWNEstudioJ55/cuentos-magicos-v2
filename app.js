@@ -1175,6 +1175,12 @@ function injectNavSprites() {
     if(!el) return;
     el.style.cssText = `display:block;width:${size}px;height:${size}px;` + sprite2Bg(key, size);
   });
+
+  // Home padre — logo y micrófono
+  const logoEl = document.getElementById('own-logo-sprite');
+  if(logoEl) logoEl.style.cssText = `width:54px;height:54px;` + sprite2Bg('oso_nav', 54);
+  const micEl = document.getElementById('own-mic-sprite');
+  if(micEl) micEl.style.cssText = `width:52px;height:52px;` + sprite2Bg('nav_mic', 52);
 }
 
 function previewVoiceWithChar() {

@@ -251,42 +251,59 @@
     <!-- HOME TAB -->
     <div id="pTab-home">
 
-      <!-- Saludo personalizado -->
-      <div style="text-align:center;padding:20px 0 8px">
-        <div style="font-family:'Fredoka One',cursive;font-size:26px;color:var(--text);margin-bottom:4px">
-          Hola, <span id="parentName">Papá</span> 👋
+      <!-- HEADER OWN — Logo + saludo -->
+      <div class="own-home-header">
+        <div class="own-home-logo">
+          <div id="own-logo-sprite" style="width:54px;height:54px;flex-shrink:0"></div>
+          <div>
+            <div class="own-logo-text" style="font-size:36px;line-height:1">
+              <span class="logo-w">W</span><span class="logo-n">N</span>
+            </div>
+            <div class="logo-tagline" style="font-size:9px;margin-top:0">CUENTOS QUE CONECTAN</div>
+          </div>
         </div>
-        <div style="font-size:13px;color:var(--text2)" id="homeSubtitle">¿Le mandás un cuento hoy a <span id="homeKidName">tu hijo</span>?</div>
-      </div>
-
-      <!-- BOTÓN PRINCIPAL — la acción del puente -->
-      <button onclick="switchParentTab('record')" style="width:100%;padding:24px;border-radius:24px;border:none;background:linear-gradient(135deg,var(--coral),#ff8e53);color:white;font-family:'Fredoka One',cursive;font-size:22px;cursor:pointer;box-shadow:0 8px 32px rgba(255,107,107,.4);margin-bottom:16px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:transform .15s" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-        <span style="font-size:48px">🎙️</span>
-        Mandarle un cuento
-        <span style="font-size:13px;font-weight:400;opacity:.85">Tu voz llega directo a su corazón</span>
-      </button>
-
-      <!-- Notificación del niño si existe -->
-      <div id="kidActivityAlert" style="display:none;background:rgba(6,214,160,.1);border:1.5px solid rgba(6,214,160,.3);border-radius:16px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="switchParentTab('library')">
-        <span style="font-size:28px">👶</span>
-        <div>
-          <div style="font-weight:800;font-size:14px;color:var(--mint)" id="kidActivityMsg">Tu hijo abrió la app</div>
-          <div style="font-size:12px;color:var(--text2)">Tocá para ver sus mensajes →</div>
+        <div class="own-home-greeting">
+          <div class="own-home-greeting-title">¡Hola, <span id="parentName">Papá</span>! 👋</div>
+          <div class="own-home-greeting-sub">¿Qué historia crearemos hoy para <span id="homeKidName">tu hijo</span>?</div>
         </div>
       </div>
 
-      <!-- Premium acceso rápido -->
-      <button onclick="showPremiumScreen()" style="width:100%;padding:16px;border-radius:18px;border:1.5px solid rgba(251,191,36,.3);background:rgba(251,191,36,.06);color:var(--warm);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;gap:12px;text-align:left">
-        <span style="font-size:28px">✨</span>
-        <div>
-          <div>Cuento automático con IA</div>
-          <div style="font-size:11px;font-weight:400;color:rgba(251,191,36,.6)">Generá y enviá con tu voz — Premium</div>
+      <!-- BOTÓN PRINCIPAL — Mandar cuento -->
+      <button onclick="switchParentTab('record')" class="own-main-btn">
+        <div class="own-main-btn-icon" id="own-mic-sprite"></div>
+        <div class="own-main-btn-text">
+          <div class="own-main-btn-title">Mandarle un cuento</div>
+          <div class="own-main-btn-sub">Tu voz llega directo a su corazón ✨</div>
         </div>
       </button>
 
-      <!-- Regalar estrellas -->
-      <div class="card" style="background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.2);margin-bottom:14px">
-        <div class="card-title">⭐ Recompensar a <span id="homeKidName">tu hijo</span></div>
+      <!-- Notificación del niño -->
+      <div id="kidActivityAlert" style="display:none;background:rgba(201,168,76,.08);border:1.5px solid rgba(201,168,76,.3);border-radius:18px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="switchParentTab('library')">
+        <span style="font-size:28px">🐻</span>
+        <div>
+          <div style="font-weight:800;font-size:14px;color:var(--own-gold2)" id="kidActivityMsg">Tu hijo abrió la app</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.45)">Tocá para ver sus mensajes →</div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN: Mensajes del niño -->
+      <div class="own-section-header">
+        <div class="own-section-title">📩 Mensajes de <span id="homeKidName3">tu hijo</span></div>
+      </div>
+      <div id="parentKidMessages"></div>
+
+      <!-- SECCIÓN: Cuentos recientes -->
+      <div class="own-section-header" style="margin-top:8px">
+        <div class="own-section-title">📚 Cuentos recientes</div>
+        <button class="own-section-link" onclick="switchParentTab('library')">Ver todos →</button>
+      </div>
+      <div id="parentHomeStories"></div>
+
+      <!-- SECCIÓN: Recompensar -->
+      <div class="own-section-header" style="margin-top:8px">
+        <div class="own-section-title">⭐ Recompensar a <span id="homeKidName">tu hijo</span></div>
+      </div>
+      <div class="own-card">
         <div class="star-gift-input">
           <button class="star-amount-btn" onclick="adjustGiftStars(-1)">−</button>
           <div class="star-amount-display" id="giftStarAmount">5</div>
@@ -296,17 +313,10 @@
         <button class="btn btn-gold btn-full btn-sm" onclick="giftStarsToKid()">⭐ Regalar estrellitas</button>
       </div>
 
-      <!-- Mensajes del niño -->
-      <div class="section-title">📩 Mensajes de <span id="homeKidName3">tu hijo</span></div>
-      <div id="parentKidMessages"></div>
-
-      <!-- Cuentos recientes -->
-      <div class="section-title" style="margin-top:8px">📚 Cuentos recientes</div>
-      <div id="parentHomeStories"></div>
-      <button class="btn btn-ghost btn-full" onclick="switchParentTab('library')">Ver todos →</button>
-
       <!-- Progreso -->
-      <div class="section-title" style="margin-top:8px">📊 Crecimiento de <span id="homeKidName2">tu hijo</span></div>
+      <div class="own-section-header" style="margin-top:8px">
+        <div class="own-section-title">📊 Crecimiento de <span id="homeKidName2">tu hijo</span></div>
+      </div>
       <div id="parentProgressSummary"></div>
 
     </div>
