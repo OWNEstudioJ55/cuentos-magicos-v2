@@ -241,7 +241,7 @@ function buildShortPrompt(prompt) {
   return `children storybook illustration, ${t}, cute cartoon, colorful, pixar style`;
 }
 
-async function tryLoadImage(url, timeoutMs=30000) {
+async function tryLoadImage(url, timeoutMs=8000) {
   return new Promise(resolve => {
     const img = new Image(); img.crossOrigin='anonymous';
     const t = setTimeout(()=>{img.src='';resolve(null);},timeoutMs);
@@ -254,15 +254,13 @@ async function tryLoadImage(url, timeoutMs=30000) {
 async function tryPollinations(prompt, seed) {
   const s = seed || Math.floor(Math.random()*999999);
   const enc = encodeURIComponent(buildShortPrompt(prompt).substring(0,200));
-  for (const model of ['flux','turbo']) {
-    try {
-      const url = `https://image.pollinations.ai/prompt/${enc}?width=512&height=512&seed=${s}&nologo=true&model=${model}&enhance=true`;
-      const r = await tryLoadImage(url, 45000);
-      if (r) return r;
-    } catch(e) {}
-    await new Promise(r=>setTimeout(r,1500));
-  }
-  return null;
+  // Solo intentamos 'turbo' — más rápido, timeout corto
+  try {
+    const url = `https://image.pollinations.ai/prompt/${enc}?width=512&height=512&seed=${s}&nologo=true&model=turbo`;
+    const r = await tryLoadImage(url, 8000);
+    if (r) return r;
+  } catch(e) {}
+  return null; // Fallback inmediato
 }
 
 async function generateImageAI(prompt) {
