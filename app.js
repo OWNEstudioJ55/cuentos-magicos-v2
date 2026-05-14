@@ -143,6 +143,62 @@ async function supaGetAudioUrl(filename) {
 const SPRITE_URL = '/sprites.png';
 const IMG_W = 1800; const IMG_H = 800;
 
+// ── NUEVO SPRITE SHEET OWN v2 ─────────────────────────────────
+const SPRITE2_URL = '/sprites2_OWN.png';
+const S2_W = 2400; const S2_H = 1600;
+
+const OWN_SPRITES = {
+  // FILA 1 — Logos
+  logo_main:  { x:104, y:133, w:415, h:214 },
+  logo_small: { x:520, y:160, w:259, h:180 },
+  oso_nav:    { x:780, y:150, w:219, h:131 },
+  // FILA 2 — Caras del oso
+  happy:      { x:87,   y:513, w:174, h:203 },
+  sleepy:     { x:262,  y:502, w:261, h:209 },
+  dreaming:   { x:524,  y:519, w:261, h:181 },
+  hugging:    { x:786,  y:521, w:261, h:181 },
+  reading:    { x:1048, y:518, w:261, h:198 },
+  reading2:   { x:1310, y:506, w:261, h:229 },
+  listening:  { x:1572, y:506, w:261, h:224 },
+  nostalgic:  { x:1834, y:350, w:261, h:364 },
+  // FILA 3 — Nav icons padre
+  nav_home:   { x:100, y:883, w:56,  h:116 },
+  nav_mic:    { x:157, y:883, w:75,  h:116 },
+  nav_book:   { x:338, y:892, w:103, h:107 },
+  nav_audio:  { x:545, y:899, w:82,  h:100 },
+  nav_draw:   { x:628, y:899, w:156, h:100 },
+  nav_game:   { x:785, y:891, w:119, h:108 },
+  nav_mail:   { x:988, y:899, w:110, h:100 },
+  // FILA 4 — Elementos textiles
+  estrella:   { x:99,  y:1000, w:116, h:288 },
+  luna:       { x:216, y:1000, w:215, h:268 },
+  boton_tex:  { x:432, y:1000, w:215, h:258 },
+  nube:       { x:648, y:1000, w:215, h:252 },
+  corazon:    { x:864, y:1000, w:215, h:248 },
+  hilo:       { x:1080,y:1000, w:215, h:289 },
+};
+
+function sprite2Div(key, sizePx, extraStyle='') {
+  const sp = OWN_SPRITES[key]; if (!sp) return '';
+  const scale = sizePx / Math.max(sp.w, sp.h);
+  const bgW = Math.round(S2_W * scale);
+  const bgH = Math.round(S2_H * scale);
+  const bx  = -Math.round(sp.x * scale);
+  const by  = -Math.round(sp.y * scale);
+  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${SPRITE2_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;flex-shrink:0;${extraStyle}"></div>`;
+}
+
+function sprite2Bg(key, sizePx) {
+  const sp = OWN_SPRITES[key]; if (!sp) return '';
+  const scale = sizePx / Math.max(sp.w, sp.h);
+  const bgW = Math.round(S2_W * scale);
+  const bgH = Math.round(S2_H * scale);
+  const bx  = -Math.round(sp.x * scale);
+  const by  = -Math.round(sp.y * scale);
+  return `background:url('${SPRITE2_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
+}
+// ─────────────────────────────────────────────────────────────
+
 const CHAR_SPRITES = {
   'dragon':    { x:59,   y:41, w:168, h:210 },
   'hada':      { x:286,  y:41, w:185, h:210 },
