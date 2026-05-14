@@ -1285,3 +1285,39 @@ textarea{resize:vertical;min-height:80px}
 .own-msg-download.locked {
   opacity:0.5;
 }
+
+/* ── Sección Recompensas OWN ── */
+.own-recompensa-title {
+  font-family:'Fredoka One',cursive;
+  font-size:22px;letter-spacing:-0.5px;
+  background:linear-gradient(135deg,#e8c97a,#c9a84c);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 8px rgba(201,168,76,0.4));
+}
+.own-recompensa-card {
+  background:rgba(13,27,62,0.85);
+  border:1.5px solid rgba(201,168,76,0.25);
+  border-radius:20px;padding:18px;
+  backdrop-filter:blur(16px);
+  box-shadow:0 4px 24px rgba(0,0,0,0.4),0 0 0 1px rgba(201,168,76,0.08);
+  position:relative;overflow:hidden;
+}
+.own-recompensa-card::before {
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(201,168,76,0.8) 30%,rgba(232,201,122,1) 50%,rgba(201,168,76,0.8) 70%,transparent);
+  animation:shimmer 3s ease-in-out infinite;
+}
+.own-recompensa-header {
+  display:flex;align-items:center;gap:12px;margin-bottom:4px;
+}
+.own-recompensa-subtitle {
+  font-family:'Fredoka One',cursive;font-size:16px;color:#fff;
+}
+.own-recompensa-hint {
+  font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;
+}
+.own-recompensa-btn {
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive !important;font-size:16px !important;
+  letter-spacing:0.3px;
+}

@@ -303,16 +303,31 @@
       <div class="own-stitch"></div>
 
       <!-- RECOMPENSAR -->
-      <div class="own-sh"><span class="own-st">⭐ Recompensar a <span id="homeKidName">tu hijo</span></span></div>
+      <div class="own-sh">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="own-estrella-sprite" style="width:32px;height:32px;flex-shrink:0"></div>
+          <span class="own-recompensa-title">Recompensas</span>
+        </div>
+      </div>
       <div class="pad">
-        <div class="own-card">
-          <div class="star-gift-input">
+        <div class="own-recompensa-card">
+          <div class="own-recompensa-header">
+            <div id="own-estrella-big" style="width:48px;height:48px;flex-shrink:0"></div>
+            <div>
+              <div class="own-recompensa-subtitle">Recompensar a <span id="homeKidName">tu hijo</span></div>
+              <div class="own-recompensa-hint">Elegí cuántas estrellitas regalar</div>
+            </div>
+          </div>
+          <div class="star-gift-input" style="margin:14px 0">
             <button class="star-amount-btn" onclick="adjustGiftStars(-1)">−</button>
             <div class="star-amount-display" id="giftStarAmount">5</div>
             <button class="star-amount-btn" onclick="adjustGiftStars(1)">+</button>
           </div>
-          <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:10px 0;font-size:13px">
-          <button class="btn btn-gold btn-full btn-sm" onclick="giftStarsToKid()">⭐ Regalar estrellitas</button>
+          <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:0 0 12px;font-size:13px">
+          <button class="btn btn-gold btn-full btn-sm own-recompensa-btn" onclick="giftStarsToKid()">
+            <span id="own-estrella-btn" style="display:inline-block;width:20px;height:20px;vertical-align:middle;margin-right:6px"></span>
+            Regalar estrellitas
+          </button>
         </div>
       </div>
 

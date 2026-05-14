@@ -1187,8 +1187,12 @@ function injectNavSprites() {
   }
   const micQc = document.getElementById('own-qc-mic');
   if(micQc) micQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_mic', 36);
-  const bookQc = document.getElementById('own-qc-book');
-  if(bookQc) bookQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_book', 36);
+  // Sección recompensas — estrella sprite
+  ['own-estrella-sprite','own-estrella-big','own-estrella-btn'].forEach((id,idx)=>{
+    const sizes=[32,48,20];
+    const el=document.getElementById(id);
+    if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
+  });
 }
 
 function previewVoiceWithChar() {
