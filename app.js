@@ -1180,7 +1180,11 @@ function injectNavSprites() {
   const logoEl = document.getElementById('own-logo-sprite');
   if(logoEl) logoEl.style.cssText = `width:46px;height:46px;` + sprite2Bg('oso_nav', 46);
   const avatarEl = document.getElementById('own-avatar-sprite');
-  if(avatarEl) avatarEl.style.cssText = `width:46px;height:46px;border-radius:11px;` + sprite2Bg('happy', 46);
+  if(avatarEl) {
+    const inner = avatarEl.querySelector('div');
+    if(inner) avatarEl.style.cssText = `width:50px;height:50px;border-radius:14px;position:relative;` + sprite2Bg('listening', 50);
+    else avatarEl.style.cssText = `width:50px;height:50px;border-radius:14px;` + sprite2Bg('listening', 50);
+  }
   const micQc = document.getElementById('own-qc-mic');
   if(micQc) micQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_mic', 36);
   const bookQc = document.getElementById('own-qc-book');

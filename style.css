@@ -1115,3 +1115,26 @@ textarea{resize:vertical;min-height:80px}
   overflow-x:auto;scrollbar-width:none;
 }
 .own-stories-row::-webkit-scrollbar{display:none}
+
+/* ── Fondo textura padre ── */
+#parentApp{
+  background-color:#0a1628 !important;
+}
+#parentApp .content{
+  background:transparent;
+}
+#parentApp .app-header{
+  background:transparent !important;
+  border-bottom:none !important;
+}
+/* Cards semi-transparentes sobre textura */
+#parentApp .own-greet-card,
+#parentApp .own-card,
+#parentApp .own-qc{
+  background:rgba(10,22,40,0.75) !important;
+  backdrop-filter:blur(16px);
+}
+/* Separador costura más visible */
+#parentApp .own-stitch{
+  opacity:0.8;
+}

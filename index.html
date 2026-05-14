@@ -230,10 +230,9 @@
 <!-- ============================================================ -->
 <!-- PARENT APP -->
 <!-- ============================================================ -->
-<div class="screen" id="parentApp">
-  <div class="app-header">
-    <h1><span class="logo-o" style="font-family:'Fredoka One',cursive">O</span><span class="logo-w" style="font-family:'Fredoka One',cursive">W</span><span class="logo-n" style="font-family:'Fredoka One',cursive">N</span></h1>
-    <div class="header-right">
+<div class="screen" id="parentApp" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;">
+  <div class="app-header" style="background:transparent;border-bottom:none">
+    <div class="header-right" style="margin-left:auto">
       <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
       <button onclick="showPremiumScreen()" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
       <button onclick="showParentNotifs()" style="position:relative;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
@@ -254,19 +253,13 @@
       <!-- HEADER OWN -->
       <div class="own-header">
         <div class="own-home-logo">
-          <div id="own-logo-sprite" style="width:46px;height:46px;flex-shrink:0"></div>
-          <div class="logo-txt">
-            <div class="own-logo-text" style="font-size:30px;line-height:1;letter-spacing:-1px">
-              <span class="logo-w">W</span><span class="logo-n">N</span>
-            </div>
-            <div class="logo-tagline" style="font-size:8px;margin-top:1px">CUENTOS QUE CONECTAN</div>
-          </div>
+          <img src="/logo.png" alt="OWN" style="height:54px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(201,168,76,0.4))">
         </div>
         <div class="own-hdr-icons">
           <div class="own-hic" onclick="switchParentTab('library')" title="Biblioteca">
             <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           </div>
-          <div class="own-hic" id="notifBtn" title="Notificaciones">
+          <div class="own-hic" id="notifBtn" onclick="showParentNotifs()" title="Notificaciones">
             <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
         </div>
@@ -275,7 +268,9 @@
       <!-- CARD SALUDO -->
       <div class="pad">
         <div class="own-greet-card">
-          <div class="own-gavatar" id="own-avatar-sprite"></div>
+          <div class="own-gavatar" id="own-avatar-sprite" style="position:relative">
+            <div style="position:absolute;inset:-4px;border-radius:18px;background:radial-gradient(circle,rgba(201,168,76,0.3),transparent 70%);filter:blur(6px)"></div>
+          </div>
           <div class="own-gtext">
             <h2>¡Hola, <span id="parentName">Papá</span>! 👋</h2>
             <p>¿Le mandás un cuento hoy a <span id="homeKidName">tu hijo</span>?</p>
