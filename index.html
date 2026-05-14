@@ -328,9 +328,12 @@
               <div class="own-recompensa-hint">Elegí cuántas estrellitas regalar</div>
             </div>
           </div>
-          <div class="star-gift-input" style="margin:16px auto;justify-content:center;gap:20px">
+          <div class="star-gift-input" style="margin:16px auto;display:flex;align-items:center;justify-content:center;gap:20px">
             <button class="star-amount-btn" style="width:44px;height:44px;font-size:24px" onclick="adjustGiftStars(-1)">−</button>
-            <div class="star-amount-display" id="giftStarAmount" style="font-size:42px;min-width:60px;text-align:center">5</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div id="own-estrella-num" style="width:36px;height:36px;flex-shrink:0"></div>
+              <div class="star-amount-display" id="giftStarAmount" style="font-size:42px;min-width:50px;text-align:center;line-height:1">5</div>
+            </div>
             <button class="star-amount-btn" style="width:44px;height:44px;font-size:24px" onclick="adjustGiftStars(1)">+</button>
           </div>
           <input type="text" id="giftStarReason" placeholder="¿Por qué? Ej: Por leer tan bien hoy" style="margin:0 0 14px;font-size:13px">

@@ -1193,8 +1193,8 @@ function injectNavSprites() {
   if(monthEl) monthEl.textContent = now.toLocaleString('es',{month:'short'});
 
   // Sección recompensas — estrella sprite
-  ['own-estrella-sprite','own-estrella-big','own-estrella-btn'].forEach((id,idx)=>{
-    const sizes=[36,56,22];
+  ['own-estrella-sprite','own-estrella-big','own-estrella-btn','own-estrella-num'].forEach((id,idx)=>{
+    const sizes=[36,56,22,36];
     const el=document.getElementById(id);
     if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
   });
@@ -2608,13 +2608,13 @@ async function loadParentKidMessages() {
   }
 
   // Header con ícono hugging sprite (oso abrazando corazón)
-  const mailBg = sprite2Bg('hugging', 36);
+  const mailBg = sprite2Bg('hugging', 44);
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px">
     ${msgs.slice(0,10).map((m,i)=>`
     <div class="own-msg-card" onclick="openMsgDetail(${i})">
       <div class="own-msg-icon">
-        <div style="width:36px;height:36px;${mailBg}"></div>
+        <div style="width:44px;height:44px;${mailBg}"></div>
       </div>
       <div class="own-msg-title">${m.title||'Mensaje'}</div>
       <div class="own-msg-date">${m.date||''}</div>
