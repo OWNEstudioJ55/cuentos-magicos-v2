@@ -3779,24 +3779,26 @@ function buildProgressFull() {
 
 // ===================== TEXT GENERATION HELPER =====================
 async function fetchPollinationsText(prompt) {
-  // Mostrar fallback inmediato
-  const fallback = getCuentoFallback(null, null, appState.kidName);
-  // Intentar via Edge Function (evita CORS/bloqueos en móvil)
+  const tema = document.getElementById('aiStoryPrompt')?.value?.trim() || prompt.substring(0,80);
+  const charEl = document.getElementById('aiStoryChar');
+  const charNames = {dragon:'Dragón',hada:'Hada',leon:'León',delfin:'Delfín',zorro:'Zorro',robot:'Robot',unicornio:'Unicornio',mago:'Mago'};
+  const personaje = charNames[charEl?.value] || 'Dragón';
+  const kidName = appState.kidName || 'el niño';
   try {
-    const shortPrompt = prompt.substring(0, 200);
     const response = await fetch('/api/generar-cuento', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: shortPrompt }),
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ tema, personaje, kidName, edad:'5', prompt: prompt.substring(0,200) })
     });
     if(response.ok) {
       const data = await response.json();
-      if(data.ok && data.texto && data.texto.length > 80) return data.texto;
+      const text = data.cuento || data.texto || '';
+      if(text && text.length > 80) return text;
     }
   } catch(e) {
-    console.warn('API generar-cuento no disponible, usando fallback');
+    console.warn('Edge Function no disponible, usando generador local');
   }
-  return fallback;
+  return getCuentoFallback(personaje, tema, kidName);
 }
 
 function getCuentoFallback(charName, tema, kidName) {
