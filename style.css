@@ -1321,3 +1321,25 @@ textarea{resize:vertical;min-height:80px}
   font-family:'Fredoka One',cursive !important;font-size:16px !important;
   letter-spacing:0.3px;
 }
+
+/* ── Fecha en header ── */
+.own-logo-date {
+  display:flex;flex-direction:column;align-items:center;
+  background:rgba(201,168,76,0.1);
+  border:1px solid rgba(201,168,76,0.2);
+  border-radius:10px;padding:4px 8px;min-width:36px;
+}
+.own-logo-date-day {
+  font-family:'Fredoka One',cursive;font-size:18px;
+  color:var(--own-gold2);line-height:1;
+}
+.own-logo-date-month {
+  font-size:8px;font-weight:800;
+  color:rgba(201,168,76,0.6);
+  text-transform:uppercase;letter-spacing:1px;
+}
+
+/* ── Ícono hugging en mensajes más grande ── */
+.own-msg-icon {
+  width:48px !important;height:48px !important;
+}

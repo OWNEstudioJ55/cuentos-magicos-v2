@@ -152,15 +152,15 @@ const OWN_SPRITES = {
   logo_main:  { x:104, y:133, w:415, h:214 },
   logo_small: { x:520, y:160, w:259, h:180 },
   oso_nav:    { x:780, y:150, w:219, h:131 },
-  // FILA 2 — Caras del oso
-  happy:      { x:87,   y:513, w:174, h:203 },
-  sleepy:     { x:262,  y:502, w:261, h:209 },
-  dreaming:   { x:524,  y:519, w:261, h:181 },
-  hugging:    { x:786,  y:521, w:261, h:181 },
-  reading:    { x:1048, y:518, w:261, h:198 },
-  reading2:   { x:1310, y:506, w:261, h:229 },
-  listening:  { x:1572, y:506, w:261, h:224 },
-  nostalgic:  { x:1834, y:350, w:261, h:364 },
+  // FILA 2 — Caras del oso (coordenadas exactas re-medidas)
+  happy:      { x:87,   y:513, w:212, h:196 },
+  sleepy:     { x:362,  y:502, w:228, h:207 },
+  dreaming:   { x:651,  y:521, w:211, h:179 },
+  hugging:    { x:944,  y:518, w:203, h:184 },
+  reading:    { x:1230, y:506, w:198, h:203 },
+  reading2:   { x:1521, y:506, w:278, h:203 },
+  listening:  { x:1820, y:524, w:279, h:185 },
+  nostalgic:  { x:2120, y:350, w:241, h:376 },
   // FILA 3 — Nav icons (coordenadas exactas medidas)
   nav_home:   { x:100,  y:883, w:132, h:138 }, // oso 3D
   nav_mic:    { x:338,  y:892, w:103, h:117 }, // micrófono
@@ -1181,12 +1181,17 @@ function injectNavSprites() {
   if(logoEl) logoEl.style.cssText = `width:46px;height:46px;` + sprite2Bg('oso_nav', 46);
   const avatarEl = document.getElementById('own-avatar-sprite');
   if(avatarEl) {
-    const inner = avatarEl.querySelector('div');
-    if(inner) avatarEl.style.cssText = `width:50px;height:50px;border-radius:14px;position:relative;` + sprite2Bg('listening', 50);
-    else avatarEl.style.cssText = `width:50px;height:50px;border-radius:14px;` + sprite2Bg('listening', 50);
+    avatarEl.style.cssText = `width:50px;height:50px;border-radius:14px;flex-shrink:0;` + sprite2Bg('listening', 50);
   }
   const micQc = document.getElementById('own-qc-mic');
   if(micQc) micQc.style.cssText = `display:block;width:36px;height:36px;` + sprite2Bg('nav_mic', 36);
+  // Fecha en header
+  const now = new Date();
+  const dayEl = document.getElementById('headerDay');
+  const monthEl = document.getElementById('headerMonth');
+  if(dayEl) dayEl.textContent = now.getDate();
+  if(monthEl) monthEl.textContent = now.toLocaleString('es',{month:'short'});
+
   // Sección recompensas — estrella sprite
   ['own-estrella-sprite','own-estrella-big','own-estrella-btn'].forEach((id,idx)=>{
     const sizes=[32,48,20];
@@ -2602,8 +2607,8 @@ async function loadParentKidMessages() {
     return;
   }
 
-  // Header con ícono mail sprite
-  const mailBg = sprite2Bg('nav_mail', 32);
+  // Header con ícono hugging sprite (oso abrazando corazón)
+  const mailBg = sprite2Bg('hugging', 36);
   el.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px">
     ${msgs.slice(0,10).map((m,i)=>`
