@@ -168,7 +168,7 @@ const OWN_SPRITES = {
   nav_audio:  { x:769,  y:891, w:135, h:116 }, // ondas audio
   nav_draw:   { x:988,  y:899, w:149, h:109 }, // mano dibujando
   nav_game:   { x:1210, y:886, w:149, h:121 }, // joystick
-  nav_mail:   { x:1467, y:895, w:141, h:99  }, // carta
+  nav_mail:   { x:1467, y:895, w:141, h:99  }, // carta/email
   // FILA 4 — Elementos textiles
   estrella:   { x:99,  y:1000, w:116, h:288 },
   luna:       { x:216, y:1000, w:215, h:268 },
@@ -2591,63 +2591,76 @@ async function loadParentKidMessages() {
 
   const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
   if(!msgs.length) {
-    el.innerHTML=`<div style="color:var(--text2);font-size:13px;padding:8px 0;text-align:center">
+    el.innerHTML=`<div style="color:rgba(255,255,255,0.4);font-size:13px;padding:8px 16px;text-align:center">
       <div style="font-size:32px;margin-bottom:6px">📭</div>
       Aún no hay mensajes de ${appState.kidName}.
     </div>`;
     return;
   }
 
-  el.innerHTML = msgs.slice(0,10).map((m,i)=>`
-    <div class="msg-card">
-      <div class="msg-header">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="font-size:22px">${m.isDrawing?'🎨':m.isVoice?'🎙️':'✍️'}</div>
-          <div>
-            <div class="msg-title">${m.title}</div>
-            <div class="msg-date">${m.date}${m.voiceLabel?' · Voz: '+m.voiceLabel:''}</div>
-          </div>
-        </div>
-        ${m.text?`<div style="font-size:13px;line-height:1.6;margin-top:8px;color:var(--text)">${m.text.substring(0,150)}${m.text.length>150?'...':''}</div>`:''}
+  // Header con ícono mail sprite
+  const mailBg = sprite2Bg('nav_mail', 32);
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px">
+    ${msgs.slice(0,10).map((m,i)=>`
+    <div class="own-msg-card" onclick="openMsgDetail(${i})">
+      <div class="own-msg-icon">
+        <div style="width:36px;height:36px;${mailBg}"></div>
       </div>
-      ${m.images&&m.images.length?`
-      <div style="position:relative;width:100%;background:#000" id="msgSlideWrap${i}">
-        <div style="position:relative;width:100%;aspect-ratio:1;overflow:hidden" id="msgSlide${i}">
-          ${m.images.map((u,j)=>`<img src="${u}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:${j===0?'block':'none'}" id="msgImg${i}_${j}">`).join('')}
-          ${m.images.length>1?`
-          <button onclick="slideMsgImg(${i},-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:white;font-size:20px;cursor:pointer;z-index:2">‹</button>
-          <button onclick="slideMsgImg(${i},1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.55);border:none;color:white;font-size:20px;cursor:pointer;z-index:2">›</button>
-          <div style="position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:5px;z-index:2">
-            ${m.images.map((_,j)=>`<div id="msgDot${i}_${j}" style="width:7px;height:7px;border-radius:50%;background:${j===0?'white':'rgba(255,255,255,0.4)'}"></div>`).join('')}
-          </div>`:''}
-        </div>
-      </div>`:''}
-      ${m.audioKey||m.audioFile?`
-      <div class="msg-player">
-        <div style="font-size:12px;font-weight:800;color:var(--accent3);margin-bottom:10px">🎧 Audio de ${appState.kidName}:</div>
-        <div style="background:rgba(52,211,153,.1);border-radius:14px;padding:12px;border:1px solid rgba(52,211,153,.2)">
-          <div style="display:flex;align-items:center;gap:10px">
-            <button id="msgPlayBtn${i}" class="msg-play-btn" onclick="toggleMsgAudio(${i},'${m.audioKey||''}','${m.audioFile||''}')">▶</button>
-            <div style="flex:1">
-              <div class="msg-progress-bar" onclick="seekMsgAudio(${i},event)">
-                <div id="msgProgress${i}" class="msg-progress-fill"></div>
-              </div>
-              <div style="font-size:11px;color:var(--text2)" id="msgTime${i}">0:00</div>
-            </div>
-          </div>
-        </div>
-      </div>`:`<div style="padding:10px 14px;font-size:12px;color:var(--text2)">Sin audio</div>`}
-      <div class="msg-actions">
-        ${isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey||m.id}','${m.title}')">📥 Descargar</button>`:''}
-        ${!isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-ghost btn-sm" onclick="showPremiumScreen()" style="opacity:0.6">🔒 Descargar (Premium)</button>`:''}
-        <button class="btn btn-green btn-sm" onclick="openParentQuizForMessage(${i})" style="margin-left:auto">🧠 Quiz</button>
-      </div>
-      <div id="parentQuizArea${i}" style="display:none;padding:0 14px 14px"></div>
-    </div>`).join('');
+      <div class="own-msg-title">${m.title||'Mensaje'}</div>
+      <div class="own-msg-date">${m.date||''}</div>
+      <div class="own-msg-type">${m.isDrawing?'🎨 Dibujo':m.isVoice?'🎙️ Audio':'✍️ Texto'}</div>
+      ${(m.audioKey||m.audioFile)?`
+        <button class="own-msg-play" onclick="event.stopPropagation();toggleMsgAudio(${i},'${m.audioKey||''}','${m.audioFile||''}')" id="msgPlayBtn${i}">▶</button>
+        ${isPremium()
+          ? `<button class="own-msg-download" onclick="event.stopPropagation();downloadMsgAudio('${m.audioKey||m.id}','${m.title}')">📥</button>`
+          : `<button class="own-msg-download locked" onclick="event.stopPropagation();showPremiumScreen()">🔒</button>`
+        }`:''}
+    </div>`).join('')}
+    </div>
+    <div id="msgDetailArea" style="padding:0 16px"></div>
+  `;
 
   window._msgSlideIdx = window._msgSlideIdx || {};
   window._msgAudios  = window._msgAudios  || {};
   msgs.slice(0,10).forEach((_,i)=>{ window._msgSlideIdx[i]=0; });
+}
+
+function openMsgDetail(i) {
+  const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
+  const m = msgs[i]; if(!m) return;
+  const area = document.getElementById('msgDetailArea');
+  if(!area) return;
+  // Toggle — si ya está abierto el mismo, cerrar
+  if(area.dataset.open === String(i)) { area.innerHTML=''; area.dataset.open=''; return; }
+  area.dataset.open = String(i);
+  area.innerHTML = `
+    <div class="own-card" style="margin-bottom:12px">
+      <div style="font-weight:800;font-size:15px;color:#fff;margin-bottom:6px">${m.title||'Mensaje'}</div>
+      ${m.text?`<div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:10px">${m.text}</div>`:''}
+      ${m.images&&m.images.length?`
+        <div style="position:relative;width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;margin-bottom:10px" id="msgSlide${i}">
+          ${m.images.map((u,j)=>`<img src="${u}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:${j===0?'block':'none'}" id="msgImg${i}_${j}">`).join('')}
+          ${m.images.length>1?`
+          <button onclick="slideMsgImg(${i},-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:white;font-size:20px;cursor:pointer">‹</button>
+          <button onclick="slideMsgImg(${i},1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:white;font-size:20px;cursor:pointer">›</button>`:''}
+        </div>`:''}
+      ${m.audioKey||m.audioFile?`
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border-radius:12px;padding:10px">
+          <button id="msgPlayBtn${i}" class="msg-play-btn" onclick="toggleMsgAudio(${i},'${m.audioKey||''}','${m.audioFile||''}')">▶</button>
+          <div style="flex:1">
+            <div class="msg-progress-bar" onclick="seekMsgAudio(${i},event)"><div id="msgProgress${i}" class="msg-progress-fill"></div></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4)" id="msgTime${i}">0:00</div>
+          </div>
+        </div>
+        <div class="msg-actions" style="margin-top:10px">
+          ${isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey||m.id}','${m.title}')">📥 Descargar</button>`:''}
+          ${!isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-ghost btn-sm" onclick="showPremiumScreen()" style="opacity:0.6">🔒 Descargar (Premium)</button>`:''}
+          <button class="btn btn-green btn-sm" onclick="openParentQuizForMessage(${i})" style="margin-left:auto">🧠 Quiz</button>
+        </div>`:`<div style="font-size:12px;color:rgba(255,255,255,0.35)">Sin audio</div>`}
+      <div id="parentQuizArea${i}" style="display:none;padding-top:10px"></div>
+    </div>`;
+}
 }
 
 // Message slideshow
