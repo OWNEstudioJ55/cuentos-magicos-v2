@@ -1164,19 +1164,17 @@ function _doSwitchParentTab(tab) {
 }
 
 function injectNavSprites() {
-  // Parent nav — 3 tabs
+  // Parent nav — nuevos sprites OWN
   const pNav = [
-    ['picon-home',    ICON_SPRITES.home,   28],
-    ['picon-record',  ICON_SPRITES.mic,    28],
-    ['picon-library', ICON_SPRITES.books,  28],
+    ['picon-home',    'nav_home',  36],
+    ['picon-record',  'nav_mic',   36],
+    ['picon-library', 'nav_book',  36],
   ];
-  pNav.forEach(([id, sprite, size]) => {
+  pNav.forEach(([id, key, size]) => {
     const el = document.getElementById(id);
-    if(!el || !sprite) return;
-    el.style.cssText = `display:block;width:${size}px;height:${size}px;` + spriteBg(sprite, size);
+    if(!el) return;
+    el.style.cssText = `display:block;width:${size}px;height:${size}px;` + sprite2Bg(key, size);
   });
-  // Kid nav uses emoji — no sprites needed
-  // Record buttons use emoji 🎙️
 }
 
 function previewVoiceWithChar() {
