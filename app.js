@@ -621,9 +621,73 @@ const CLASSIC_STORIES = [
       {q:'¿Por qué los niños no pudieron volver con las migajas de pan?', opts:['Se les mojaron','Los pájaros se las comieron','El viento las llevó','Se perdieron igual'], correct:1},
     ]
   },
+  {
+    id:'blancanieves', title:'Blancanieves', emoji:'🍎',
+    color:'#ec4899', text:`Había una vez una princesa de piel blanca como la nieve, labios rojos como la sangre y cabello negro como el ébano. Se llamaba Blancanieves. Su madrastra, la malvada reina, tenía un espejo mágico. "Espejito, espejito, ¿quién es la más bella?" El espejo siempre decía: "Blancanieves". La reina ordenó a un cazador llevar a Blancanieves al bosque y matarla. Pero el cazador tuvo piedad y la dejó escapar. Blancanieves encontró una casita donde vivían siete enanitos: Dormilón, Gruñón, Tímido, Feliz, Estornudo, Chistoso y Sabio. Los enanitos la acogieron con amor. La reina se enteró y le llevó una manzana envenenada. Blancanieves la mordió y cayó dormida. Los enanitos la pusieron en un ataúd de cristal. Un príncipe la encontró, se enamoró y al darle un beso, Blancanieves despertó. Vivieron felices para siempre.`,
+    images:['https://picsum.photos/seed/snow1/512/512','https://picsum.photos/seed/dwarf1/512/512','https://picsum.photos/seed/apple1/512/512','https://picsum.photos/seed/prince1/512/512'],
+    quiz:[
+      {q:'¿Cómo se llamaba la princesa?', opts:['Cenicienta','Blancanieves','Aurora','Rapunzel'], correct:1},
+      {q:'¿Cuántos enanitos había?', opts:['Cinco','Seis','Siete','Ocho'], correct:2},
+      {q:'¿Qué le dio la reina malvada a Blancanieves?', opts:['Una flor','Una manzana envenenada','Un pastel','Un vestido'], correct:1},
+      {q:'¿Quién despertó a Blancanieves?', opts:['Un enanito','Su mamá','Un príncipe','Un hada'], correct:2},
+    ]
+  },
+  {
+    id:'gatoconbotas', title:'El Gato con Botas', emoji:'👢',
+    color:'#f59e0b', text:`Había un molinero que al morir dejó a sus tres hijos como herencia el molino, el burro y el gato. Al hijo menor solo le tocó el gato. Pero el gato era muy especial y muy astuto. "Dame unas botas y una bolsa, y te haré rico", le dijo a su amo. El gato comenzó a cazar liebres y perdices y a llevarlas al rey como regalo "del Marqués de Carabás". El rey quedó muy impresionado. Un día, mientras el rey paseaba con su hija en carruaje, el gato hizo que su amo se bañara en el río. "¡Socorro! ¡El Marqués de Carabás se ahoga!" gritó el gato. El rey le dio ropa elegante a su amo. El gato también convenció a todos los campesinos de decir que las tierras eran del Marqués. Finalmente, el gato engañó a un ogro que se convirtió en ratón, ¡y el gato se lo comió! El castillo quedó para su amo, quien se casó con la princesa y vivieron felices.`,
+    images:['https://picsum.photos/seed/cat1/512/512','https://picsum.photos/seed/castle2/512/512','https://picsum.photos/seed/king1/512/512','https://picsum.photos/seed/boots1/512/512'],
+    quiz:[
+      {q:'¿Qué pidió el gato a su amo?', opts:['Comida y agua','Botas y una bolsa','Un sombrero','Un castillo'], correct:1},
+      {q:'¿Qué nombre inventó el gato para su amo?', opts:['Príncipe Encantado','Duque de Alba','Marqués de Carabás','Conde de Monte'], correct:2},
+      {q:'¿En qué se convirtió el ogro?', opts:['En sapo','En ratón','En serpiente','En pájaro'], correct:1},
+      {q:'¿Con quién se casó el hijo del molinero?', opts:['Con una campesina','Con la princesa','Con una hada','Con la hija del ogro'], correct:1},
+    ]
+  },
+  {
+    id:'zorrayuvas', title:'La Zorra y las Uvas', emoji:'🦊',
+    color:'#84cc16', text:`Una zorra caminaba por el bosque cuando vio un hermoso racimo de uvas colgando de una vid muy alta. Las uvas eran grandes, brillantes y de color morado. "¡Qué deliciosas se ven!" pensó la zorra, relamiéndose. Dio un salto para alcanzarlas, pero no llegó. Intentó de nuevo, y otra vez. Saltó muchas veces, pero las uvas estaban demasiado alto. Cansada y frustrada, la zorra se alejó con la cabeza bien en alto. "Seguramente esas uvas están verdes y agrias", dijo mirando hacia atrás. "No las quiero, no me gustan las uvas verdes". Y así la zorra se fue, inventando una excusa para no sentirse mal por no haber podido alcanzarlas. Esta historia nos enseña que a veces, cuando no podemos obtener algo, decimos que no lo queríamos para sentirnos mejor.`,
+    images:['https://picsum.photos/seed/fox1/512/512','https://picsum.photos/seed/grapes1/512/512','https://picsum.photos/seed/forest4/512/512','https://picsum.photos/seed/vine1/512/512'],
+    quiz:[
+      {q:'¿Qué quería alcanzar la zorra?', opts:['Manzanas','Peras','Uvas','Cerezas'], correct:2},
+      {q:'¿Por qué no pudo alcanzarlas?', opts:['Eran muy pesadas','Estaban muy altas','Había un perro guardián','Tenía miedo'], correct:1},
+      {q:'¿Qué dijo la zorra al final?', opts:['Que eran muy caras','Que estarían verdes y agrias','Que no le gustaban las frutas','Que volvería mañana'], correct:1},
+      {q:'¿Qué nos enseña esta historia?', opts:['Que hay que saltar más alto','Que las uvas son agrias','Que a veces nos engañamos a nosotros mismos','Que la zorra es tonta'], correct:2},
+    ]
+  },
+  {
+    id:'musicosbremen', title:'Los Músicos de Bremen', emoji:'🎵',
+    color:'#06b6d4', text:`Un burro viejo fue abandonado por su amo. En el camino encontró a un perro, un gato y un gallo que también habían sido abandonados. Decidieron ir juntos a Bremen para ser músicos. Al anochecer vieron una casita iluminada. Mirando por la ventana vieron a unos ladrones comiendo. Con un plan ingenioso, el burro se paró en sus patas traseras, el perro saltó sobre él, el gato trepó sobre el perro, y el gallo voló hasta arriba. ¡Luego hicieron todos ruido a la vez! El burro rebuzó, el perro ladró, el gato maulló y el gallo cantó. Los ladrones, aterrados, huyeron creyendo que era un monstruo. Los cuatro amigos se quedaron a vivir en la casa, disfrutando de la comida. Nunca llegaron a Bremen, ¡pero encontraron algo mejor: un hogar y una familia!`,
+    images:['https://picsum.photos/seed/donkey1/512/512','https://picsum.photos/seed/rooster1/512/512','https://picsum.photos/seed/cottage1/512/512','https://picsum.photos/seed/music1/512/512'],
+    quiz:[
+      {q:'¿A qué ciudad querían ir los animales?', opts:['Berlín','París','Bremen','Madrid'], correct:2},
+      {q:'¿Qué animales formaban el grupo?', opts:['Burro, perro, gato y gallo','Burro, vaca, oveja y gallo','Caballo, perro, gato y loro','Burro, perro, lobo y gallo'], correct:0},
+      {q:'¿Qué había en la casita?', opts:['Una familia','Unos ladrones','Un dragón','Una bruja'], correct:1},
+      {q:'¿Qué hicieron para asustar a los ladrones?', opts:['Los atacaron','Hicieron ruido todos juntos','Llamaron a la policía','Prendieron fuego'], correct:1},
+    ]
+  },
+  {
+    id:'liebretortuga', title:'La Liebre y la Tortuga', emoji:'🐢',
+    color:'#10b981', text:`Érase una vez una liebre muy veloz que siempre se burlaba de la tortuga por caminar tan despacio. "¡Eres lentísima! ¡Nunca llegarás a ningún lado!" se reía la liebre. La tortuga, cansada de las burlas, la desafió a una carrera. Todos los animales del bosque fueron a ver la carrera. Cuando el árbitro dio la señal, la liebre salió disparada y en un instante dejó a la tortuga muy atrás. Tan confiada estaba que decidió echarse una siesta bajo un árbol. "¿Para qué apurarme? La tortuga tarda tanto que tengo tiempo de sobra", pensó. Pero la tortuga siguió caminando sin parar, paso a paso, constante y determinada. Cuando la liebre despertó, la tortuga ya estaba llegando a la meta. La liebre corrió lo más rápido que pudo, ¡pero era demasiado tarde! La tortuga ganó la carrera. Todos celebraron. La moraleja: la constancia y el esfuerzo superan al talento descuidado.`,
+    images:['https://picsum.photos/seed/turtle1/512/512','https://picsum.photos/seed/hare1/512/512','https://picsum.photos/seed/race1/512/512','https://picsum.photos/seed/forest5/512/512'],
+    quiz:[
+      {q:'¿Por qué la liebre perdió la carrera?', opts:['Era muy lenta','Se perdió en el bosque','Se durmió durante la carrera','Se lastimó una pata'], correct:2},
+      {q:'¿Quién desafió a quién?', opts:['La liebre desafió a la tortuga','La tortuga desafió a la liebre','Un árbitro los hizo correr','El rey organizó la carrera'], correct:1},
+      {q:'¿Qué hizo la tortuga durante toda la carrera?', opts:['Corrió muy rápido al final','Caminó sin parar constantemente','Pidió ayuda a otros animales','Tomó un camino más corto'], correct:1},
+      {q:'¿Cuál es la moraleja de la historia?', opts:['Los lentos siempre ganan','La constancia supera al talento descuidado','Las liebres son malas','Las tortugas son más inteligentes'], correct:1},
+    ]
+  },
+  {
+    id:'patitofeo', title:'El Patito Feo', emoji:'🦢',
+    color:'#6366f1', text:`En una granja, una mamá pata empollaba sus huevos con mucha paciencia. Uno a uno fueron naciendo los patitos, amarillos y adorables. Pero el último huevo era más grande y cuando eclosionó, salió un patito gris, grande y torpe. "¡Qué feo es!" decían todos. Los otros animales se burlaban de él y lo picoteaban. Hasta sus propios hermanos lo rechazaban. El pobre patito se fue de la granja muy triste. Durante el otoño e invierno vivió solo, pasando frío y hambre. Pero llegó la primavera, y el patito vio en el lago a unos hermosos cisnes blancos. Bajó la cabeza con vergüenza, esperando ser rechazado. Pero cuando vio su reflejo en el agua, ¡no vio un patito feo sino un hermoso cisne blanco! Los otros cisnes lo recibieron con alegría. El patito feo se había convertido en el cisne más bello. Nunca más volvió a sentirse solo.`,
+    images:['https://picsum.photos/seed/duck1/512/512','https://picsum.photos/seed/swan1/512/512','https://picsum.photos/seed/lake1/512/512','https://picsum.photos/seed/farm1/512/512'],
+    quiz:[
+      {q:'¿Por qué el patito era diferente?', opts:['Era más pequeño','Era gris y grande','Era muy ruidoso','Era de otro color amarillo'], correct:1},
+      {q:'¿Qué descubrió el patito al mirarse en el lago?', opts:['Que era un pato común','Que era un hermoso cisne','Que había crecido mucho','Que tenía plumas blancas'], correct:1},
+      {q:'¿Cómo lo trataban los otros animales?', opts:['Con mucho amor','Con indiferencia','Con burlas y rechazo','Con respeto'], correct:2},
+      {q:'¿Qué nos enseña esta historia?', opts:['Que los patos son mejores que los cisnes','Que la belleza interior es lo que importa','Que hay que escapar de casa','Que el invierno es peligroso'], correct:1},
+    ]
+  },
 ];
-
-// ===================== ACHIEVEMENTS =====================
 const ACHIEVEMENTS = [
   {id:'first_story', icon:'📖', name:'Primer cuento', desc:'Escuchaste tu primer cuento', req: s => s.storiesListened >= 1},
   {id:'star_5', icon:'⭐', name:'5 Estrellitas', desc:'¡Acumulaste 5 estrellitas!', req: s => s.stars >= 5},
@@ -704,6 +768,9 @@ async function init() {
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  // Mostrar nav del niño solo en kidApp
+  const kidNav = document.getElementById('kidNavBar');
+  if(kidNav) kidNav.style.display = id === 'kidApp' ? 'flex' : 'none';
 }
 
 // ===================== GOOGLE LOGIN =====================
@@ -3397,32 +3464,23 @@ async function loadKidHomeStories() {
   if(noHero) noHero.style.display='none';
 
   const lastSeen = parseInt(localStorage.getItem('ownKidLastSeenStories')||'0');
-  const cardKeys  = ['card_celeste','card_coral','card_verde','card_lila'];
-  const brdColors = ['#7BBFE8','#F4A261','#52C77F','#A78BFA'];
+  const cardColors = ['card_celeste','card_coral','card_verde','card_lila'];
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map((s,idx)=>{
     const img=s.images&&s.images[0];
     const sprite=CHAR_SPRITES[s.char];
     const thumbBg=sprite?spriteBg(sprite,80):'';
     const isNew = s.supaSync && new Date(s.created||0).getTime() > lastSeen;
-    const brd = brdColors[idx%4];
-    const cardKey = cardKeys[idx%4];
-    const sp = KID_SPRITES[cardKey];
-    const scale = 150 / Math.max(sp.w, sp.h);
-    const bgW = Math.round(KS_W * scale);
-    const bgH = Math.round(KS_H * scale);
-    const bx  = -Math.round(sp.x * scale);
-    const by  = -Math.round(sp.y * scale);
-    return `<div onclick="openKidStory('${s.id}')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;border:2.5px solid ${brd};box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;position:relative;background:white">
-      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:#F4A261;color:white;font-size:9px;font-weight:800;border-radius:12px;padding:2px 7px;z-index:3;font-family:'Nunito',sans-serif">¡NUEVO!</div>`:''}
-      <div style="position:relative;width:150px;height:150px;overflow:hidden">
-        <img src="${KID_SPRITE_URL}" style="position:absolute;width:${bgW}px;height:${bgH}px;left:${bx}px;top:${by}px;max-width:none;pointer-events:none">
-        ${img?`<img src="${img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:
-        !img&&sprite?`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:80px;height:80px;${thumbBg}"></div></div>`:
-        `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px">${s.char||'📖'}</div>`}
+    const bgColors=['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF'];
+    const bgColor = bgColors[idx%4];
+    return `<div class="own-kid-story-card" onclick="openKidStory('${s.id}')" style="background:${bgColor}">
+      ${isNew?`<div class="own-kid-new-badge">¡NUEVO!</div>`:''}
+      <div class="own-kid-story-thumb">
+        ${img ? `<img src="${img}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;border-radius:14px 14px 0 0">` : ''}
+        ${!img?`<div style="${thumbBg}${!sprite?'font-size:42px;display:flex;align-items:center;justify-content:center;width:100%;height:100%':'width:80px;height:80px;margin:auto'}">${!sprite?(s.char||'📖'):''}</div>`:''}
       </div>
-      <div style="padding:8px 10px 10px;background:rgba(255,255,255,0.9)">
-        <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033;line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title||'Sin título'}</div>
-        <div style="font-size:9px;color:#9B7B6B;font-weight:600">${s.created||''}</div>
+      <div class="own-kid-story-info">
+        <div class="own-kid-story-title">${s.title}</div>
+        <div class="own-kid-story-date">${s.created||''}</div>
       </div>
     </div>`;
   }).join('');
@@ -3457,14 +3515,36 @@ function loadKidAudioFromBlob(blob) {
 function buildClassicStories() {
   const el=document.getElementById('kidClassicStories');
   if(!el) return;
-  el.innerHTML=CLASSIC_STORIES.map(s=>`
-    <div class="kid-story-card" onclick="openClassicStory('${s.id}')" style="background:linear-gradient(135deg,${s.color}22,${s.color}11);border:1px solid ${s.color}44">
-      <div class="kid-story-card-img-placeholder" style="display:flex;background:${s.color}22">${s.emoji}</div>
-      <div class="kid-story-card-body">
-        <div class="kid-story-card-title">${s.title}</div>
-        <div class="kid-story-card-meta"><span class="classic-badge">📖 Clásico</span></div>
+  const bgColors=['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF','#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF','#B8DFF0'];
+  const brdColors=['#7BBFE8','#F4A261','#52C77F','#A78BFA','#7BBFE8','#F4A261','#52C77F','#A78BFA','#7BBFE8'];
+  el.style.cssText='display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch';
+  el.innerHTML=CLASSIC_STORIES.map((s,idx)=>`
+    <div onclick="openClassicStory('${s.id}')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;border:2.5px solid ${brdColors[idx%4]};box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:${bgColors[idx%4]}">
+      <div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;background:rgba(255,255,255,0.3)">
+        ${s.emoji}
+      </div>
+      <div style="padding:8px 10px 10px;background:rgba(255,255,255,0.85)">
+        <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033;line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title}</div>
+        <div style="font-size:9px;color:#9B7B6B;font-weight:600">📖 Clásico</div>
       </div>
     </div>`).join('');
+
+  // Sección cuentos OWN
+  const ownEl = document.getElementById('kidOwnClassicStories');
+  if(ownEl) {
+    ownEl.style.cssText='display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch';
+    ownEl.innerHTML=`
+      <div style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;border:2.5px solid #C9A84C;box-shadow:0 4px 14px rgba(0,0,0,0.1);background:#FFF8E7;opacity:0.6">
+        <div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;font-size:48px;flex-direction:column;gap:4px;background:rgba(201,168,76,0.1)">
+          <span>🔒</span>
+          <span style="font-size:11px;color:#C9A84C;font-family:'Fredoka One',cursive">Próximamente</span>
+        </div>
+        <div style="padding:8px 10px 10px;background:rgba(255,255,255,0.85)">
+          <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033">Cuentos OWN</div>
+          <div style="font-size:9px;color:#9B7B6B">✨ Especiales</div>
+        </div>
+      </div>`;
+  }
 }
 
 async function openKidStory(id) {

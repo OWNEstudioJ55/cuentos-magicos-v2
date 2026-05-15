@@ -1540,3 +1540,8 @@ textarea{resize:vertical;min-height:80px}
 #kidApp .kid-bottom-nav {
   display:flex !important;
 }
+
+/* ── Nav niño SOLO visible dentro de kidApp ── */
+.kid-bottom-nav { display:none !important; }
+#kidApp .kid-bottom-nav { display:flex !important; }
+#kidApp .kid-content { padding-bottom:80px; }
