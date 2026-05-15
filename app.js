@@ -199,6 +199,60 @@ function sprite2Bg(key, sizePx) {
 }
 // ─────────────────────────────────────────────────────────────
 
+// ── SPRITE SHEET NIÑO ─────────────────────────────────────
+const KID_SPRITE_URL = '/sprites_kid_OWN.png';
+const KS_W = 1200; const KS_H = 896;
+
+const KID_SPRITES = {
+  // FILA 1 — Botones player
+  btn_play:      { x:50,  y:45, w:170, h:185 },
+  btn_pause:     { x:220, y:45, w:240, h:185 },
+  btn_prev:      { x:460, y:46, w:190, h:184 },
+  btn_next:      { x:650, y:39, w:200, h:191 },
+  btn_play_big:  { x:850, y:39, w:210, h:191 },
+  btn_pause_big: { x:1060,y:86, w:93,  h:50  },
+  barra_prog:    { x:1100,y:86, w:53,  h:50  },
+  // FILA 2 — Cards cuentos
+  card_celeste:  { x:45,  y:230, w:265, h:330 },
+  card_coral:    { x:310, y:230, w:310, h:330 },
+  card_verde:    { x:620, y:230, w:300, h:330 },
+  card_lila:     { x:920, y:298, w:234, h:262 },
+  badge_nuevo:   { x:929, y:298, w:221, h:61  },
+  badge_fav:     { x:1093,y:298, w:61,  h:61  },
+  // FILA 3 — Player screen
+  marco_portada: { x:46,  y:560, w:194, h:230 },
+  panel_info:    { x:240, y:560, w:400, h:90  },
+  btn_prev_sm:   { x:530, y:560, w:190, h:167 },
+  btn_play_sm:   { x:620, y:560, w:200, h:167 },
+  btn_next_sm:   { x:720, y:560, w:180, h:167 },
+  barra_player:  { x:830, y:560, w:324, h:120 },
+  btn_siguiente: { x:830, y:665, w:324, h:62  },
+  // FILA 4 — Nav icons
+  nav_escuchar:  { x:48,  y:790, w:152, h:63  },
+  nav_crear:     { x:200, y:790, w:177, h:63  },
+  nav_jugar:     { x:404, y:790, w:107, h:73  },
+};
+
+function kidSprite(key, sizePx, extraStyle='') {
+  const sp = KID_SPRITES[key]; if(!sp) return '';
+  const scale = sizePx / Math.max(sp.w, sp.h);
+  const bgW = Math.round(KS_W * scale);
+  const bgH = Math.round(KS_H * scale);
+  const bx  = -Math.round(sp.x * scale);
+  const by  = -Math.round(sp.y * scale);
+  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;flex-shrink:0;${extraStyle}"></div>`;
+}
+
+function kidSpriteBg(key, sizePx) {
+  const sp = KID_SPRITES[key]; if(!sp) return '';
+  const scale = sizePx / Math.max(sp.w, sp.h);
+  const bgW = Math.round(KS_W * scale);
+  const bgH = Math.round(KS_H * scale);
+  const bx  = -Math.round(sp.x * scale);
+  const by  = -Math.round(sp.y * scale);
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
+}
+// ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
   'dragon':    { x:59,   y:41, w:168, h:210 },
   'hada':      { x:286,  y:41, w:185, h:210 },
