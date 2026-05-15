@@ -3372,6 +3372,11 @@ function switchKidTab(tab) {
   if(tab==='stars') { updateStarDisplay(); buildKidAchievements(); }
   if(tab==='write') loadKidWritings();
   if(tab==='draw') setTimeout(initKidDraw, 80);
+  // Asegurar que kTab-play se muestre al tocar Jugar
+  if(tab==='play') {
+    const el=document.getElementById('kTab-play');
+    if(el) { el.style.display='block'; el.style.visibility='visible'; }
+  }
 }
 
 async function sendKidReaction(emoji) {
