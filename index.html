@@ -947,15 +947,12 @@
       <!-- ====== VERSIÓN DEL PADRE ====== -->
       <div id="kidParentVersion">
 
-        <!-- Slideshow con marco dorado sprite -->
+        <!-- Slideshow con borde dorado -->
         <div style="position:relative;margin:0 16px 8px">
-          <div style="position:relative">
-            <div class="slideshow-container" id="kidSlideshow" style="border-radius:16px;overflow:hidden;background:#F5EDE0;margin:10px">
-              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9B7B6B;font-size:48px" id="slidePlaceholder">📖</div>
-              <button class="slide-nav-btn" style="left:14px;background:rgba(201,168,76,0.85);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(-1)">‹</button>
-              <button class="slide-nav-btn" style="right:14px;background:rgba(201,168,76,0.85);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(1)">›</button>
-            </div>
-            <div style="position:absolute;inset:0;background-image:url('/sprites_kid_OWN.png');background-size:2000px 1493px;background-position:-47px -725px;background-repeat:no-repeat;pointer-events:none;z-index:2"></div>
+          <div class="slideshow-container" id="kidSlideshow" style="border-radius:20px;overflow:hidden;border:4px solid #C9A84C;background:#F5EDE0;box-shadow:0 0 0 2px #e8c97a,0 4px 20px rgba(201,168,76,0.3)">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9B7B6B;font-size:48px" id="slidePlaceholder">📖</div>
+            <button class="slide-nav-btn" style="left:10px;background:rgba(201,168,76,0.9);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(-1)">‹</button>
+            <button class="slide-nav-btn" style="right:10px;background:rgba(201,168,76,0.9);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(1)">›</button>
           </div>
         </div>
         <div class="slideshow-dots" id="slideshowDots" style="margin-bottom:8px"></div>
@@ -971,22 +968,22 @@
           <div style="text-align:center;font-size:12px;color:#9B7B6B;margin-bottom:14px" id="kidTimeDisplay">0:00</div>
 
           <!-- Controles con sprites -->
-          <div style="display:flex;align-items:center;justify-content:center;gap:20px">
+          <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:4px">
             <button onclick="playPrevKidStory()" id="kidBtnPrev"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:862px 643px;background-position:-159px -352px;background-repeat:no-repeat;width:56px;height:56px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:840px 627px;background-position:-174px -328px;background-repeat:no-repeat;width:56px;height:56px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
             <button onclick="toggleKidPlay()" id="kidPlayBtn"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:960px 717px;background-position:-256px -386px;background-repeat:no-repeat;width:72px;height:72px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:982px 733px;background-position:-266px -379px;background-repeat:no-repeat;width:72px;height:72px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
             <button onclick="playNextKidStory()" id="kidBtnNext"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:840px 627px;background-position:-287px -343px;background-repeat:no-repeat;width:56px;height:56px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:840px 627px;background-position:-288px -328px;background-repeat:no-repeat;width:56px;height:56px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
           </div>
 
           <!-- Botón reproducir siguiente -->
-          <div style="margin-top:16px;display:flex;justify-content:center">
+          <div style="margin-top:12px;display:flex;justify-content:center">
             <button onclick="playNextKidStory()" id="kidBtnSiguiente"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:864px 645px;background-position:-157px -410px;background-repeat:no-repeat;width:200px;height:40px;border:none;cursor:pointer;padding:0;transition:transform .12s"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:885px 661px;background-position:-164px -422px;background-repeat:no-repeat;width:180px;height:34px;border:none;cursor:pointer;padding:0;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"></button>
           </div>
         </div>
@@ -1381,7 +1378,7 @@
       <span>Crear</span>
     </button>
     <button class="kid-nav-btn" id="knav-play" onclick="ownShowGames()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
-      <span id="knav-icon-play" style="display:inline-block;width:52px;height:52px;overflow:hidden;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-182px -424px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s"></span>
+      <span id="knav-icon-play" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-182px -442px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s;background-position-y:-442px"></span>
       <span>Jugar</span>
     </button>
   </div>
