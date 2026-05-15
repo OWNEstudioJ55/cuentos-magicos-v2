@@ -3359,10 +3359,19 @@ function showKidApp() {
   switchKidTab('home');
   showScreen('kidApp');
   updateKidProgress('sessionMinutes', 0);
-
-  // Inyectar sprites del niño después de que el DOM es visible
+  // Inyectar oso sprite en el hero
   setTimeout(()=>{
-    injectKidSpriteEl('kidHeroOsoSprite', 'happy',       52);
+    const heroOso = document.getElementById('kidHeroOso');
+    if(heroOso && typeof KID_SPRITES !== 'undefined') {
+      const sp = KID_SPRITES['happy'];
+      if(sp) {
+        const scale = 52/Math.max(sp.w,sp.h);
+        const bgW=Math.round(KS_W*scale), bgH=Math.round(KS_H*scale);
+        const bx=-Math.round(sp.x*scale), by=-Math.round(sp.y*scale);
+        heroOso.style.cssText=`width:52px;height:52px;overflow:hidden;flex-shrink:0`;
+        heroOso.innerHTML=`<img src="${KID_SPRITE_URL}" style="width:${bgW}px;height:${bgH}px;margin-left:${bx}px;margin-top:${by}px;display:block;max-width:none">`;
+      }
+    }
   }, 300);
 }
 
@@ -3469,36 +3478,23 @@ async function loadKidHomeStories() {
   if(noHero) noHero.style.display='none';
 
   const lastSeen = parseInt(localStorage.getItem('ownKidLastSeenStories')||'0');
-  const bgColors  = ['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF'];
-  const brdColors = ['#7BBFE8','#F4A261','#52C77F','#A78BFA'];
-
+  const cardColors = ['card_celeste','card_coral','card_verde','card_lila'];
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map((s,idx)=>{
     const img=s.images&&s.images[0];
     const sprite=CHAR_SPRITES[s.char];
+    const thumbBg=sprite?spriteBg(sprite,80):'';
     const isNew = s.supaSync && new Date(s.created||0).getTime() > lastSeen;
-    const bg  = bgColors[idx%4];
-    const brd = brdColors[idx%4];
-    const thumbHtml = img
-      ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`
-      : sprite
-        ? `<div style="width:80px;height:80px;margin:auto;${spriteBg(sprite,80)}"></div>`
-        : `<div style="font-size:48px;display:flex;align-items:center;justify-content:center;width:100%;height:100%">${s.char||'📖'}</div>`;
-
-    return `<div onclick="openKidStory('${s.id}')" style="
-        flex-shrink:0;width:150px;
-        border-radius:20px;overflow:hidden;
-        border:2.5px solid ${brd};
-        box-shadow:0 4px 14px rgba(0,0,0,0.1);
-        cursor:pointer;background:${bg};
-        display:flex;flex-direction:column;
-      ">
-      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:#F4A261;color:white;font-size:9px;font-weight:800;border-radius:12px;padding:2px 7px;z-index:3;font-family:'Nunito',sans-serif">¡NUEVO!</div>`:''}
-      <div style="width:150px;height:140px;overflow:hidden;flex-shrink:0;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center">
-        ${thumbHtml}
+    const bgColors=['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF'];
+    const bgColor = bgColors[idx%4];
+    return `<div class="own-kid-story-card" onclick="openKidStory('${s.id}')" style="background:${bgColor}">
+      ${isNew?`<div class="own-kid-new-badge">¡NUEVO!</div>`:''}
+      <div class="own-kid-story-thumb">
+        ${img ? `<img src="${img}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;border-radius:14px 14px 0 0">` : ''}
+        ${!img?`<div style="${thumbBg}${!sprite?'font-size:42px;display:flex;align-items:center;justify-content:center;width:100%;height:100%':'width:80px;height:80px;margin:auto'}">${!sprite?(s.char||'📖'):''}</div>`:''}
       </div>
-      <div style="padding:8px 10px 10px;background:rgba(255,255,255,0.85);flex:1">
-        <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033;line-height:1.3;margin-bottom:2px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">${s.title||'Sin título'}</div>
-        <div style="font-size:9px;color:#9B7B6B;font-weight:600">${s.created||''}</div>
+      <div class="own-kid-story-info">
+        <div class="own-kid-story-title">${s.title}</div>
+        <div class="own-kid-story-date">${s.created||''}</div>
       </div>
     </div>`;
   }).join('');
@@ -4421,46 +4417,30 @@ let currentGame=null;
 function openKidGame(gameId) {
   const area = document.getElementById('kidGameArea');
   const title = document.getElementById('kidGameTitle');
-  const content = document.getElementById('kidGameContent');
-  if(!area || !content) { openGame(gameId); return; }
-
-  const names = {quiz:'🧠 Quiz de Cuentos', memory:'🃏 Memoria', words:'🔤 Palabras Mágicas', puzzle:'🧩 Armar el Cuento'};
-  if(title) title.textContent = names[gameId] || '🎮 Juego';
-  area.style.display = 'block';
-  content.innerHTML = '';
-
-  // Renderizar el juego en el contenido
-  currentGame = gameId;
+  if(!area) { openGame(gameId); return; }
+  const names = {quiz:'🧠 Quiz de Cuentos', memory:'🃏 Memoria', words:'🔤 Palabras Mágicas', puzzle:'🧩 Puzzle'};
+  if(title) title.textContent = names[gameId]||'🎮 Juego';
+  // Ocultar todos los game areas
+  ['quiz','memory','words','draw','puzzle'].forEach(g=>{
+    const el=document.getElementById('gameArea-'+g);
+    if(el) el.style.display='none';
+  });
+  // Mostrar el seleccionado
+  const active = document.getElementById('gameArea-'+gameId);
+  if(active) { active.style.display='block'; active.innerHTML=''; }
+  area.style.display='block';
+  currentGame=gameId;
   updateKidProgress('gamesPlayed');
-
-  // Mover el game area al kidGameContent
-  const legacyArea = document.getElementById('gameArea-'+gameId);
-  if(legacyArea) {
-    legacyArea.innerHTML = '';
-    content.appendChild(legacyArea);
-    legacyArea.style.display = 'block';
-    legacyArea.classList.add('active');
-  }
-
   if(gameId==='quiz') buildQuizGame();
   else if(gameId==='memory') buildMemoryGame();
   else if(gameId==='words') buildWordsGame();
   else if(gameId==='puzzle') buildPuzzleGame();
-
-  // Scroll al área del juego
-  setTimeout(()=>area.scrollIntoView({behavior:'smooth', block:'start'}), 100);
+  setTimeout(()=>area.scrollIntoView({behavior:'smooth',block:'start'}),200);
 }
 
 function closeKidGame() {
-  const area = document.getElementById('kidGameArea');
-  if(area) area.style.display = 'none';
-  // Devolver los game areas a su lugar
-  document.querySelectorAll('.game-area').forEach(a=>{
-    a.classList.remove('active');
-    a.style.display = 'none';
-    const ktp = document.getElementById('kTab-play');
-    if(ktp && !ktp.contains(a)) ktp.appendChild(a);
-  });
+  const area=document.getElementById('kidGameArea');
+  if(area) area.style.display='none';
 }
 
 function openGame(gameId) {
