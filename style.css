@@ -1545,3 +1545,26 @@ textarea{resize:vertical;min-height:80px}
 .kid-bottom-nav { display:none !important; }
 #kidApp .kid-bottom-nav { display:flex !important; }
 #kidApp .kid-content { padding-bottom:80px; }
+
+/* ── Override variables CSS para mundo niño ── */
+#kidApp { 
+  --text: #5C4033;
+  --text2: #9B7B6B;
+  --text3: #B8A090;
+  --card: rgba(255,255,255,0.88);
+  --bg2: rgba(245,237,224,0.9);
+  --accent: #C9A84C;
+  --accent2: #7BBFE8;
+  --accent3: #52C77F;
+  --coral: #F4A261;
+  --gold: #C9A84C;
+  --warm: #F4A261;
+}
+#kidApp .game-card {
+  background:rgba(255,255,255,0.88) !important;
+  border:2px solid #E8D5B7 !important;
+  color:#5C4033 !important;
+}
+#kidApp .game-icon { filter: none; }
+#kidApp .game-name { color:#5C4033 !important; }
+#kidApp .game-desc { color:#9B7B6B !important; }
