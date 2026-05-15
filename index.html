@@ -235,22 +235,27 @@
 <!-- PARENT APP -->
 <!-- ============================================================ -->
 <div class="screen" id="parentApp" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#0a1628;">
-  <div class="app-header" style="background:transparent;border-bottom:none;position:relative;z-index:10;justify-content:space-between">
-    <!-- IZQUIERDA: fecha + campanita -->
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:3px 8px;text-align:center;min-width:36px">
-        <div style="font-family:'Fredoka One',cursive;font-size:16px;color:var(--own-gold2);line-height:1" id="headerDay"></div>
-        <div style="font-size:8px;font-weight:800;color:rgba(201,168,76,0.6);text-transform:uppercase;letter-spacing:1px" id="headerMonth"></div>
+  <div class="app-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(10,22,40,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid rgba(201,168,76,0.2);position:relative;z-index:10">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <img src="/logooso.png" alt="OWN" style="height:36px;object-fit:contain;mix-blend-mode:screen">
+      <div style="display:flex;align-items:center;gap:8px">
+        <!-- Fecha -->
+        <div style="background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:3px 8px;text-align:center;min-width:36px">
+          <div style="font-family:'Fredoka One',cursive;font-size:16px;color:var(--own-gold2);line-height:1" id="headerDay"></div>
+          <div style="font-size:8px;font-weight:800;color:rgba(201,168,76,0.6);text-transform:uppercase;letter-spacing:1px" id="headerMonth"></div>
+        </div>
+        <!-- Campanita -->
+        <button onclick="showParentNotifs()" style="position:relative;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
+          🔔<span id="parentNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
+        </button>
+        <!-- Monedas -->
+        <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
+        <!-- Salir -->
+        <button class="btn-logout" onclick="doLogout()" style="background:rgba(201,168,76,0.1);color:rgba(255,255,255,0.7);border:1px solid rgba(201,168,76,0.2);border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700">Salir</button>
       </div>
-      <button onclick="showParentNotifs()" style="position:relative;background:rgba(167,139,250,0.15);border:1px solid rgba(167,139,250,0.3);color:var(--text);padding:5px 10px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
-        🔔<span id="parentNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:16px;height:16px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
-      </button>
     </div>
-    <!-- DERECHA: monedas + premium + salir -->
-    <div style="display:flex;align-items:center;gap:8px">
-      <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
-      <button onclick="showPremiumScreen()" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
-      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    <div style="font-family:'Fredoka One',cursive;font-size:17px;color:rgba(255,255,255,0.9)">
+      ¡Hola, <span id="parentName">Papá</span>! 👋
     </div>
   </div>
 

@@ -1535,3 +1535,8 @@ textarea{resize:vertical;min-height:80px}
 #kidApp .kid-bottom-nav {
   display:flex;
 }
+
+/* ── Fix nav niño — solo dentro de kidApp activo ── */
+#kidApp .kid-bottom-nav {
+  display:flex !important;
+}
