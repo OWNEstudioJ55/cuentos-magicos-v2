@@ -1502,3 +1502,27 @@ textarea{resize:vertical;min-height:80px}
 #kidApp .audio-progress {
   background:var(--kid-gold) !important;
 }
+
+/* ── Fondo niño con textura fija ── */
+#kidApp {
+  background:
+    url('/fondonn.png') top center / 100% 100vh no-repeat fixed,
+    #F5EDE0 !important;
+}
+#kidApp .kid-content {
+  background:transparent !important;
+}
+#kidApp .own-kid-header {
+  background:rgba(255,248,240,0.85) !important;
+  backdrop-filter:blur(12px);
+}
+#kidApp .own-kid-nav {
+  background:rgba(255,248,240,0.92) !important;
+  backdrop-filter:blur(12px);
+}
+#kidApp .own-kid-story-card,
+#kidApp .own-kid-hero-new,
+#kidApp .own-kid-hero-empty {
+  background:rgba(255,255,255,0.82) !important;
+  backdrop-filter:blur(8px);
+}
