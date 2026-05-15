@@ -870,12 +870,7 @@
   <!-- HEADER NIÑO -->
   <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
     <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:693px 518px;background-position:-182px -450px;background-repeat:no-repeat;flex-shrink:0"></span>
-        <div style="font-family:'Fredoka One',cursive;font-size:28px;line-height:1;letter-spacing:-1px">
-          <span style="color:#E07B39">O</span><span style="color:#4A9EBF">W</span><span style="color:#C9A84C">N</span>
-        </div>
-      </div>
+      <img src="/logooso.png" alt="OWN" style="height:52px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(92,64,51,0.25))">
       <div style="display:flex;gap:8px;align-items:center">
         <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
         <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
@@ -893,7 +888,7 @@
 
       <!-- Hero — cuento nuevo del padre -->
       <div id="kidNewStoryHero" style="display:none;margin:8px 16px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:2px solid #E8D5B7;border-radius:20px;padding:14px 16px;cursor:pointer;box-shadow:0 4px 20px rgba(92,64,51,0.12);display:flex;align-items:center;gap:12px" onclick="openFirstNewStory()">
-        <div style="font-size:52px;flex-shrink:0">🐻</div>
+        <div style="width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:640px 478px;background-position:-168px -415px;background-repeat:no-repeat;flex-shrink:0"></div>
         <div style="flex:1">
           <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:2px">¡Papá/Mamá te mandó un cuento!</div>
           <div style="font-size:11px;color:#9B7B6B">Tocá para escucharlo 🎧</div>
@@ -903,14 +898,14 @@
 
       <!-- Sin cuentos nuevos -->
       <div id="kidNoStoryHero" style="margin:12px 16px;background:rgba(255,255,255,0.75);backdrop-filter:blur(8px);border:2px dashed #E8D5B7;border-radius:24px;padding:24px;text-align:center">
-        <div style="font-size:44px;margin-bottom:8px">🌟</div>
+        <div style="width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:640px 478px;background-position:-168px -415px;background-repeat:no-repeat;margin:0 auto 8px"></div>
         <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">¡Hola, <span id="kidHeroName">amigo</span>!</div>
         <div style="font-size:13px;color:#9B7B6B">Papá/Mamá te mandará un cuento pronto</div>
       </div>
 
       <!-- Cuentos del padre -->
       <div class="own-kid-sh">
-        <span class="own-kid-st">🎙️ Cuentos de Papá/Mamá</span>
+        <span class="own-kid-st" style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:28px;height:28px;background-image:url('/sprites_kid_OWN.png');background-size:472px 353px;background-position:-11px -247px;background-repeat:no-repeat"></span> Cuentos de Papá/Mamá</span>
       </div>
       <div id="kidHomeStories" style="display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 
@@ -928,7 +923,7 @@
 
       <!-- Cuentos OWN -->
       <div class="own-kid-sh">
-        <span class="own-kid-st">🐻 Cuentos OWN</span>
+        <span class="own-kid-st" style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:28px;height:28px;background-image:url('/sprites_kid_OWN.png');background-size:480px 358px;background-position:-126px -311px;background-repeat:no-repeat"></span> Cuentos OWN</span>
       </div>
       <div id="kidOwnClassicStories" style="padding-bottom:80px"></div>
 
@@ -952,12 +947,17 @@
       <!-- ====== VERSIÓN DEL PADRE ====== -->
       <div id="kidParentVersion">
 
-        <!-- Slideshow con marco peluche -->
+        <!-- Slideshow con marco sprite dorado -->
         <div style="position:relative;margin:0 16px 8px">
-          <div class="slideshow-container" id="kidSlideshow" style="border-radius:24px;overflow:hidden;border:3px solid #E8D5B7;background:#F5EDE0">
+          <!-- Marco dorado del sprite como overlay -->
+          <div style="position:relative;display:inline-block;width:100%">
+            <div class="slideshow-container" id="kidSlideshow" style="border-radius:18px;overflow:hidden;background:#F5EDE0;margin:8px">
             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9B7B6B;font-size:48px" id="slidePlaceholder">📖</div>
-            <button class="slide-nav-btn" style="left:10px;background:rgba(201,168,76,0.8);border-radius:50%;width:36px;height:36px;font-size:20px" onclick="slideKid(-1)">‹</button>
-            <button class="slide-nav-btn" style="right:10px;background:rgba(201,168,76,0.8);border-radius:50%;width:36px;height:36px;font-size:20px" onclick="slideKid(1)">›</button>
+            <button class="slide-nav-btn" style="left:10px;background:rgba(201,168,76,0.85);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(-1)">‹</button>
+            <button class="slide-nav-btn" style="right:10px;background:rgba(201,168,76,0.85);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(1)">›</button>
+          </div>
+          <!-- Marco dorado encima -->
+          <div style="position:absolute;inset:0;background-image:url('/sprites_kid_OWN.png');background-size:2000px 1493px;background-position:-47px -725px;background-repeat:no-repeat;pointer-events:none;z-index:2"></div>
           </div>
         </div>
         <div class="slideshow-dots" id="slideshowDots" style="margin-bottom:8px"></div>
@@ -973,15 +973,21 @@
           <div style="text-align:center;font-size:12px;color:#9B7B6B;margin-bottom:14px" id="kidTimeDisplay">0:00</div>
 
           <!-- Controles con sprites -->
-          <div style="display:flex;align-items:center;justify-content:center;gap:16px">
-            <button onclick="seekKid(-10)" id="kidBtnPrev" style="background:none;border:none;cursor:pointer;width:56px;height:56px;padding:0"></button>
-            <button onclick="toggleKidPlay()" id="kidPlayBtn" style="background:none;border:none;cursor:pointer;width:72px;height:72px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:0"></button>
-            <button onclick="seekKid(10)" id="kidBtnNext" style="background:none;border:none;cursor:pointer;width:56px;height:56px;padding:0"></button>
+          <div style="display:flex;align-items:center;justify-content:center;gap:20px">
+            <button onclick="playPrevKidStory()" id="kidBtnPrev"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:862px 643px;background-position:-159px -352px;background-repeat:no-repeat;width:56px;height:56px;border:none;cursor:pointer;padding:0;transition:transform .12s;border-radius:50%"
+              onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
+            <button onclick="toggleKidPlay()" id="kidPlayBtn"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:960px 717px;background-position:-256px -386px;background-repeat:no-repeat;width:72px;height:72px;border:none;cursor:pointer;padding:0;transition:transform .12s;border-radius:50%"
+              onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
+            <button onclick="playNextKidStory()" id="kidBtnNext"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:840px 627px;background-position:-287px -343px;background-repeat:no-repeat;width:56px;height:56px;border:none;cursor:pointer;padding:0;transition:transform .12s;border-radius:50%"
+              onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
           </div>
 
           <!-- Botón reproducir siguiente -->
           <div style="margin-top:16px;display:flex;justify-content:center">
-            <button onclick="playNextKidStory()" id="kidBtnSiguiente" style="background:none;border:none;cursor:pointer;width:200px;height:40px;padding:0"></button>
+<button onclick="playNextKidStory()" id="kidBtnSiguiente" style="background-image:url('/sprites_kid_OWN.png');background-size:864px 645px;background-position:-157px -410px;background-repeat:no-repeat;width:200px;height:40px;border:none;cursor:pointer;padding:0;transition:transform .12s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"></button>
           </div>
         </div>
 
@@ -1365,17 +1371,17 @@
 
   </div>
 
-  <div class="kid-bottom-nav own-kid-nav" id="kidNavBar" style="background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;position:fixed;bottom:0;left:0;right:0;z-index:200;display:none">
-    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:472px 352px;background-position:-11px -247px;background-repeat:no-repeat;border-radius:12px;transition:transform 0.15s" id="knav-icon-home"></span>
+  <div class="kid-bottom-nav own-kid-nav" id="kidNavBar" style="background:rgba(255,248,240,0.95);backdrop-filter:blur(12px);border-top:2px solid #E8D5B7;position:fixed;bottom:0;left:0;right:0;z-index:200;display:none">
+    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+      <span style="font-size:30px">🎧</span>
       <span>Escuchar</span>
     </button>
-    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:472px 352px;background-position:-60px -247px;background-repeat:no-repeat;border-radius:12px;transition:transform 0.15s;opacity:0.7" id="knav-icon-draw"></span>
+    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+      <span style="font-size:30px">🎨</span>
       <span>Crear</span>
     </button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:472px 352px;background-position:-109px -247px;background-repeat:no-repeat;border-radius:12px;transition:transform 0.15s;opacity:0.7" id="knav-icon-play"></span>
+    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+      <span style="font-size:30px">⭐</span>
       <span>Jugar</span>
     </button>
   </div>
@@ -1403,41 +1409,85 @@
 <!-- OWN App -->
 <script src="app.js"></script>
 
-<!-- Nav sprite state manager -->
+<!-- OWN sprite overrides -->
+<style>
+/* Tarjetas clásicas con fondos sprite */
+.own-classic-card-0 { background-image: url('/sprites_kid_OWN.png') !important; background-size:914px 683px !important; background-position:-21px -149px !important; background-repeat:no-repeat !important; background-color:transparent !important; }
+.own-classic-card-1 { background-image: url('/sprites_kid_OWN.png') !important; background-size:914px 683px !important; background-position:-149px -149px !important; background-repeat:no-repeat !important; background-color:transparent !important; }
+.own-classic-card-2 { background-image: url('/sprites_kid_OWN.png') !important; background-size:914px 683px !important; background-position:-276px -149px !important; background-repeat:no-repeat !important; background-color:transparent !important; }
+.own-classic-card-3 { background-image: url('/sprites_kid_OWN.png') !important; background-size:914px 683px !important; background-position:-403px -149px !important; background-repeat:no-repeat !important; background-color:transparent !important; }
+</style>
+
 <script>
-(function(){
-  var ICON_IDS = { home:'knav-icon-home', draw:'knav-icon-draw', play:'knav-icon-play' };
-  function updateNavSprites(tab){
-    Object.keys(ICON_IDS).forEach(function(key){
-      var icon = document.getElementById(ICON_IDS[key]);
-      var btn  = document.getElementById('knav-' + key);
-      if(!icon || !btn) return;
-      if(key === tab){
-        icon.style.opacity = '1';
-        icon.style.transform = 'scale(1.12)';
-        btn.style.color = '#C9A84C';
-      } else {
-        icon.style.opacity = '0.5';
-        icon.style.transform = 'scale(1)';
-        btn.style.color = '#9B7B6B';
-      }
-    });
-  }
+// Parchar render de tarjetas clásicas con colores sprite
+(function patchClassicCards(){
   var tries = 0;
-  var interval = setInterval(function(){
+  var iv = setInterval(function(){
     tries++;
-    if(typeof window.switchKidTab === 'function' && !window.switchKidTab._patched){
-      var orig = window.switchKidTab;
-      window.switchKidTab = function(tab){
-        orig(tab);
-        updateNavSprites(tab);
-      };
-      window.switchKidTab._patched = true;
-      clearInterval(interval);
+    var container = document.getElementById('kidClassicStories');
+    if(container && container.children.length > 0){
+      var cards = container.querySelectorAll('[class*="own-kid-card"], .classic-card, [style*="border-radius"][style*="cursor"]');
+      if(cards.length === 0) cards = container.children;
+      Array.from(cards).forEach(function(card, i){
+        card.classList.add('own-classic-card-' + (i % 4));
+      });
+      clearInterval(iv);
     }
-    if(tries > 100) clearInterval(interval);
+    // Observar mutaciones para cuando se carguen dinámicamente
+    if(tries === 5){
+      var obs = new MutationObserver(function(){
+        var cards = container ? container.querySelectorAll('[style*="cursor:pointer"],[style*="cursor: pointer"]') : [];
+        if(!cards.length && container) cards = container.children;
+        Array.from(cards).forEach(function(card, i){
+          if(!card.className.includes('own-classic-card')){
+            card.classList.add('own-classic-card-' + (i % 4));
+          }
+        });
+      });
+      if(container) obs.observe(container, {childList: true, subtree: true});
+      clearInterval(iv);
+    }
+    if(tries > 60) clearInterval(iv);
+  }, 200);
+})();
+
+// Parchar play/pause del player para cambiar icono sprite
+(function patchPlayPause(){
+  var SP_BASE = "url('/sprites_kid_OWN.png')";
+  var PLAY_CSS  = SP_BASE + ";background-size:960px 717px;background-position:-256px -386px";
+  var PAUSE_CSS = SP_BASE + ";background-size:960px 656px;background-position:-208px -354px";
+  
+  var tries = 0;
+  var iv = setInterval(function(){
+    tries++;
+    if(typeof window.toggleKidPlay === 'function' && !window.toggleKidPlay._patched){
+      var orig = window.toggleKidPlay;
+      window.toggleKidPlay = function(){
+        orig();
+        setTimeout(function(){
+          var btn = document.getElementById('kidPlayBtn');
+          if(!btn) return;
+          // Detectar si está pausado leyendo el estado del audio global
+          var audio = window.kidAudio || window.currentKidAudio;
+          var paused = !audio || audio.paused;
+          btn.style.backgroundImage = SP_BASE;
+          if(paused){
+            btn.style.backgroundSize = '960px 717px';
+            btn.style.backgroundPosition = '-256px -386px';
+          } else {
+            // botón pause (azul)
+            btn.style.backgroundSize = '960px 717px';
+            btn.style.backgroundPosition = '-208px -354px';
+          }
+        }, 50);
+      };
+      window.toggleKidPlay._patched = true;
+      clearInterval(iv);
+    }
+    if(tries > 100) clearInterval(iv);
   }, 80);
 })();
 </script>
+
 </body>
 </html>
