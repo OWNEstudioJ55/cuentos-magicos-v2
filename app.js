@@ -1252,6 +1252,16 @@ function injectNavSprites() {
     const el=document.getElementById(id);
     if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
   });
+
+  // Kid player — botones sprite
+  const kidPlay = document.getElementById('kidPlayBtn');
+  if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
+  const kidPrev = document.getElementById('kidBtnPrev');
+  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_prev',56)}`; }
+  const kidNext = document.getElementById('kidBtnNext');
+  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_next',56)}`; }
+  const kidSig = document.getElementById('kidBtnSiguiente');
+  if(kidSig) { kidSig.innerHTML=''; kidSig.style.cssText=`width:200px;height:40px;${kidSpriteBg('btn_siguiente',40)}`; }
 }
 
 function previewVoiceWithChar() {
@@ -3413,7 +3423,8 @@ function loadKidAudioFromBlob(blob) {
     if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
   };
   audio.onended=()=>{
-    const b=document.getElementById('kidPlayBtn'); if(b) b.textContent='▶';
+    const b=document.getElementById('kidPlayBtn');
+    if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
     appState.kidIsPlaying=false;
     updateKidProgress('storiesListened');
   };
@@ -3494,7 +3505,7 @@ async function openKidStory(id) {
           if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
         };
         audio.onended=()=>{
-          const b=document.getElementById('kidPlayBtn'); if(b) b.textContent='▶';
+          const b=document.getElementById('kidPlayBtn'); if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
           appState.kidIsPlaying=false;
           updateKidProgress('storiesListened');
         };
@@ -3552,7 +3563,7 @@ function openClassicStory(id) {
   // Use TTS for classic story
   if(appState.kidAudio){ appState.kidAudio.pause(); appState.kidAudio=null; }
   appState.kidIsPlaying=false;
-  const pb=document.getElementById('kidPlayBtn'); if(pb) pb.textContent='▶';
+  const pb=document.getElementById('kidPlayBtn'); if(pb) pb.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
   switchKidTab('player');
   updateKidProgress('classicsListened');
   updateKidProgress('storiesListened');

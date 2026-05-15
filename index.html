@@ -917,47 +917,71 @@
 
     <!-- PLAYER TAB KID -->
     <div id="kTab-player" style="display:none">
-      <button class="btn btn-ghost btn-sm" onclick="switchKidTab('home')" style="margin-bottom:12px">← Inicio</button>
-      <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:12px;color:var(--text)" id="kidStoryTitle">Cuento</div>
+
+      <!-- Header volver -->
+      <div style="padding:16px 16px 8px;display:flex;align-items:center;gap:12px">
+        <button onclick="switchKidTab('home')" style="background:#F5EDE0;border:2px solid #E8D5B7;border-radius:14px;padding:8px 14px;font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;cursor:pointer">← Volver</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;flex:1;text-align:center" id="kidStoryTitle">Cuento</div>
+      </div>
 
       <!-- VERSION TOGGLE -->
-      <div id="kidVersionToggle" style="display:flex;gap:8px;margin-bottom:14px">
-        <button id="btnVerPadre" class="btn btn-accent btn-sm" style="flex:1;font-size:14px;padding:12px" onclick="switchKidVersion('parent')">📖 Versión de papá</button>
-        <button id="btnVerNino" class="btn btn-ghost btn-sm" style="flex:1;font-size:14px;padding:12px" onclick="switchKidVersion('kid')">🌟 Mi versión</button>
+      <div id="kidVersionToggle" style="display:flex;gap:10px;margin:0 16px 14px">
+        <button id="btnVerPadre" onclick="switchKidVersion('parent')" style="flex:1;padding:12px;border-radius:16px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;cursor:pointer">📖 Versión de papá</button>
+        <button id="btnVerNino" onclick="switchKidVersion('kid')" style="flex:1;padding:12px;border-radius:16px;border:2px solid #E8D5B7;background:#F5EDE0;font-family:'Fredoka One',cursive;font-size:14px;color:#9B7B6B;cursor:pointer">🌟 Mi versión</button>
       </div>
 
       <!-- ====== VERSIÓN DEL PADRE ====== -->
       <div id="kidParentVersion">
-        <!-- Slideshow -->
-        <div class="slideshow-container" id="kidSlideshow" style="margin-bottom:0">
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:48px" id="slidePlaceholder">📖</div>
-          <button class="slide-nav-btn" style="left:10px" onclick="slideKid(-1)">‹</button>
-          <button class="slide-nav-btn" style="right:10px" onclick="slideKid(1)">›</button>
-        </div>
-        <div class="slideshow-dots" id="slideshowDots" style="margin-bottom:12px"></div>
 
-        <!-- Audio player -->
-        <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:12px;border:1px solid rgba(167,139,250,0.15)">
-          <div style="font-family:'Baloo 2',cursive;font-size:15px;margin-bottom:12px;color:var(--accent2)">🎧 Escuchá el cuento</div>
-          <div class="audio-player">
-            <div class="audio-controls">
-              <button class="seek-btn" onclick="seekKid(-10)" style="font-size:24px;width:44px;height:44px">⏪</button>
-              <button class="play-btn" id="kidPlayBtn" onclick="toggleKidPlay()" style="width:64px;height:64px;font-size:28px">▶</button>
-              <button class="seek-btn" onclick="seekKid(10)" style="font-size:24px;width:44px;height:44px">⏩</button>
-              <div class="audio-waveform" style="flex:1"><div class="audio-progress" id="kidProgress"></div></div>
-              <span class="audio-time" id="kidTimeDisplay" style="font-size:12px">0:00</span>
-            </div>
+        <!-- Slideshow con marco peluche -->
+        <div style="position:relative;margin:0 16px 8px">
+          <div class="slideshow-container" id="kidSlideshow" style="border-radius:24px;overflow:hidden;border:3px solid #E8D5B7;background:#F5EDE0">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9B7B6B;font-size:48px" id="slidePlaceholder">📖</div>
+            <button class="slide-nav-btn" style="left:10px;background:rgba(201,168,76,0.8);border-radius:50%;width:36px;height:36px;font-size:20px" onclick="slideKid(-1)">‹</button>
+            <button class="slide-nav-btn" style="right:10px;background:rgba(201,168,76,0.8);border-radius:50%;width:36px;height:36px;font-size:20px" onclick="slideKid(1)">›</button>
+          </div>
+        </div>
+        <div class="slideshow-dots" id="slideshowDots" style="margin-bottom:8px"></div>
+
+        <!-- PLAYER con botones sprite -->
+        <div style="margin:0 16px 14px;background:#FFF8F0;border-radius:24px;padding:18px;border:2px solid #E8D5B7;box-shadow:0 4px 16px rgba(92,64,51,0.1)">
+          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#9B7B6B;text-align:center;margin-bottom:14px">🎧 Escuchá el cuento</div>
+
+          <!-- Barra de progreso -->
+          <div style="position:relative;height:10px;background:#E8D5B7;border-radius:10px;margin-bottom:16px;cursor:pointer" onclick="seekKidByClick(event,this)" id="kidProgressBar">
+            <div id="kidProgress" style="height:100%;background:linear-gradient(90deg,#C9A84C,#e8c97a);border-radius:10px;width:0%;transition:width .1s"></div>
+          </div>
+          <div style="text-align:center;font-size:12px;color:#9B7B6B;margin-bottom:14px" id="kidTimeDisplay">0:00</div>
+
+          <!-- Controles con sprites -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:16px">
+            <button onclick="seekKid(-10)" id="kidBtnPrev" style="background:none;border:none;cursor:pointer;width:56px;height:56px;padding:0"></button>
+            <button onclick="toggleKidPlay()" id="kidPlayBtn" style="background:none;border:none;cursor:pointer;width:72px;height:72px;padding:0"></button>
+            <button onclick="seekKid(10)" id="kidBtnNext" style="background:none;border:none;cursor:pointer;width:56px;height:56px;padding:0"></button>
+          </div>
+
+          <!-- Botón reproducir siguiente -->
+          <div style="margin-top:16px;display:flex;justify-content:center">
+            <button onclick="playNextKidStory()" id="kidBtnSiguiente" style="background:none;border:none;cursor:pointer;width:200px;height:40px;padding:0"></button>
           </div>
         </div>
 
-        <!-- Story text if any -->
-        <div id="kidStoryTextCard" style="display:none;background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;border:1px solid rgba(167,139,250,0.15)">
-          <div style="font-family:'Baloo 2',cursive;font-size:15px;margin-bottom:10px;color:var(--text2)">📝 Texto del cuento</div>
-          <div id="kidStoryTextContent" style="font-size:14px;line-height:1.8;color:var(--text)"></div>
+        <!-- Story text -->
+        <div id="kidStoryTextCard" style="display:none;margin:0 16px 14px;background:#FFF8F0;border-radius:20px;padding:16px;border:2px solid #E8D5B7">
+          <div style="font-family:'Fredoka One',cursive;font-size:15px;margin-bottom:10px;color:#9B7B6B">📝 Texto del cuento</div>
+          <div id="kidStoryTextContent" style="font-size:14px;line-height:1.8;color:#5C4033"></div>
         </div>
 
         <!-- Reacción del niño -->
-        <div style="background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;text-align:center;border:1px solid rgba(255,209,102,.2)">
+        <div style="margin:0 16px 14px;background:#FFF8F0;border-radius:20px;padding:16px;text-align:center;border:2px solid #E8D5B7">
+          <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033;margin-bottom:12px">¿Cómo te gustó el cuento? 💭</div>
+          <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap" id="kidReactionBtns">
+            <button onclick="sendKidReaction('❤️')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">❤️</button>
+            <button onclick="sendKidReaction('⭐')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">⭐</button>
+            <button onclick="sendKidReaction('😄')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">😄</button>
+            <button onclick="sendKidReaction('🤩')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">🤩</button>
+          </div>
+        </div>
           <div style="font-family:'Baloo 2',cursive;font-size:14px;color:var(--text2);margin-bottom:10px">¿Te gustó el cuento?</div>
           <div style="display:flex;justify-content:center;gap:16px" id="kidReactionBtns">
             <button onclick="sendKidReaction('❤️')" style="font-size:40px;background:none;border:none;cursor:pointer">❤️</button>
