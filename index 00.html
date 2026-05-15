@@ -187,28 +187,24 @@
 <!-- ============================================================ -->
 <!-- LOGIN SCREEN -->
 <!-- ============================================================ -->
-<div class="screen" id="loginScreen" style="background-image:url('/textp.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#0a1628;">
-  <div class="login-box" style="background:rgba(10,22,40,0.88);border:1px solid rgba(201,168,76,0.2);backdrop-filter:blur(20px)">
-
-    <!-- Logo completo -->
-    <div class="login-logo" style="margin-bottom:24px">
-      <img src="/logooso.png" alt="OWN" style="width:260px;object-fit:contain;">
+<div class="screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <h1><span class="logo-o">O</span><span class="logo-w">W</span><span class="logo-n">N</span></h1>
+      <p>✨ Cuentos Mágicos ✨</p>
     </div>
-
-    <!-- Tabs papá / niño -->
     <div class="login-tab-bar">
       <button class="login-tab active" id="tabParent" onclick="switchLoginTab('parent')">👨 Papá/Mamá</button>
       <button class="login-tab" id="tabKid" onclick="switchLoginTab('kid')">🧒 Niño/a</button>
     </div>
-
     <div class="input-group"><label>Contraseña</label><input type="password" id="loginPass" placeholder="Tu contraseña secreta" autocomplete="current-password"></div>
     <button class="btn-primary" onclick="doLogin()">Entrar ✨</button>
     <div class="login-error" id="loginError">❌ Contraseña incorrecta</div>
     <div style="margin-top:18px;text-align:center">
-      <button onclick="document.getElementById('resetModal').classList.add('open')" style="background:none;border:none;color:rgba(201,168,76,0.6);font-family:'Nunito',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline">🔑 ¿Olvidaste la contraseña?</button>
+      <button onclick="document.getElementById('resetModal').classList.add('open')" style="background:none;border:none;color:var(--text2);font-family:'Nunito',sans-serif;font-size:12px;cursor:pointer;text-decoration:underline">🔑 ¿Olvidaste la contraseña?</button>
     </div>
     <div style="margin-top:10px;text-align:center">
-      <button onclick="doFullReset()" style="background:none;border:none;color:rgba(255,255,255,0.25);font-family:'Nunito',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ Reconfigurar desde cero</button>
+      <button onclick="doFullReset()" style="background:none;border:none;color:var(--text3);font-family:'Nunito',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline">⚙️ Reconfigurar desde cero</button>
     </div>
   </div>
 </div>
@@ -265,12 +261,16 @@
       <!-- LOGO HEADER — estilo mockup -->
       <div class="own-logo-header">
         <div style="width:40px"></div>
-        <div style="display:flex;align-items:center;justify-content:center">
-          <img src="/logooso.png" alt="OWN" style="height:240px;object-fit:contain;">
+        <div style="display:flex;align-items:center;gap:4px">
+          <img src="/logo_120x120_01.png" alt="OWN" style="width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 4px 16px rgba(201,168,76,0.6))">
+          <div class="own-logo-letters">
+            <span class="logo-w" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(201,168,76,0.8))">W</span>
+            <span class="logo-n" style="font-family:'Fredoka One',cursive;font-size:52px;line-height:1;filter:drop-shadow(0 0 16px rgba(135,180,212,0.8))">N</span>
+          </div>
         </div>
         <div style="width:40px"></div>
       </div>
-      <div class="own-logo-tagline" style="margin-top:-4px">CUENTOS QUE CONECTAN</div>
+      <div class="own-logo-tagline">CUENTOS QUE CONECTAN</div>
 
       <!-- CARD SALUDO -->
       <div class="pad">
@@ -865,142 +865,91 @@
 <!-- ============================================================ -->
 <!-- KID APP — UI COMPLETAMENTE DIFERENTE Y MÁGICA -->
 <!-- ============================================================ -->
-<div class="screen" id="kidApp" style="background:url('/fondonn.png') top center/100% 100vh no-repeat fixed,#F5EDE0;">
-
-  <!-- HEADER NIÑO -->
-  <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
-    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <div style="display:flex;align-items:center;gap:6px">
-        <span style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:693px 518px;background-position:-182px -450px;background-repeat:no-repeat;flex-shrink:0"></span>
-        <div style="font-family:'Fredoka One',cursive;font-size:28px;line-height:1;letter-spacing:-1px">
-          <span style="color:#E07B39">O</span><span style="color:#4A9EBF">W</span><span style="color:#C9A84C">N</span>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
-        <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
-      </div>
-    </div>
-    <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033">
-      ¡Hola, <span id="kidNameHeader">amigo</span>! 👋
+<div class="screen" id="kidApp">
+  <div class="kid-header">
+    <h1>
+      <span style="color:#ff6fd8">O</span><span style="color:#f97316">W</span><span style="color:#a78bfa">N</span>
+      <span style="font-size:16px;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text2)">✨ <span id="kidNameHeader">Hola!</span></span>
+    </h1>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="kid-stars-badge">⭐ <span id="kidStars">0</span></div>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
 
-  <div class="kid-content" id="kidContent" style="background:transparent">
+  <div class="kid-content" id="kidContent">
 
     <!-- HOME TAB KID -->
     <div id="kTab-home">
 
-      <!-- Hero — cuento nuevo del padre -->
-      <div id="kidNewStoryHero" style="display:none;margin:8px 16px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:2px solid #E8D5B7;border-radius:20px;padding:14px 16px;cursor:pointer;box-shadow:0 4px 20px rgba(92,64,51,0.12);display:flex;align-items:center;gap:12px" onclick="openFirstNewStory()">
-        <div style="font-size:52px;flex-shrink:0">🐻</div>
-        <div style="flex:1">
-          <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:2px">¡Papá/Mamá te mandó un cuento!</div>
-          <div style="font-size:11px;color:#9B7B6B">Tocá para escucharlo 🎧</div>
-        </div>
-        <div style="background:#C9A84C;border-radius:12px;padding:8px 10px;font-size:18px">▶</div>
+      <!-- Hero — cuento del padre -->
+      <div id="kidNewStoryHero" style="display:none;background:linear-gradient(135deg,rgba(255,107,107,.2),rgba(255,142,83,.1));border:2px solid rgba(255,107,107,.4);border-radius:24px;padding:20px;margin-bottom:16px;text-align:center;cursor:pointer;animation:fadeIn .5s ease" onclick="openFirstNewStory()">
+        <div style="font-size:56px;margin-bottom:8px">🎙️</div>
+        <div style="font-family:'Baloo 2',cursive;font-size:20px;font-weight:900;color:var(--coral);margin-bottom:4px">¡Papá/Mamá te mandó un cuento!</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:14px">Tocá para escucharlo</div>
+        <div style="background:var(--coral);color:white;border:none;border-radius:14px;padding:12px 28px;font-family:'Baloo 2',cursive;font-size:16px;font-weight:800;display:inline-block">▶ Escuchar ahora</div>
       </div>
 
       <!-- Sin cuentos nuevos -->
-      <div id="kidNoStoryHero" style="margin:12px 16px;background:rgba(255,255,255,0.75);backdrop-filter:blur(8px);border:2px dashed #E8D5B7;border-radius:24px;padding:24px;text-align:center">
-        <div style="font-size:44px;margin-bottom:8px">🌟</div>
-        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">¡Hola, <span id="kidHeroName">amigo</span>!</div>
-        <div style="font-size:13px;color:#9B7B6B">Papá/Mamá te mandará un cuento pronto</div>
+      <div id="kidNoStoryHero" style="background:rgba(255,255,255,.04);border:2px dashed rgba(255,255,255,.1);border-radius:24px;padding:24px;margin-bottom:16px;text-align:center">
+        <div style="font-size:48px;margin-bottom:8px">🌟</div>
+        <div style="font-family:'Baloo 2',cursive;font-size:16px;color:var(--text2);margin-bottom:4px">Hola, <span id="kidHeroName">amigo</span>!</div>
+        <div style="font-size:13px;color:var(--text3)">Papá/Mamá te mandará un cuento pronto</div>
       </div>
 
       <!-- Cuentos del padre -->
-      <div class="own-kid-sh">
-        <span class="own-kid-st">🎙️ Cuentos de Papá/Mamá</span>
-      </div>
-      <div id="kidHomeStories" style="display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
-
-      <!-- Separador costura -->
-      <div class="own-kid-stitch"></div>
+      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--coral)">🎙️ Cuentos de Papá/Mamá</div>
+      <div id="kidHomeStories"></div>
 
       <!-- Cuentos clásicos -->
-      <div class="own-kid-sh">
-        <span class="own-kid-st">✨ Historias para Soñar</span>
-      </div>
+      <div style="font-family:'Baloo 2',cursive;font-size:20px;margin:16px 0 12px;color:var(--accent3)">📖 Cuentos Clásicos</div>
       <div id="kidClassicStories"></div>
-
-      <!-- Separador costura -->
-      <div class="own-kid-stitch"></div>
-
-      <!-- Cuentos OWN -->
-      <div class="own-kid-sh">
-        <span class="own-kid-st">🐻 Cuentos OWN</span>
-      </div>
-      <div id="kidOwnClassicStories" style="padding-bottom:80px"></div>
 
     </div>
 
     <!-- PLAYER TAB KID -->
     <div id="kTab-player" style="display:none">
-
-      <!-- Header volver -->
-      <div style="padding:16px 16px 8px;display:flex;align-items:center;gap:12px">
-        <button onclick="switchKidTab('home')" style="background:#F5EDE0;border:2px solid #E8D5B7;border-radius:14px;padding:8px 14px;font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;cursor:pointer">← Volver</button>
-        <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;flex:1;text-align:center" id="kidStoryTitle">Cuento</div>
-      </div>
+      <button class="btn btn-ghost btn-sm" onclick="switchKidTab('home')" style="margin-bottom:12px">← Inicio</button>
+      <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:12px;color:var(--text)" id="kidStoryTitle">Cuento</div>
 
       <!-- VERSION TOGGLE -->
-      <div id="kidVersionToggle" style="display:flex;gap:10px;margin:0 16px 14px">
-        <button id="btnVerPadre" onclick="switchKidVersion('parent')" style="flex:1;padding:12px;border-radius:16px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;cursor:pointer">📖 Versión de papá</button>
-        <button id="btnVerNino" onclick="switchKidVersion('kid')" style="flex:1;padding:12px;border-radius:16px;border:2px solid #E8D5B7;background:#F5EDE0;font-family:'Fredoka One',cursive;font-size:14px;color:#9B7B6B;cursor:pointer">🌟 Mi versión</button>
+      <div id="kidVersionToggle" style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="btnVerPadre" class="btn btn-accent btn-sm" style="flex:1;font-size:14px;padding:12px" onclick="switchKidVersion('parent')">📖 Versión de papá</button>
+        <button id="btnVerNino" class="btn btn-ghost btn-sm" style="flex:1;font-size:14px;padding:12px" onclick="switchKidVersion('kid')">🌟 Mi versión</button>
       </div>
 
       <!-- ====== VERSIÓN DEL PADRE ====== -->
       <div id="kidParentVersion">
-
-        <!-- Slideshow con marco peluche -->
-        <div style="position:relative;margin:0 16px 8px">
-          <div class="slideshow-container" id="kidSlideshow" style="border-radius:24px;overflow:hidden;border:3px solid #E8D5B7;background:#F5EDE0">
-            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9B7B6B;font-size:48px" id="slidePlaceholder">📖</div>
-            <button class="slide-nav-btn" style="left:10px;background:rgba(201,168,76,0.8);border-radius:50%;width:36px;height:36px;font-size:20px" onclick="slideKid(-1)">‹</button>
-            <button class="slide-nav-btn" style="right:10px;background:rgba(201,168,76,0.8);border-radius:50%;width:36px;height:36px;font-size:20px" onclick="slideKid(1)">›</button>
-          </div>
+        <!-- Slideshow -->
+        <div class="slideshow-container" id="kidSlideshow" style="margin-bottom:0">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:48px" id="slidePlaceholder">📖</div>
+          <button class="slide-nav-btn" style="left:10px" onclick="slideKid(-1)">‹</button>
+          <button class="slide-nav-btn" style="right:10px" onclick="slideKid(1)">›</button>
         </div>
-        <div class="slideshow-dots" id="slideshowDots" style="margin-bottom:8px"></div>
+        <div class="slideshow-dots" id="slideshowDots" style="margin-bottom:12px"></div>
 
-        <!-- PLAYER con botones sprite -->
-        <div style="margin:0 16px 14px;background:#FFF8F0;border-radius:24px;padding:18px;border:2px solid #E8D5B7;box-shadow:0 4px 16px rgba(92,64,51,0.1)">
-          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#9B7B6B;text-align:center;margin-bottom:14px">🎧 Escuchá el cuento</div>
-
-          <!-- Barra de progreso -->
-          <div style="position:relative;height:10px;background:#E8D5B7;border-radius:10px;margin-bottom:16px;cursor:pointer" onclick="seekKidByClick(event,this)" id="kidProgressBar">
-            <div id="kidProgress" style="height:100%;background:linear-gradient(90deg,#C9A84C,#e8c97a);border-radius:10px;width:0%;transition:width .1s"></div>
-          </div>
-          <div style="text-align:center;font-size:12px;color:#9B7B6B;margin-bottom:14px" id="kidTimeDisplay">0:00</div>
-
-          <!-- Controles con sprites -->
-          <div style="display:flex;align-items:center;justify-content:center;gap:16px">
-            <button onclick="seekKid(-10)" id="kidBtnPrev" style="background:none;border:none;cursor:pointer;width:56px;height:56px;padding:0"></button>
-            <button onclick="toggleKidPlay()" id="kidPlayBtn" style="background:none;border:none;cursor:pointer;width:72px;height:72px;padding:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:0"></button>
-            <button onclick="seekKid(10)" id="kidBtnNext" style="background:none;border:none;cursor:pointer;width:56px;height:56px;padding:0"></button>
-          </div>
-
-          <!-- Botón reproducir siguiente -->
-          <div style="margin-top:16px;display:flex;justify-content:center">
-            <button onclick="playNextKidStory()" id="kidBtnSiguiente" style="background:none;border:none;cursor:pointer;width:200px;height:40px;padding:0"></button>
+        <!-- Audio player -->
+        <div style="background:var(--card);border-radius:18px;padding:18px;margin-bottom:12px;border:1px solid rgba(167,139,250,0.15)">
+          <div style="font-family:'Baloo 2',cursive;font-size:15px;margin-bottom:12px;color:var(--accent2)">🎧 Escuchá el cuento</div>
+          <div class="audio-player">
+            <div class="audio-controls">
+              <button class="seek-btn" onclick="seekKid(-10)" style="font-size:24px;width:44px;height:44px">⏪</button>
+              <button class="play-btn" id="kidPlayBtn" onclick="toggleKidPlay()" style="width:64px;height:64px;font-size:28px">▶</button>
+              <button class="seek-btn" onclick="seekKid(10)" style="font-size:24px;width:44px;height:44px">⏩</button>
+              <div class="audio-waveform" style="flex:1"><div class="audio-progress" id="kidProgress"></div></div>
+              <span class="audio-time" id="kidTimeDisplay" style="font-size:12px">0:00</span>
+            </div>
           </div>
         </div>
 
-        <!-- Story text -->
-        <div id="kidStoryTextCard" style="display:none;margin:0 16px 14px;background:#FFF8F0;border-radius:20px;padding:16px;border:2px solid #E8D5B7">
-          <div style="font-family:'Fredoka One',cursive;font-size:15px;margin-bottom:10px;color:#9B7B6B">📝 Texto del cuento</div>
-          <div id="kidStoryTextContent" style="font-size:14px;line-height:1.8;color:#5C4033"></div>
+        <!-- Story text if any -->
+        <div id="kidStoryTextCard" style="display:none;background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;border:1px solid rgba(167,139,250,0.15)">
+          <div style="font-family:'Baloo 2',cursive;font-size:15px;margin-bottom:10px;color:var(--text2)">📝 Texto del cuento</div>
+          <div id="kidStoryTextContent" style="font-size:14px;line-height:1.8;color:var(--text)"></div>
         </div>
 
         <!-- Reacción del niño -->
-        <div style="margin:0 16px 14px;background:#FFF8F0;border-radius:20px;padding:16px;text-align:center;border:2px solid #E8D5B7">
-          <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033;margin-bottom:12px">¿Cómo te gustó el cuento? 💭</div>
-          <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap" id="kidReactionBtns">
-            <button onclick="sendKidReaction('❤️')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">❤️</button>
-            <button onclick="sendKidReaction('⭐')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">⭐</button>
-            <button onclick="sendKidReaction('😄')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">😄</button>
-            <button onclick="sendKidReaction('🤩')" style="font-size:32px;background:none;border:2px solid #E8D5B7;border-radius:16px;padding:8px 14px;cursor:pointer;transition:transform .15s" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'">🤩</button>
-          </div>
-        </div>
+        <div style="background:var(--card);border-radius:18px;padding:16px;margin-bottom:12px;text-align:center;border:1px solid rgba(255,209,102,.2)">
           <div style="font-family:'Baloo 2',cursive;font-size:14px;color:var(--text2);margin-bottom:10px">¿Te gustó el cuento?</div>
           <div style="display:flex;justify-content:center;gap:16px" id="kidReactionBtns">
             <button onclick="sendKidReaction('❤️')" style="font-size:40px;background:none;border:none;cursor:pointer">❤️</button>
@@ -1130,12 +1079,12 @@
     </div>
 
     <!-- DRAW TAB KID — nueva pantalla separada -->
-    <div id="kTab-draw" style="display:none;padding-bottom:80px">
-      <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:6px;color:#5C4033;padding:12px 16px 0">🎨 Mis Creaciones</div>
-      <p style="font-size:13px;color:#9B7B6B;margin-bottom:14px;padding:0 16px">Hacé tus dibujos y mandáselos a papá/mamá.</p>
-      <div style="padding:0 16px">
+    <div id="kTab-draw" style="display:none">
+      <div style="font-family:'Baloo 2',cursive;font-size:24px;margin-bottom:6px;color:var(--accent)">🎨 Mis Dibujos</div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Hacé hasta 5 dibujos, reproducílos como cuento y mandáselos a papá/mamá.</p>
+
       <!-- Drawing canvas -->
-      <div style="background:rgba(255,255,255,0.88);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid #E8D5B7;box-shadow:0 3px 12px rgba(92,64,51,0.08)">
+      <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(167,139,250,0.2)">
         <!-- Color picker lápiz -->
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
           <span style="font-size:11px;font-weight:800;color:var(--text2)">Lápiz:</span>
@@ -1241,45 +1190,38 @@
     </div>
 
     <!-- PLAYGROUND TAB KID -->
-    <div id="kTab-play" style="display:none;padding:16px;padding-bottom:80px">
-      <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:12px;color:#5C4033">🎮 ¡A Jugar!</div>
+    <div id="kTab-play" style="display:none">
+      <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:12px;color:var(--accent)">🎮 ¡A Jugar!</div>
 
-      <!-- Carrusel de juegos -->
-      <div style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:12px">
-        <div onclick="openKidGame('quiz')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #7BBFE8;background:#B8DFF0;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🧠</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Quiz</div>
-          <div style="font-size:9px;color:#5C9ABF;font-weight:700;text-align:center">¿Cuánto recordás?</div>
+      <div class="game-grid" id="gameGrid">
+        <div class="game-card" onclick="openGame('quiz')">
+          <div class="game-icon">🧠</div>
+          <div class="game-name">Quiz de Cuentos</div>
+          <div class="game-desc">¿Cuánto recordás?</div>
         </div>
-        <div onclick="openKidGame('memory')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #F4A261;background:#FDDCCA;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🃏</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Memoria</div>
-          <div style="font-size:9px;color:#C47A3A;font-weight:700;text-align:center">¡Encontrá parejas!</div>
+        <div class="game-card" onclick="openGame('memory')">
+          <div class="game-icon">🃏</div>
+          <div class="game-name">Memoria</div>
+          <div class="game-desc">¡Encontrá las parejas!</div>
         </div>
-        <div onclick="openKidGame('words')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #52C77F;background:#C8EFD8;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🔤</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Palabras</div>
-          <div style="font-size:9px;color:#2E8B57;font-weight:700;text-align:center">Completá la historia</div>
+        <div class="game-card" onclick="openGame('words')">
+          <div class="game-icon">🔤</div>
+          <div class="game-name">Palabras Mágicas</div>
+          <div class="game-desc">Completá la historia</div>
         </div>
-        <div onclick="openKidGame('puzzle')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #A78BFA;background:#E8DFFF;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🧩</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Puzzle</div>
-          <div style="font-size:9px;color:#7B5EA7;font-weight:700;text-align:center">Ordená las escenas</div>
+        <div class="game-card" style="grid-column:1/-1" onclick="openGame('puzzle')">
+          <div class="game-icon">🧩</div>
+          <div class="game-name">Armar el Cuento</div>
+          <div class="game-desc">Ordená las escenas con imágenes</div>
         </div>
       </div>
 
-      <!-- Área del juego activo -->
-      <div id="kidGameArea" style="display:none;margin-top:12px;background:rgba(255,255,255,0.9);border-radius:20px;padding:16px;border:2px solid #E8D5B7">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div id="kidGameTitle" style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033"></div>
-          <button onclick="closeKidGame()" style="background:rgba(92,64,51,0.1);border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 12px;font-family:'Nunito',sans-serif;font-size:12px;color:#5C4033;cursor:pointer">✕ Cerrar</button>
-        </div>
-        <div id="gameArea-quiz" class="game-area"></div>
-        <div id="gameArea-memory" class="game-area"></div>
-        <div id="gameArea-words" class="game-area"></div>
-        <div id="gameArea-draw" class="game-area"></div>
-        <div id="gameArea-puzzle" class="game-area"></div>
-      </div>
+      <!-- Game areas -->
+      <div class="game-area" id="gameArea-quiz"></div>
+      <div class="game-area" id="gameArea-memory"></div>
+      <div class="game-area" id="gameArea-words"></div>
+      <div class="game-area" id="gameArea-draw"></div>
+      <div class="game-area" id="gameArea-puzzle"></div>
     </div>
 
     <!-- WRITING TAB KID (área de escritura / redacción) -->
@@ -1365,19 +1307,10 @@
 
   </div>
 
-  <div class="kid-bottom-nav own-kid-nav" id="kidNavBar" style="background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;position:fixed;bottom:0;left:0;right:0;z-index:200;display:none">
-    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:472px 352px;background-position:-11px -247px;background-repeat:no-repeat;border-radius:12px;transition:transform 0.15s" id="knav-icon-home"></span>
-      <span>Escuchar</span>
-    </button>
-    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:472px 352px;background-position:-60px -247px;background-repeat:no-repeat;border-radius:12px;transition:transform 0.15s;opacity:0.7" id="knav-icon-draw"></span>
-      <span>Crear</span>
-    </button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:472px 352px;background-position:-109px -247px;background-repeat:no-repeat;border-radius:12px;transition:transform 0.15s;opacity:0.7" id="knav-icon-play"></span>
-      <span>Jugar</span>
-    </button>
+  <div class="kid-bottom-nav">
+    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-home" style="font-size:28px">🎧</span>Escuchar</button>
+    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-draw" style="font-size:28px">🎨</span>Dibujar</button>
+    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;padding:10px 0;font-size:13px"><span class="nav-icon" id="kicon-play" style="font-size:28px">⭐</span>Jugar</button>
   </div>
 </div>
 
@@ -1402,42 +1335,5 @@
 
 <!-- OWN App -->
 <script src="app.js"></script>
-
-<!-- Nav sprite state manager -->
-<script>
-(function(){
-  var ICON_IDS = { home:'knav-icon-home', draw:'knav-icon-draw', play:'knav-icon-play' };
-  function updateNavSprites(tab){
-    Object.keys(ICON_IDS).forEach(function(key){
-      var icon = document.getElementById(ICON_IDS[key]);
-      var btn  = document.getElementById('knav-' + key);
-      if(!icon || !btn) return;
-      if(key === tab){
-        icon.style.opacity = '1';
-        icon.style.transform = 'scale(1.12)';
-        btn.style.color = '#C9A84C';
-      } else {
-        icon.style.opacity = '0.5';
-        icon.style.transform = 'scale(1)';
-        btn.style.color = '#9B7B6B';
-      }
-    });
-  }
-  var tries = 0;
-  var interval = setInterval(function(){
-    tries++;
-    if(typeof window.switchKidTab === 'function' && !window.switchKidTab._patched){
-      var orig = window.switchKidTab;
-      window.switchKidTab = function(tab){
-        orig(tab);
-        updateNavSprites(tab);
-      };
-      window.switchKidTab._patched = true;
-      clearInterval(interval);
-    }
-    if(tries > 100) clearInterval(interval);
-  }, 80);
-})();
-</script>
 </body>
 </html>
