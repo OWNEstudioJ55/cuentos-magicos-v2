@@ -3358,7 +3358,12 @@ function showKidApp() {
   loadWriteImgPicker();
   switchKidTab('home');
   showScreen('kidApp');
-  updateKidProgress('sessionMinutes', 0); // start tracking
+  updateKidProgress('sessionMinutes', 0);
+
+  // Inyectar sprites del niño después de que el DOM es visible
+  setTimeout(()=>{
+    injectKidSpriteEl('kidHeroOsoSprite', 'happy',       52);
+  }, 300);
 }
 
 function switchKidTab(tab) {
@@ -4413,6 +4418,51 @@ function buildKidAchievements() {
 
 // ===================== GAMES / PLAYGROUND =====================
 let currentGame=null;
+function openKidGame(gameId) {
+  const area = document.getElementById('kidGameArea');
+  const title = document.getElementById('kidGameTitle');
+  const content = document.getElementById('kidGameContent');
+  if(!area || !content) { openGame(gameId); return; }
+
+  const names = {quiz:'🧠 Quiz de Cuentos', memory:'🃏 Memoria', words:'🔤 Palabras Mágicas', puzzle:'🧩 Armar el Cuento'};
+  if(title) title.textContent = names[gameId] || '🎮 Juego';
+  area.style.display = 'block';
+  content.innerHTML = '';
+
+  // Renderizar el juego en el contenido
+  currentGame = gameId;
+  updateKidProgress('gamesPlayed');
+
+  // Mover el game area al kidGameContent
+  const legacyArea = document.getElementById('gameArea-'+gameId);
+  if(legacyArea) {
+    legacyArea.innerHTML = '';
+    content.appendChild(legacyArea);
+    legacyArea.style.display = 'block';
+    legacyArea.classList.add('active');
+  }
+
+  if(gameId==='quiz') buildQuizGame();
+  else if(gameId==='memory') buildMemoryGame();
+  else if(gameId==='words') buildWordsGame();
+  else if(gameId==='puzzle') buildPuzzleGame();
+
+  // Scroll al área del juego
+  setTimeout(()=>area.scrollIntoView({behavior:'smooth', block:'start'}), 100);
+}
+
+function closeKidGame() {
+  const area = document.getElementById('kidGameArea');
+  if(area) area.style.display = 'none';
+  // Devolver los game areas a su lugar
+  document.querySelectorAll('.game-area').forEach(a=>{
+    a.classList.remove('active');
+    a.style.display = 'none';
+    const ktp = document.getElementById('kTab-play');
+    if(ktp && !ktp.contains(a)) ktp.appendChild(a);
+  });
+}
+
 function openGame(gameId) {
   document.querySelectorAll('.game-card').forEach(c=>c.classList.remove('active-game'));
   document.querySelectorAll('.game-area').forEach(a=>a.classList.remove('active'));

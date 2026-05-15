@@ -870,7 +870,7 @@
   <!-- HEADER NIÑO -->
   <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
     <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <img src="/logooso.png" alt="OWN" style="height:36px;object-fit:contain;mix-blend-mode:multiply">
+      <img src="/logooso.png" alt="OWN" style="height:48px;object-fit:contain;mix-blend-mode:screen">
       <div style="display:flex;gap:8px;align-items:center">
         <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
         <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
@@ -888,7 +888,7 @@
 
       <!-- Hero — cuento nuevo del padre -->
       <div id="kidNewStoryHero" style="display:none;margin:8px 16px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:2px solid #E8D5B7;border-radius:20px;padding:14px 16px;cursor:pointer;box-shadow:0 4px 20px rgba(92,64,51,0.12);display:flex;align-items:center;gap:12px" onclick="openFirstNewStory()">
-        <div style="font-size:52px;flex-shrink:0">🐻</div>
+        <div id="kidHeroOsoSprite" style="width:52px;height:52px;flex-shrink:0;overflow:hidden"></div>
         <div style="flex:1">
           <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:2px">¡Papá/Mamá te mandó un cuento!</div>
           <div style="font-size:11px;color:#9B7B6B">Tocá para escucharlo 🎧</div>
@@ -1241,39 +1241,43 @@
 
       <!-- Juegos en carrusel -->
       <div style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:8px;margin-bottom:16px">
-
-        <div onclick="openGame('quiz')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #7BBFE8;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#B8DFF0;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
+        <div onclick="openKidGame('quiz')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #7BBFE8;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#B8DFF0;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
           <div style="font-size:48px;margin-bottom:10px">🧠</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:4px">Quiz de Cuentos</div>
+          <div style="font-family:'Fredoka One',cursine;font-size:14px;color:#5C4033;text-align:center;margin-bottom:4px">Quiz de Cuentos</div>
           <div style="font-size:10px;color:#7BBFE8;font-weight:700;text-align:center">¿Cuánto recordás?</div>
         </div>
-
-        <div onclick="openGame('memory')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #F4A261;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#FDDCCA;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
+        <div onclick="openKidGame('memory')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #F4A261;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#FDDCCA;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
           <div style="font-size:48px;margin-bottom:10px">🃏</div>
           <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:4px">Memoria</div>
           <div style="font-size:10px;color:#F4A261;font-weight:700;text-align:center">¡Encontrá las parejas!</div>
         </div>
-
-        <div onclick="openGame('words')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #52C77F;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#C8EFD8;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
+        <div onclick="openKidGame('words')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #52C77F;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#C8EFD8;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
           <div style="font-size:48px;margin-bottom:10px">🔤</div>
           <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:4px">Palabras Mágicas</div>
           <div style="font-size:10px;color:#52C77F;font-weight:700;text-align:center">Completá la historia</div>
         </div>
-
-        <div onclick="openGame('puzzle')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #A78BFA;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#E8DFFF;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
+        <div onclick="openKidGame('puzzle')" style="flex-shrink:0;width:140px;border-radius:20px;overflow:hidden;border:2.5px solid #A78BFA;box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:#E8DFFF;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px">
           <div style="font-size:48px;margin-bottom:10px">🧩</div>
           <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:4px">Armar el Cuento</div>
           <div style="font-size:10px;color:#A78BFA;font-weight:700;text-align:center">Ordená las escenas</div>
         </div>
-
       </div>
 
-      <!-- Game areas -->
-      <div class="game-area" id="gameArea-quiz"></div>
-      <div class="game-area" id="gameArea-memory"></div>
-      <div class="game-area" id="gameArea-words"></div>
-      <div class="game-area" id="gameArea-draw"></div>
-      <div class="game-area" id="gameArea-puzzle"></div>
+      <!-- Área del juego activo -->
+      <div id="kidGameArea" style="display:none;background:rgba(255,255,255,0.88);border-radius:20px;padding:16px;border:2px solid #E8D5B7">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div id="kidGameTitle" style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033"></div>
+          <button onclick="closeKidGame()" style="background:rgba(92,64,51,0.1);border:none;border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;cursor:pointer">✕ Cerrar</button>
+        </div>
+        <div id="kidGameContent"></div>
+      </div>
+
+      <!-- Game areas legacy (para compatibilidad) -->
+      <div class="game-area" id="gameArea-quiz" style="display:none"></div>
+      <div class="game-area" id="gameArea-memory" style="display:none"></div>
+      <div class="game-area" id="gameArea-words" style="display:none"></div>
+      <div class="game-area" id="gameArea-draw" style="display:none"></div>
+      <div class="game-area" id="gameArea-puzzle" style="display:none"></div>
     </div>
 
     <!-- WRITING TAB KID (área de escritura / redacción) -->
