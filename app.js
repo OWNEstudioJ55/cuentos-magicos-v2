@@ -240,7 +240,7 @@ function kidSprite(key, sizePx, extraStyle='') {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `<div style="width:${sizePx}px;height:${sizePx}px;overflow:hidden;flex-shrink:0;${extraStyle}"><img src="${KID_SPRITE_URL}" style="width:${bgW}px;height:${bgH}px;margin-left:${bx}px;margin-top:${by}px;mix-blend-mode:multiply;display:block;max-width:none"></div>`;
+  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;flex-shrink:0;${extraStyle}"></div>`;
 }
 
 function kidSpriteBg(key, sizePx) {
@@ -250,12 +250,10 @@ function kidSpriteBg(key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  // Devuelve HTML en lugar de CSS para poder usar mix-blend-mode en img
-  return `__KID_SPRITE__${key}__${sizePx}__`;
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
 }
 
 function injectKidSpriteEl(id, key, sizePx) {
-  console.log('inyectando ' + id);
   const sp = KID_SPRITES[key]; if(!sp) return;
   const el = document.getElementById(id); if(!el) return;
   const scale = sizePx / Math.max(sp.w, sp.h);
@@ -263,7 +261,7 @@ function injectKidSpriteEl(id, key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  el.style.cssText = `width:${sizePx}px;height:${sizePx}px;overflow:hidden;display:block;`;
+  el.style.cssText = `width:${sizePx}px;height:${sizePx}px;overflow:hidden;display:block;flex-shrink:0;`;
   el.innerHTML = `<img src="${KID_SPRITE_URL}" style="width:${bgW}px;height:${bgH}px;margin-left:${bx}px;margin-top:${by}px;display:block;max-width:none;pointer-events:none">`;
 }
 // ─────────────────────────────────────────────────────────
@@ -1267,19 +1265,27 @@ function injectNavSprites() {
     if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
   });
 
-  // Kid nav — sprites peluche con img
-  injectKidSpriteEl('kicon-escuchar', 'nav_escuchar', 44);
-  injectKidSpriteEl('kicon-crear',    'nav_crear',    44);
-  injectKidSpriteEl('kicon-jugar',    'nav_jugar',    44);
+  // Kid nav — sprites peluche
+  const kidNavItems = [
+    ['kicon-escuchar', 'nav_escuchar', 44],
+    ['kicon-crear',    'nav_crear',    44],
+    ['kicon-jugar',    'nav_jugar',    44],
+  ];
+  kidNavItems.forEach(([id,key,size])=>{
+    const el=document.getElementById(id);
+    if(el) el.style.cssText=`width:${size}px;height:${size}px;`+kidSpriteBg(key,size);
+  });
 
-  // Hero botón
-  injectKidSpriteEl('kidHeroBtnSig', 'btn_siguiente', 48);
-
-  // Player botones
-  injectKidSpriteEl('kidPlayBtn',     'btn_play_big', 72);
-  injectKidSpriteEl('kidBtnPrev',     'btn_prev_sm',  56);
-  injectKidSpriteEl('kidBtnNext',     'btn_next_sm',  56);
-  injectKidSpriteEl('kidBtnSiguiente','btn_siguiente', 40);
+  // Hero botón "Escuchar ahora"
+  const heroBtn=document.getElementById('kidHeroBtnSig');
+  if(heroBtn) heroBtn.style.cssText=`width:220px;height:48px;`+kidSpriteBg('btn_siguiente',48);
+  if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
+  const kidPrev = document.getElementById('kidBtnPrev');
+  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_prev',56)}`; }
+  const kidNext = document.getElementById('kidBtnNext');
+  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_next',56)}`; }
+  const kidSig = document.getElementById('kidBtnSiguiente');
+  if(kidSig) { kidSig.innerHTML=''; kidSig.style.cssText=`width:200px;height:40px;${kidSpriteBg('btn_siguiente',40)}`; }
 }
 
 function previewVoiceWithChar() {
@@ -3298,14 +3304,15 @@ function showKidApp() {
   switchKidTab('home');
   showScreen('kidApp');
   updateKidProgress('sessionMinutes', 0);
-
-  // Inyectar sprites del niño DESPUÉS de que el DOM está visible
   setTimeout(()=>{
     injectKidSpriteEl('kicon-escuchar', 'nav_escuchar', 44);
     injectKidSpriteEl('kicon-crear',    'nav_crear',    44);
     injectKidSpriteEl('kicon-jugar',    'nav_jugar',    44);
     injectKidSpriteEl('kidHeroBtnSig',  'btn_siguiente', 48);
-  }, 500);
+    injectKidSpriteEl('kidPlayBtn',     'btn_play_big', 72);
+    injectKidSpriteEl('kidBtnPrev',     'btn_prev_sm',  56);
+    injectKidSpriteEl('kidBtnNext',     'btn_next_sm',  56);
+  }, 300);
 }
 
 function switchKidTab(tab) {
