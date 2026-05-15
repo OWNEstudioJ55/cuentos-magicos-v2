@@ -868,16 +868,23 @@
 <div class="screen" id="kidApp" style="background:url('/fondonn.png') top center/100% auto no-repeat fixed,#D9DFC3;">
 
   <!-- HEADER NIÑO -->
-  <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
-    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <img src="/logooso.png" alt="OWN" style="height:52px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(92,64,51,0.3))">
+  <div class="kid-header own-kid-header" style="padding:44px 16px 10px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
+    <!-- Fila superior: saludo izq + campanita + estrellas + salir -->
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:8px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033">¡Hola, <span id="kidNameHeader">amigo</span>! 👋</div>
+        <button onclick="showParentNotifs()" style="position:relative;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;padding:5px 8px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
+          🔔<span id="kidNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:14px;height:14px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
+        </button>
+      </div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
         <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
       </div>
     </div>
-    <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033">
-      ¡Hola, <span id="kidNameHeader">amigo</span>! 👋
+    <!-- Logo centrado 2x más grande -->
+    <div style="display:flex;justify-content:center;width:100%">
+      <img src="/logooso.png" alt="OWN" style="height:104px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(92,64,51,0.3))">
     </div>
   </div>
 
@@ -1171,7 +1178,7 @@
       </div>
 
       <!-- Saved drawings sequence -->
-      <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px">
+      <div style="background:rgba(255,248,235,0.9);border-radius:18px;padding:14px;margin-bottom:14px">
         <div style="font-family:'Baloo 2',cursive;font-size:17px;margin-bottom:10px;color:var(--accent2)">🖼️ Mi secuencia de dibujos</div>
         <div id="kidDrawingSequence" style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px">
           <div id="kidDrawSlot1" style="aspect-ratio:1;border-radius:10px;border:2px dashed rgba(167,139,250,0.3);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text2);cursor:pointer;position:relative" onclick="selectKidDrawSlot(1)">1</div>
@@ -1187,7 +1194,7 @@
       </div>
 
       <!-- Reproducción de secuencia -->
-      <div id="kidDrawPlayArea" style="display:none;background:var(--bg2);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(52,211,153,0.3)">
+      <div id="kidDrawPlayArea" style="display:none;background:rgba(245,237,224,0.8);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(52,211,153,0.3)">
         <div style="font-family:'Baloo 2',cursive;font-size:16px;margin-bottom:10px;color:var(--accent3)">▶ Reproduciendo tu cuento:</div>
         <div class="slideshow-container" id="kidDrawSlideshow" style="aspect-ratio:1;border-radius:14px;margin-bottom:8px">
           <button class="slide-nav-btn" style="left:6px" onclick="slideKidDraw(-1)">‹</button>
@@ -1198,7 +1205,7 @@
       </div>
 
       <!-- Grabación de voz para el cuento dibujado -->
-      <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(255,111,216,0.2)">
+      <div style="background:rgba(255,248,235,0.9);border-radius:18px;padding:14px;margin-bottom:14px;border:2px solid rgba(255,111,216,0.2)">
         <div style="font-family:'Fredoka One',cursive;font-size:17px;margin-bottom:10px;color:var(--coral)">🎙️ Grabá tu voz para el cuento</div>
         <div class="timer-display" id="kidDrawRecTimer" style="font-size:36px;margin-bottom:4px">0:00</div>
         <div class="rec-status" id="kidDrawRecStatus">Tocá para grabar tu voz</div>
@@ -1366,6 +1373,42 @@
 
   </div>
 
+  <!-- Juegos de palabras para niños de 4 años -->
+  <div style="margin-top:20px">
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:12px">🔤 Completá la palabra</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+
+      <div onclick="startWordPuzzle(0)" style="background:rgba(255,216,162,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(201,168,76,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+        <div style="font-size:36px;margin-bottom:6px">🐱</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">GA _ O</div>
+        <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
+      </div>
+
+      <div onclick="startWordPuzzle(1)" style="background:rgba(162,216,255,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(100,180,240,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+        <div style="font-size:36px;margin-bottom:6px">🐶</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">PE _ RO</div>
+        <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
+      </div>
+
+      <div onclick="startWordPuzzle(2)" style="background:rgba(162,255,196,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(100,200,130,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+        <div style="font-size:36px;margin-bottom:6px">🦁</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">LE _ N</div>
+        <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
+      </div>
+
+      <div onclick="startWordPuzzle(3)" style="background:rgba(255,162,200,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(240,100,150,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+        <div style="font-size:36px;margin-bottom:6px">🌈</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">SOL _ </div>
+        <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
+      </div>
+
+    </div>
+    <!-- Area juego letra -->
+    <div id="wordPuzzleArea" style="display:none;margin-top:14px;background:rgba(255,255,255,0.9);border-radius:20px;padding:16px;border:2px solid #E8D5B7">
+      <div id="wordPuzzleContent"></div>
+    </div>
+  </div>
+
   <!-- Área del juego activo -->
   <div id="kidGameArea" style="display:none;margin-top:16px;background:#fff;border-radius:20px;padding:16px;border:2px solid #E8D5B7">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
@@ -1512,7 +1555,10 @@
     im.className='own-card-img';
     var lb=document.createElement('div');
     lb.className='own-card-label';
-    lb.innerHTML='<strong>'+title+'</strong>'+(sub?'<span class="own-card-sub">'+sub+'</span>':'');
+    var icons={'Caperucita':'🐺','chanchito':'🐷','Hansel':'🏠','Gretel':'🏠','Patito':'🦢','tortuga':'🐢','liebre':'🐰','Rapunzel':'👑','Blancanieves':'🍎','Cenicienta':'👠','Pinocho':'🪵','default':'📖'};
+    var icon='📖';
+    Object.keys(icons).forEach(function(k){if(title.toLowerCase().indexOf(k.toLowerCase())>-1)icon=icons[k];});
+    lb.innerHTML='<div style="font-size:28px;margin-bottom:3px">'+icon+'</div><strong>'+title+'</strong>'+(sub?'<span class="own-card-sub">'+sub+'</span>':'');
     w.appendChild(im); w.appendChild(lb);
     el.parentNode.insertBefore(w,el);
     el.parentNode.removeChild(el);
@@ -1537,6 +1583,35 @@
     if(tw>100)clearInterval(iw);
   },200);
 })();
+</script>
+
+<script>
+var WORD_PUZZLES=[
+  {emoji:'🐱',word:'GATO',blank:'GA_O',letter:'T',hint:'Hace miau'},
+  {emoji:'🐶',word:'PERRO',blank:'PE_RO',letter:'R',hint:'Hace guau'},
+  {emoji:'🦁',word:'LEON',blank:'LE_N',letter:'O',hint:'El rey de la selva'},
+  {emoji:'🌈',word:'SOL',blank:'SO_',letter:'L',hint:'Brilla de día'},
+];
+function startWordPuzzle(idx){
+  var p=WORD_PUZZLES[idx];
+  var area=document.getElementById('wordPuzzleArea');
+  var content=document.getElementById('wordPuzzleContent');
+  area.style.display='block';
+  content.innerHTML='<div style="text-align:center;margin-bottom:16px"><div style="font-size:52px">'+p.emoji+'</div><div style="font-family:Fredoka One,cursive;font-size:18px;color:#5C4033;margin:8px 0">'+p.hint+'</div><div style="font-family:Fredoka One,cursive;font-size:28px;color:#C9A84C;letter-spacing:6px;margin-bottom:16px">'+p.blank+'</div></div>'
+  +'<div style="text-align:center;margin-bottom:12px"><input id="wpInput" maxlength="1" style="width:60px;height:60px;text-align:center;font-family:Fredoka One,cursive;font-size:32px;border:3px solid #C9A84C;border-radius:14px;color:#5C4033;text-transform:uppercase" placeholder="?"></div>'
+  +'<button onclick="checkWordPuzzle(''+p.letter+'',''+p.word+'')" style="width:100%;padding:12px;background:#C9A84C;border:none;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;color:#fff;cursor:pointer">✅ Verificar</button>';
+  area.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function checkWordPuzzle(correct,word){
+  var val=(document.getElementById('wpInput').value||'').toUpperCase().trim();
+  var content=document.getElementById('wordPuzzleContent');
+  if(val===correct){
+    content.innerHTML+='<div style="text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:20px;color:#34d399">🎉 ¡Correcto! La palabra es '+word+' +3⭐</div>';
+    if(window.appState){appState.stars+=3;localStorage.setItem("ownStars",appState.stars);if(typeof updateStarDisplay==="function")updateStarDisplay();}
+  } else {
+    content.innerHTML+='<div style="text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:16px;color:#f87171">❌ Intentá de nuevo — la letra es '+correct+'</div>';
+  }
+}
 </script>
 </body>
 </html>
