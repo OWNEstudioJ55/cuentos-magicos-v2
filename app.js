@@ -3397,35 +3397,32 @@ async function loadKidHomeStories() {
   if(noHero) noHero.style.display='none';
 
   const lastSeen = parseInt(localStorage.getItem('ownKidLastSeenStories')||'0');
-  const bgColors  = ['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF'];
+  const cardKeys  = ['card_celeste','card_coral','card_verde','card_lila'];
   const brdColors = ['#7BBFE8','#F4A261','#52C77F','#A78BFA'];
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map((s,idx)=>{
     const img=s.images&&s.images[0];
     const sprite=CHAR_SPRITES[s.char];
     const thumbBg=sprite?spriteBg(sprite,80):'';
     const isNew = s.supaSync && new Date(s.created||0).getTime() > lastSeen;
-    const bg  = bgColors[idx%4];
     const brd = brdColors[idx%4];
-    return `<div onclick="openKidStory('${s.id}')" style="
-      background:${bg};
-      border:2.5px solid ${brd};
-      border-radius:20px;
-      overflow:hidden;
-      cursor:pointer;
-      position:relative;
-      box-shadow:0 4px 14px rgba(0,0,0,0.08);
-      transition:transform .15s;
-    " onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
-      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:#F4A261;color:white;font-size:9px;font-weight:800;border-radius:12px;padding:3px 8px;font-family:'Nunito',sans-serif;z-index:2">¡NUEVO!</div>`:''}
-      <div style="width:100%;aspect-ratio:1;overflow:hidden;background:rgba(255,255,255,0.4)">
-        ${img ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">` : ''}
-        ${!img ? `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;${thumbBg}">
-          ${!sprite?`<span style="font-size:48px">${s.char||'📖'}</span>`:''}
-        </div>` : ''}
+    const cardKey = cardKeys[idx%4];
+    const sp = KID_SPRITES[cardKey];
+    const scale = 150 / Math.max(sp.w, sp.h);
+    const bgW = Math.round(KS_W * scale);
+    const bgH = Math.round(KS_H * scale);
+    const bx  = -Math.round(sp.x * scale);
+    const by  = -Math.round(sp.y * scale);
+    return `<div onclick="openKidStory('${s.id}')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;border:2.5px solid ${brd};box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;position:relative;background:white">
+      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:#F4A261;color:white;font-size:9px;font-weight:800;border-radius:12px;padding:2px 7px;z-index:3;font-family:'Nunito',sans-serif">¡NUEVO!</div>`:''}
+      <div style="position:relative;width:150px;height:150px;overflow:hidden">
+        <img src="${KID_SPRITE_URL}" style="position:absolute;width:${bgW}px;height:${bgH}px;left:${bx}px;top:${by}px;max-width:none;pointer-events:none">
+        ${img?`<img src="${img}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">`:
+        !img&&sprite?`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><div style="width:80px;height:80px;${thumbBg}"></div></div>`:
+        `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px">${s.char||'📖'}</div>`}
       </div>
-      <div style="padding:10px 12px 12px;background:rgba(255,255,255,0.6)">
-        <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;line-height:1.3;margin-bottom:3px">${s.title||'Sin título'}</div>
-        <div style="font-size:10px;color:#9B7B6B;font-weight:600">${s.created||''}</div>
+      <div style="padding:8px 10px 10px;background:rgba(255,255,255,0.9)">
+        <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033;line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title||'Sin título'}</div>
+        <div style="font-size:9px;color:#9B7B6B;font-weight:600">${s.created||''}</div>
       </div>
     </div>`;
   }).join('');
