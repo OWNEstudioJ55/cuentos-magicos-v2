@@ -881,7 +881,7 @@
     </div>
   </div>
 
-  <div class="kid-content" id="kidContent" style="background:transparent"><div id="test-jugar" style="display:none;background:red;color:white;font-size:80px;text-align:center;padding:20px">PLAY TAB</div>
+  <div class="kid-content" id="kidContent" style="background:transparent">
 
     <!-- HOME TAB KID -->
     <div id="kTab-home">
@@ -1532,17 +1532,6 @@
     if(tw>100)clearInterval(iw);
   },200);
 })();
-</script>
-<script>
-var _origSwitch = window.switchKidTab;
-window.switchKidTab = function(tab) {
-  if(_origSwitch) _origSwitch(tab);
-  var t = document.getElementById('test-jugar');
-  if(t) t.style.display = tab==='play' ? 'block' : 'none';
-  console.log('switchKidTab called with:', tab);
-  var el = document.getElementById('kTab-play');
-  console.log('kTab-play element:', el, el ? el.style.display : 'NOT FOUND');
-};
 </script>
 </body>
 </html>
