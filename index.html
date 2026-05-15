@@ -868,16 +868,16 @@
 <div class="screen" id="kidApp" style="background-image:url('/fondonn.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#F5EDE0;">
 
   <!-- HEADER NIÑO -->
-  <div class="kid-header own-kid-header">
-    <div style="display:flex;align-items:center;gap:8px">
-      <img src="/logooso.png" alt="OWN" style="height:108px;object-fit:contain;mix-blend-mode:multiply;margin-top:4px">
+  <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:4px;padding:52px 16px 12px">
+    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <img src="/logooso.png" alt="OWN" style="height:54px;object-fit:contain;mix-blend-mode:multiply">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none">⭐ <span id="kidStars">0</span></div>
+        <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2)">Salir</button>
+      </div>
     </div>
-    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033">
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#5C4033;margin-top:4px">
       ¡Hola, <span id="kidNameHeader">amigo</span>! 👋
-    </div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none">⭐ <span id="kidStars">0</span></div>
-      <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2)">Salir</button>
     </div>
   </div>
 
