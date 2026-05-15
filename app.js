@@ -255,6 +255,7 @@ function kidSpriteBg(key, sizePx) {
 }
 
 function injectKidSpriteEl(id, key, sizePx) {
+  console.log('inyectando ' + id);
   const sp = KID_SPRITES[key]; if(!sp) return;
   const el = document.getElementById(id); if(!el) return;
   const scale = sizePx / Math.max(sp.w, sp.h);
@@ -3304,7 +3305,7 @@ function showKidApp() {
     injectKidSpriteEl('kicon-crear',    'nav_crear',    44);
     injectKidSpriteEl('kicon-jugar',    'nav_jugar',    44);
     injectKidSpriteEl('kidHeroBtnSig',  'btn_siguiente', 48);
-  }, 100);
+  }, 500);
 }
 
 function switchKidTab(tab) {
