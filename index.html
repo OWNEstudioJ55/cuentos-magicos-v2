@@ -865,15 +865,15 @@
 <!-- ============================================================ -->
 <!-- KID APP — UI COMPLETAMENTE DIFERENTE Y MÁGICA -->
 <!-- ============================================================ -->
-<div class="screen" id="kidApp" style="background-image:url('/fondonn.png');background-size:cover;background-position:top center;background-attachment:fixed;background-color:#F5EDE0;">
+<div class="screen" id="kidApp" style="background:url('/fondonn.png') top center/100% 100vh no-repeat fixed,#F5EDE0;">
 
   <!-- HEADER NIÑO -->
-  <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px">
+  <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
     <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
       <img src="/logooso.png" alt="OWN" style="height:36px;object-fit:contain;mix-blend-mode:multiply">
       <div style="display:flex;gap:8px;align-items:center">
-        <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none">⭐ <span id="kidStars">0</span></div>
-        <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2)">Salir</button>
+        <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
+        <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
       </div>
     </div>
     <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033">
@@ -881,22 +881,22 @@
     </div>
   </div>
 
-  <div class="kid-content" id="kidContent">
+  <div class="kid-content" id="kidContent" style="background:transparent">
 
     <!-- HOME TAB KID -->
     <div id="kTab-home">
 
       <!-- Hero — cuento nuevo del padre -->
-      <div id="kidNewStoryHero" style="display:none" onclick="openFirstNewStory()" class="own-kid-hero-new">
-        <div class="own-kid-hero-icon">🎙️</div>
-        <div class="own-kid-hero-title">¡Papá/Mamá te mandó un cuento!</div>
-        <div class="own-kid-hero-sub">Tocá para escucharlo</div>
-        <div class="own-kid-hero-btn">▶ Escuchar ahora</div>
+      <div id="kidNewStoryHero" style="display:none;margin:12px 16px;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:2px solid #E8D5B7;border-radius:24px;padding:20px;text-align:center;cursor:pointer;box-shadow:0 4px 20px rgba(92,64,51,0.12)" onclick="openFirstNewStory()">
+        <div style="font-size:44px;margin-bottom:8px">🎙️</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#5C4033;margin-bottom:4px">¡Papá/Mamá te mandó un cuento!</div>
+        <div style="font-size:13px;color:#9B7B6B;margin-bottom:14px">Tocá para escucharlo</div>
+        <div id="kidHeroBtnSig" style="margin:0 auto;width:220px;height:48px"></div>
       </div>
 
       <!-- Sin cuentos nuevos -->
-      <div id="kidNoStoryHero" class="own-kid-hero-empty">
-        <div style="font-size:48px;margin-bottom:8px">🌟</div>
+      <div id="kidNoStoryHero" style="margin:12px 16px;background:rgba(255,255,255,0.75);backdrop-filter:blur(8px);border:2px dashed #E8D5B7;border-radius:24px;padding:24px;text-align:center">
+        <div style="font-size:44px;margin-bottom:8px">🌟</div>
         <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">¡Hola, <span id="kidHeroName">amigo</span>!</div>
         <div style="font-size:13px;color:#9B7B6B">Papá/Mamá te mandará un cuento pronto</div>
       </div>
@@ -907,9 +907,12 @@
       </div>
       <div id="kidHomeStories" class="own-kid-stories-grid"></div>
 
+      <!-- Separador costura -->
+      <div class="own-kid-stitch"></div>
+
       <!-- Cuentos clásicos -->
-      <div class="own-kid-sh" style="margin-top:8px">
-        <span class="own-kid-st">📖 Cuentos Clásicos</span>
+      <div class="own-kid-sh">
+        <span class="own-kid-st">✨ Historias para Soñar</span>
       </div>
       <div id="kidClassicStories" class="own-kid-stories-grid"></div>
 
@@ -1339,17 +1342,17 @@
 
   </div>
 
-  <div class="kid-bottom-nav own-kid-nav">
+  <div class="kid-bottom-nav own-kid-nav" style="background:rgba(255,248,240,0.92);backdrop-filter:blur(12px);border-top:2px solid #E8D5B7">
     <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')">
-      <span style="font-size:26px">🎧</span>
+      <div id="kicon-escuchar" style="width:44px;height:44px;margin:0 auto 2px"></div>
       <span class="own-kid-nav-label">Escuchar</span>
     </button>
     <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()">
-      <span style="font-size:26px">🎨</span>
+      <div id="kicon-crear" style="width:44px;height:44px;margin:0 auto 2px"></div>
       <span class="own-kid-nav-label">Crear</span>
     </button>
     <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')">
-      <span style="font-size:26px">⭐</span>
+      <div id="kicon-jugar" style="width:44px;height:44px;margin:0 auto 2px"></div>
       <span class="own-kid-nav-label">Jugar</span>
     </button>
   </div>
