@@ -33,7 +33,7 @@
     <!-- Logo OWN -->
     <div class="login-logo">
       <div class="own-logo-wrap">
-        <span style="font-size:46px;line-height:1;filter:drop-shadow(0 4px 12px rgba(236,96,142,0.5));animation:floatBear 3s ease-in-out infinite">🐻</span>
+        <span style="animation:floatBear 3s ease-in-out infinite"><span style="display:inline-block;width:46px;height:46px;background-image:url('/sprites_kid_OWN.png');background-size:613px 458px;background-position:-161px -398px;background-repeat:no-repeat;vertical-align:middle"></span></span>
         <div class="own-logo-text">
           <span class="logo-w">W</span><span class="logo-n">N</span>
         </div>
@@ -116,7 +116,7 @@
     <!-- Logo OWN -->
     <div class="login-logo">
       <div class="own-logo-wrap">
-        <span style="font-size:40px;line-height:1;filter:drop-shadow(0 4px 12px rgba(236,96,142,0.5))">🐻</span>
+        <span style=""><span style="display:inline-block;width:46px;height:46px;background-image:url('/sprites_kid_OWN.png');background-size:613px 458px;background-position:-161px -398px;background-repeat:no-repeat;vertical-align:middle"></span></span>
         <div class="own-logo-text">
           <span class="logo-w">W</span><span class="logo-n">N</span>
         </div>
@@ -174,7 +174,7 @@
     <!-- PASO 3: Todo listo -->
     <div class="step" id="step3">
       <div style="text-align:center;padding:24px 0 8px">
-        <div style="font-size:64px;margin-bottom:12px;animation:floatBear 2s ease-in-out infinite">🐻</div>
+        <div style="margin-bottom:12px;animation:floatBear 2s ease-in-out infinite"><span style="display:inline-block;width:46px;height:46px;background-image:url('/sprites_kid_OWN.png');background-size:613px 458px;background-position:-161px -398px;background-repeat:no-repeat;vertical-align:middle"></span></div>
         <div style="font-family:'Fredoka One',cursive;font-size:26px;color:var(--own-gold2);margin-bottom:8px">¡Todo listo!</div>
         <div id="setupBetaInfo" style="background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);border-radius:14px;padding:14px;margin-bottom:18px;font-size:13px;color:rgba(201,168,76,.8);line-height:1.6"></div>
         <p style="font-size:13px;color:rgba(255,255,255,0.45);margin-bottom:24px">Comenzá a crear cuentos mágicos para tu familia</p>
@@ -1416,15 +1416,15 @@
 
 <!-- OWN Sprite UI -->
 <style>
-.own-card-wrap{flex-shrink:0!important;width:130px!important;height:141px!important;border-radius:18px!important;overflow:hidden!important;box-shadow:0 4px 14px rgba(0,0,0,0.13)!important;cursor:pointer!important;transition:transform .15s!important;background:transparent!important;display:inline-block!important;position:relative!important}
+.own-card-wrap{flex-shrink:0!important;width:130px!important;height:141px!important;border-radius:18px!important;overflow:hidden!important;box-shadow:0 4px 14px rgba(0,0,0,0.13)!important;cursor:pointer!important;transition:transform .15s!important;display:inline-block!important;position:relative!important}
 .own-card-wrap:active{transform:scale(0.95)!important}
-.own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;position:absolute!important;top:0!important;left:0!important;z-index:2!important;}
-.own-card-label{padding:6px 8px 8px!important;font-family:'Fredoka One',cursive!important;font-size:12px!important;color:#5C4033!important;text-align:center!important;line-height:1.3!important;background:rgba(255,255,255,0.9)!important;position:relative!important;z-index:3!important;margin:0 14px 12px!important;border-radius:10px!important;padding:5px 6px 6px!important}
+.own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;display:block!important;}
+.own-card-label{position:absolute!important;bottom:8px!important;left:8px!important;right:8px!important;padding:5px 6px!important;font-family:'Fredoka One',cursive!important;font-size:12px!important;color:#5C4033!important;text-align:center!important;line-height:1.3!important;background:rgba(255,255,255,0.88)!important;border-radius:10px!important;z-index:3!important;}
 .own-card-sub{font-family:'Nunito',sans-serif!important;font-size:9px!important;color:#9B7B6B!important;font-weight:700!important;display:block!important}
-.own-card-blue .own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;position:absolute!important;top:0!important;left:0!important;z-index:2!important;}
-.own-card-salmon .own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;position:absolute!important;top:0!important;left:0!important;z-index:2!important;}
-.own-card-mint .own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;position:absolute!important;top:0!important;left:0!important;z-index:2!important;}
-.own-card-lavender .own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;position:absolute!important;top:0!important;left:0!important;z-index:2!important;}
+.own-card-blue{background-image:url('/sprites_kid_OWN.png')!important;background-size:978px 730px!important;background-position:-45px -178px!important;background-repeat:no-repeat!important;}
+.own-card-salmon{background-image:url('/sprites_kid_OWN.png')!important;background-size:981px 733px!important;background-position:-194px -178px!important;background-repeat:no-repeat!important;}
+.own-card-mint{background-image:url('/sprites_kid_OWN.png')!important;background-size:987px 737px!important;background-position:-346px -179px!important;background-repeat:no-repeat!important;}
+.own-card-lavender{background-image:url('/sprites_kid_OWN.png')!important;background-size:987px 737px!important;background-position:-499px -179px!important;background-repeat:no-repeat!important;}
 </style>
 <script>
 (function(){
