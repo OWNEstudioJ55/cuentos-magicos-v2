@@ -916,7 +916,7 @@
       <div class="own-kid-sh">
         <span class="own-kid-st">✨ Historias para Soñar</span>
       </div>
-      <div id="kidClassicStories"></div>
+      <div id="kidClassicStories" style="display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 
       <!-- Separador costura -->
       <div class="own-kid-stitch"></div>
@@ -1247,7 +1247,7 @@
     </div>
 
     <!-- PLAYGROUND TAB KID -->
-    <div id="kTab-play" style="display:none;padding:16px;padding-bottom:80px">
+    <div id="kTab-games" style="display:none;padding:16px;padding-bottom:80px">
       <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:12px;color:#5C4033">🎮 ¡A Jugar!</div>
 
       <!-- Carrusel de juegos con tarjetas sprite -->
@@ -1380,7 +1380,7 @@
       <span id="knav-icon-draw" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:832px 621px;background-position:-107px -466px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s"></span>
       <span>Crear</span>
     </button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+    <button class="kid-nav-btn" id="knav-play" onclick="ownShowGames()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
       <span id="knav-icon-play" style="display:inline-block;width:52px;height:52px;overflow:hidden;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-182px -424px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s"></span>
       <span>Jugar</span>
     </button>
@@ -1409,21 +1409,18 @@
 <!-- OWN App -->
 <script src="app.js"></script>
 
-<!-- OWN Sprite UI Overrides -->
+
+<!-- OWN Sprite UI -->
 <style>
-/* Tarjetas clásicas con sprite — se aplican via JS al renderizarse */
 .own-card-blue     { background-image:url('/sprites_kid_OWN.png')!important; background-size:978px 730px!important; background-position:-45px -178px!important; background-repeat:no-repeat!important; width:130px!important; min-width:130px!important; height:141px!important; border:none!important; border-radius:18px!important; }
 .own-card-salmon   { background-image:url('/sprites_kid_OWN.png')!important; background-size:981px 733px!important; background-position:-194px -178px!important; background-repeat:no-repeat!important; width:130px!important; min-width:130px!important; height:141px!important; border:none!important; border-radius:18px!important; }
 .own-card-mint     { background-image:url('/sprites_kid_OWN.png')!important; background-size:987px 737px!important; background-position:-346px -179px!important; background-repeat:no-repeat!important; width:130px!important; min-width:130px!important; height:141px!important; border:none!important; border-radius:18px!important; }
 .own-card-lavender { background-image:url('/sprites_kid_OWN.png')!important; background-size:987px 737px!important; background-position:-499px -179px!important; background-repeat:no-repeat!important; width:130px!important; min-width:130px!important; height:141px!important; border:none!important; border-radius:18px!important; }
 </style>
-
 <script>
 (function(){
-  // ── 1. Nav sprite active state ──
+  // ── Nav sprite active state ──
   var ICONS={home:'knav-icon-home',draw:'knav-icon-draw',play:'knav-icon-play'};
-  var COLORS=['own-card-blue','own-card-salmon','own-card-mint','own-card-lavender'];
-
   function setActive(tab){
     Object.keys(ICONS).forEach(function(k){
       var el=document.getElementById(ICONS[k]);
@@ -1436,34 +1433,27 @@
     });
   }
 
-  // ── 2. Forzar que tab 'play' muestre kTab-play (juegos) ──
-  // app.js puede mapear 'play' a kTab-stars — lo sobreescribimos
-  function showPlayTab(){
-    // Ocultar todos los tabs
-    ['home','player','draw','stars','play','write'].forEach(function(t){
-      var el=document.getElementById('kTab-'+t);
-      if(el)el.style.display='none';
+  // ── Mostrar tab juegos sin tocar app.js ──
+  window.ownShowGames = function(){
+    // Ocultar todos los kTab-*
+    document.querySelectorAll('[id^="kTab-"]').forEach(function(el){
+      el.style.display='none';
     });
-    // Mostrar el de juegos
-    var play=document.getElementById('kTab-play');
-    if(play)play.style.display='block';
+    var g=document.getElementById('kTab-games');
+    if(g) g.style.display='block';
     setActive('play');
-  }
+    // Scroll top
+    var kc=document.getElementById('kidContent');
+    if(kc) kc.scrollTop=0;
+  };
 
-  // ── 3. Parchar switchKidTab ──
+  // ── Parchar switchKidTab para nav state ──
   var t=0,iv=setInterval(function(){
     t++;
     if(typeof window.switchKidTab==='function'&&!window.switchKidTab._spr){
       var orig=window.switchKidTab;
       window.switchKidTab=function(tab){
-        if(tab==='play'){
-          // Llamar el original por si hace más cosas (nav state, etc.)
-          orig(tab);
-          // Forzar mostrar kTab-play de todas formas
-          setTimeout(showPlayTab, 10);
-        } else {
-          orig(tab);
-        }
+        orig(tab);
         setActive(tab);
       };
       window.switchKidTab._spr=true;
@@ -1472,42 +1462,30 @@
     if(t>150)clearInterval(iv);
   },80);
 
-  // ── 4. Tarjetas clásicas con sprite ──
-  // MutationObserver en kidClassicStories y kidOwnClassicStories
-  var colorCycle=['blue','salmon','mint','lavender'];
-
-  function applySprite(container){
+  // ── Tarjetas clásicas con sprite (MutationObserver) ──
+  var COLORS=['blue','salmon','mint','lavender'];
+  function applyCards(container){
     if(!container)return;
-    // Buscar hijos directos que sean tarjetas (divs con cursor:pointer)
-    var items=Array.from(container.children);
-    items.forEach(function(el,i){
-      // Ya tiene clase propia → skip
-      if(el.classList.contains('own-card-blue')||el.classList.contains('own-card-salmon')||
-         el.classList.contains('own-card-mint')||el.classList.contains('own-card-lavender'))return;
-      el.classList.add('own-card-'+colorCycle[i%4]);
+    Array.from(container.children).forEach(function(el,i){
+      var c='own-card-'+COLORS[i%4];
+      if(!el.classList.contains(c)) el.classList.add(c);
     });
   }
-
-  function watchContainer(id){
+  function watch(id){
     var el=document.getElementById(id);
     if(!el)return;
-    applySprite(el);
-    new MutationObserver(function(){applySprite(el);}).observe(el,{childList:true});
+    applyCards(el);
+    new MutationObserver(function(){applyCards(el);}).observe(el,{childList:true});
   }
-
-  // Esperar a que los contenedores existan y tengan hijos
   var tw=0,iw=setInterval(function(){
     tw++;
-    var c1=document.getElementById('kidClassicStories');
-    var c2=document.getElementById('kidOwnClassicStories');
-    if(c1&&c2){
-      watchContainer('kidClassicStories');
-      watchContainer('kidOwnClassicStories');
+    if(document.getElementById('kidClassicStories')){
+      watch('kidClassicStories');
+      watch('kidOwnClassicStories');
       clearInterval(iw);
     }
     if(tw>100)clearInterval(iw);
   },200);
-
 })();
 </script>
 </body>
