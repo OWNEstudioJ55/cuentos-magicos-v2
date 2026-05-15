@@ -3296,7 +3296,15 @@ function showKidApp() {
   loadWriteImgPicker();
   switchKidTab('home');
   showScreen('kidApp');
-  updateKidProgress('sessionMinutes', 0); // start tracking
+  updateKidProgress('sessionMinutes', 0);
+
+  // Inyectar sprites del niño DESPUÉS de que el DOM está visible
+  setTimeout(()=>{
+    injectKidSpriteEl('kicon-escuchar', 'nav_escuchar', 44);
+    injectKidSpriteEl('kicon-crear',    'nav_crear',    44);
+    injectKidSpriteEl('kicon-jugar',    'nav_jugar',    44);
+    injectKidSpriteEl('kidHeroBtnSig',  'btn_siguiente', 48);
+  }, 100);
 }
 
 function switchKidTab(tab) {
