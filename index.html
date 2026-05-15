@@ -865,7 +865,7 @@
 <!-- ============================================================ -->
 <!-- KID APP — UI COMPLETAMENTE DIFERENTE Y MÁGICA -->
 <!-- ============================================================ -->
-<div class="screen" id="kidApp" style="background:#F5EDE0;">
+<div class="screen" id="kidApp" style="background:url('/fondonn.png') top center/100% auto no-repeat fixed,#D9DFC3;">
 
   <!-- HEADER NIÑO -->
   <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
@@ -1238,54 +1238,56 @@
 
     <!-- PLAYGROUND TAB KID -->
     <div id="kTab-play" style="display:none;padding:16px;padding-bottom:80px">
-      <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:12px;color:#5C4033">🎮 ¡A Jugar!</div>
 
-      <!-- Grid 2x2 de juegos -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-bottom:12px">
-        <div onclick="openKidGame('quiz')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:978px 730px;background-position:-45px -178px;background-repeat:no-repeat"></div>
-          <div style="padding:7px 8px 9px;text-align:center">
-            <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Quiz</div>
-            <div style="font-size:9px;color:#5C9ABF;font-weight:700">¿Cuánto recordás?</div>
-          </div>
-        </div>
-        <div onclick="openKidGame('memory')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:981px 733px;background-position:-194px -178px;background-repeat:no-repeat"></div>
-          <div style="padding:7px 8px 9px;text-align:center">
-            <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Memoria</div>
-            <div style="font-size:9px;color:#C47A3A;font-weight:700">¡Encontrá parejas!</div>
-          </div>
-        </div>
-        <div onclick="openKidGame('words')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-346px -179px;background-repeat:no-repeat"></div>
-          <div style="padding:7px 8px 9px;text-align:center">
-            <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Palabras</div>
-            <div style="font-size:9px;color:#2E8B57;font-weight:700">Completá la historia</div>
-          </div>
-        </div>
-        <div onclick="openKidGame('puzzle')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-499px -179px;background-repeat:no-repeat"></div>
-          <div style="padding:7px 8px 9px;text-align:center">
-            <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Puzzle</div>
-            <div style="font-size:9px;color:#7B5EA7;font-weight:700">Ordená las escenas</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Área del juego activo -->
-      <div id="kidGameArea" style="display:none;margin-top:12px;background:rgba(255,255,255,0.9);border-radius:20px;padding:16px;border:2px solid #E8D5B7">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div id="kidGameTitle" style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033"></div>
-          <button onclick="closeKidGame()" style="background:rgba(92,64,51,0.1);border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 12px;font-family:'Nunito',sans-serif;font-size:12px;color:#5C4033;cursor:pointer">✕ Cerrar</button>
-        </div>
-        <div id="gameArea-quiz" class="game-area"></div>
-        <div id="gameArea-memory" class="game-area"></div>
-        <div id="gameArea-words" class="game-area"></div>
-        <div id="gameArea-draw" class="game-area"></div>
-        <div id="gameArea-puzzle" class="game-area"></div>
-      </div>
+  <!-- Cuento 1: Caperucita Roja -->
+  <div style="background:#fff;border-radius:20px;border:2px solid #E8D5B7;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 12px rgba(92,64,51,0.1)">
+    <div style="height:120px;background:#FDDCCA;display:flex;align-items:center;justify-content:center;font-size:64px">🐺</div>
+    <div style="padding:14px">
+      <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">Caperucita Roja</div>
+      <div style="font-size:11px;color:#9B7B6B;margin-bottom:10px">📖 Clásico</div>
+      <p style="font-size:13px;color:#5C4033;line-height:1.6;margin-bottom:10px">Había una vez una niña que siempre usaba una caperuza roja. Un día fue a visitar a su abuelita que vivía en el bosque. En el camino se encontró con el lobo feroz que quería llegar primero a la casa...</p>
+      <button onclick="openKidGame('quiz')" style="width:100%;padding:10px;background:#C9A84C;border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:14px;color:#fff;cursor:pointer">🎮 Jugar con este cuento</button>
     </div>
+  </div>
 
+  <!-- Cuento 2: Los Tres Chanchitos -->
+  <div style="background:#fff;border-radius:20px;border:2px solid #E8D5B7;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 12px rgba(92,64,51,0.1)">
+    <div style="height:120px;background:#FDDCCA;display:flex;align-items:center;justify-content:center;font-size:64px">🐷</div>
+    <div style="padding:14px">
+      <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">Los Tres Chanchitos</div>
+      <div style="font-size:11px;color:#9B7B6B;margin-bottom:10px">📖 Clásico</div>
+      <p style="font-size:13px;color:#5C4033;line-height:1.6;margin-bottom:10px">Tres chanchitos hermanos decidieron construir sus propias casas. Uno de paja, uno de madera y uno de ladrillos. Cuando llegó el lobo feroz y sopló con todas sus fuerzas, solo la casa de ladrillos resistió...</p>
+      <button onclick="openKidGame('memory')" style="width:100%;padding:10px;background:#C9A84C;border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:14px;color:#fff;cursor:pointer">🎮 Jugar con este cuento</button>
+    </div>
+  </div>
+
+  <!-- Cuento 3: Hansel y Gretel -->
+  <div style="background:#fff;border-radius:20px;border:2px solid #E8D5B7;margin-bottom:16px;overflow:hidden;box-shadow:0 4px 12px rgba(92,64,51,0.1)">
+    <div style="height:120px;background:#C8EFD8;display:flex;align-items:center;justify-content:center;font-size:64px">🌲</div>
+    <div style="padding:14px">
+      <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:4px">Hansel y Gretel</div>
+      <div style="font-size:11px;color:#9B7B6B;margin-bottom:10px">📖 Clásico</div>
+      <p style="font-size:13px;color:#5C4033;line-height:1.6;margin-bottom:10px">Dos hermanos se perdieron en el bosque y encontraron una casa hecha de dulces y chocolate. Pero adentro vivía una bruja malvada que quería atraparlos. Juntos usaron su ingenio para escapar...</p>
+      <button onclick="openKidGame('words')" style="width:100%;padding:10px;background:#C9A84C;border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:14px;color:#fff;cursor:pointer">🎮 Jugar con este cuento</button>
+    </div>
+  </div>
+
+  <!-- Area juego activo -->
+  <div id="kidGameArea" style="display:none;margin-top:8px;background:#fff;border-radius:20px;padding:16px;border:2px solid #E8D5B7">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div id="kidGameTitle" style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033"></div>
+      <button onclick="closeKidGame()" style="background:rgba(92,64,51,0.1);border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 12px;font-size:12px;color:#5C4033;cursor:pointer">✕ Cerrar</button>
+    </div>
+    <div id="gameArea-quiz" class="game-area"></div>
+    <div id="gameArea-memory" class="game-area"></div>
+    <div id="gameArea-words" class="game-area"></div>
+    <div id="gameArea-draw" class="game-area"></div>
+    <div id="gameArea-puzzle" class="game-area"></div>
+  </div>
+
+</div>
+
+    
     <!-- WRITING TAB KID (área de escritura / redacción) -->
     <div id="kTab-write" style="display:none">
       <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:12px;color:var(--accent2)">✍️ Mi Diario de Cuentos</div>
