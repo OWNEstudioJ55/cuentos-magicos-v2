@@ -1526,3 +1526,12 @@ textarea{resize:vertical;min-height:80px}
   background:rgba(255,255,255,0.82) !important;
   backdrop-filter:blur(8px);
 }
+
+/* ── Fix nav niño solo visible en kidApp ── */
+.kid-bottom-nav {
+  display:none;
+}
+#kidApp.active .kid-bottom-nav,
+#kidApp .kid-bottom-nav {
+  display:flex;
+}
