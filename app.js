@@ -240,7 +240,7 @@ function kidSprite(key, sizePx, extraStyle='') {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;flex-shrink:0;${extraStyle}"></div>`;
+  return `<div style="width:${sizePx}px;height:${sizePx}px;background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;flex-shrink:0;${extraStyle}"></div>`;
 }
 
 function kidSpriteBg(key, sizePx) {
@@ -250,7 +250,7 @@ function kidSpriteBg(key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;`;
 }
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
