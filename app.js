@@ -252,18 +252,6 @@ function kidSpriteBg(key, sizePx) {
   const by  = -Math.round(sp.y * scale);
   return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
 }
-
-function injectKidSpriteEl(id, key, sizePx) {
-  const sp = KID_SPRITES[key]; if(!sp) return;
-  const el = document.getElementById(id); if(!el) return;
-  const scale = sizePx / Math.max(sp.w, sp.h);
-  const bgW = Math.round(KS_W * scale);
-  const bgH = Math.round(KS_H * scale);
-  const bx  = -Math.round(sp.x * scale);
-  const by  = -Math.round(sp.y * scale);
-  el.style.cssText = `width:${sizePx}px;height:${sizePx}px;overflow:hidden;display:block;flex-shrink:0;`;
-  el.innerHTML = `<img src="${KID_SPRITE_URL}" style="width:${bgW}px;height:${bgH}px;margin-left:${bx}px;margin-top:${by}px;display:block;max-width:none;pointer-events:none">`;
-}
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
   'dragon':    { x:59,   y:41, w:168, h:210 },
@@ -3303,16 +3291,7 @@ function showKidApp() {
   loadWriteImgPicker();
   switchKidTab('home');
   showScreen('kidApp');
-  updateKidProgress('sessionMinutes', 0);
-  setTimeout(()=>{
-    injectKidSpriteEl('kicon-escuchar', 'nav_escuchar', 44);
-    injectKidSpriteEl('kicon-crear',    'nav_crear',    44);
-    injectKidSpriteEl('kicon-jugar',    'nav_jugar',    44);
-    injectKidSpriteEl('kidHeroBtnSig',  'btn_siguiente', 48);
-    injectKidSpriteEl('kidPlayBtn',     'btn_play_big', 72);
-    injectKidSpriteEl('kidBtnPrev',     'btn_prev_sm',  56);
-    injectKidSpriteEl('kidBtnNext',     'btn_next_sm',  56);
-  }, 300);
+  updateKidProgress('sessionMinutes', 0); // start tracking
 }
 
 function switchKidTab(tab) {
@@ -3418,23 +3397,35 @@ async function loadKidHomeStories() {
   if(noHero) noHero.style.display='none';
 
   const lastSeen = parseInt(localStorage.getItem('ownKidLastSeenStories')||'0');
-  const cardColors = ['card_celeste','card_coral','card_verde','card_lila'];
+  const bgColors  = ['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF'];
+  const brdColors = ['#7BBFE8','#F4A261','#52C77F','#A78BFA'];
   el.innerHTML=userStories.sort((a,b)=>b.id-a.id).map((s,idx)=>{
     const img=s.images&&s.images[0];
     const sprite=CHAR_SPRITES[s.char];
     const thumbBg=sprite?spriteBg(sprite,80):'';
     const isNew = s.supaSync && new Date(s.created||0).getTime() > lastSeen;
-    const bgColors=['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF'];
-    const bgColor = bgColors[idx%4];
-    return `<div class="own-kid-story-card" onclick="openKidStory('${s.id}')" style="background:${bgColor}">
-      ${isNew?`<div class="own-kid-new-badge">¡NUEVO!</div>`:''}
-      <div class="own-kid-story-thumb">
-        ${img ? `<img src="${img}" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;border-radius:14px 14px 0 0">` : ''}
-        ${!img?`<div style="${thumbBg}${!sprite?'font-size:42px;display:flex;align-items:center;justify-content:center;width:100%;height:100%':'width:80px;height:80px;margin:auto'}">${!sprite?(s.char||'📖'):''}</div>`:''}
+    const bg  = bgColors[idx%4];
+    const brd = brdColors[idx%4];
+    return `<div onclick="openKidStory('${s.id}')" style="
+      background:${bg};
+      border:2.5px solid ${brd};
+      border-radius:20px;
+      overflow:hidden;
+      cursor:pointer;
+      position:relative;
+      box-shadow:0 4px 14px rgba(0,0,0,0.08);
+      transition:transform .15s;
+    " onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+      ${isNew?`<div style="position:absolute;top:8px;right:8px;background:#F4A261;color:white;font-size:9px;font-weight:800;border-radius:12px;padding:3px 8px;font-family:'Nunito',sans-serif;z-index:2">¡NUEVO!</div>`:''}
+      <div style="width:100%;aspect-ratio:1;overflow:hidden;background:rgba(255,255,255,0.4)">
+        ${img ? `<img src="${img}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">` : ''}
+        ${!img ? `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;${thumbBg}">
+          ${!sprite?`<span style="font-size:48px">${s.char||'📖'}</span>`:''}
+        </div>` : ''}
       </div>
-      <div class="own-kid-story-info">
-        <div class="own-kid-story-title">${s.title}</div>
-        <div class="own-kid-story-date">${s.created||''}</div>
+      <div style="padding:10px 12px 12px;background:rgba(255,255,255,0.6)">
+        <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;line-height:1.3;margin-bottom:3px">${s.title||'Sin título'}</div>
+        <div style="font-size:10px;color:#9B7B6B;font-weight:600">${s.created||''}</div>
       </div>
     </div>`;
   }).join('');
