@@ -1250,28 +1250,28 @@
       <!-- Grid 2x2 de juegos -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-bottom:12px">
         <div onclick="openKidGame('quiz')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:978px 730px;background-position:-45px -178px;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center"><span style="font-size:36px">🧠</span></div>
+          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:978px 730px;background-position:-45px -178px;background-repeat:no-repeat"></div>
           <div style="padding:7px 8px 9px;text-align:center">
             <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Quiz</div>
             <div style="font-size:9px;color:#5C9ABF;font-weight:700">¿Cuánto recordás?</div>
           </div>
         </div>
         <div onclick="openKidGame('memory')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:981px 733px;background-position:-194px -178px;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center"><span style="font-size:36px">🃏</span></div>
+          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:981px 733px;background-position:-194px -178px;background-repeat:no-repeat"></div>
           <div style="padding:7px 8px 9px;text-align:center">
             <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Memoria</div>
             <div style="font-size:9px;color:#C47A3A;font-weight:700">¡Encontrá parejas!</div>
           </div>
         </div>
         <div onclick="openKidGame('words')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-346px -179px;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center"><span style="font-size:36px">🔤</span></div>
+          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-346px -179px;background-repeat:no-repeat"></div>
           <div style="padding:7px 8px 9px;text-align:center">
             <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Palabras</div>
             <div style="font-size:9px;color:#2E8B57;font-weight:700">Completá la historia</div>
           </div>
         </div>
         <div onclick="openKidGame('puzzle')" style="border-radius:18px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;transition:transform .15s;background:#fff" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-499px -179px;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center"><span style="font-size:36px">🧩</span></div>
+          <div style="height:105px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-499px -179px;background-repeat:no-repeat"></div>
           <div style="padding:7px 8px 9px;text-align:center">
             <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Puzzle</div>
             <div style="font-size:9px;color:#7B5EA7;font-weight:700">Ordená las escenas</div>
@@ -1386,7 +1386,7 @@
       <span>Crear</span>
     </button>
     <button class="kid-nav-btn" id="knav-play" onclick="ownShowGames()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
-      <span id="knav-icon-play" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-182px -442px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s;background-position-y:-442px"></span>
+      <span id="knav-icon-play" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-182px -442px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s"></span>
       <span>Jugar</span>
     </button>
   </div>
@@ -1443,26 +1443,27 @@
     });
   }
 
-  // ── Mostrar tab juegos sin tocar app.js ──
+  // ── Mostrar tab juegos ──
   window.ownShowGames = function(){
-    // Ocultar todos los kTab-*
     document.querySelectorAll('[id^="kTab-"]').forEach(function(el){
       el.style.display='none';
     });
     var g=document.getElementById('kTab-games');
-    if(g) g.style.display='block';
+    if(g){ g.style.display='block'; g.style.visibility='visible'; }
     setActive('play');
-    // Scroll top
     var kc=document.getElementById('kidContent');
     if(kc) kc.scrollTop=0;
   };
 
-  // ── Parchar switchKidTab para nav state ──
+  // ── Parchar switchKidTab: ocultar kTab-games al cambiar de tab ──
   var t=0,iv=setInterval(function(){
     t++;
     if(typeof window.switchKidTab==='function'&&!window.switchKidTab._spr){
       var orig=window.switchKidTab;
       window.switchKidTab=function(tab){
+        // Ocultar juegos si cambian a otro tab
+        var g=document.getElementById('kTab-games');
+        if(g) g.style.display='none';
         orig(tab);
         setActive(tab);
       };
