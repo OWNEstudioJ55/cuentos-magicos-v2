@@ -263,7 +263,7 @@ function injectKidSpriteEl(id, key, sizePx) {
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
   el.style.cssText = `width:${sizePx}px;height:${sizePx}px;overflow:hidden;display:block;`;
-  el.innerHTML = `<img src="${KID_SPRITE_URL}" style="width:${bgW}px;height:${bgH}px;margin-left:${bx}px;margin-top:${by}px;mix-blend-mode:multiply;display:block;max-width:none;pointer-events:none">`;
+  el.innerHTML = `<img src="${KID_SPRITE_URL}" style="width:${bgW}px;height:${bgH}px;margin-left:${bx}px;margin-top:${by}px;mix-blend-mode:screen;display:block;max-width:none;pointer-events:none">`;
 }
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
