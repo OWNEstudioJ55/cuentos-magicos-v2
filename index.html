@@ -870,7 +870,7 @@
   <!-- HEADER NIÑO -->
   <div class="kid-header own-kid-header" style="flex-direction:column;align-items:flex-start;gap:2px;padding:44px 16px 8px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
     <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
-      <img src="/logooso.png" alt="OWN" style="height:52px;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(92,64,51,0.2))">
+      <img src="/logooso.png" alt="OWN" style="height:52px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(92,64,51,0.3))">
       <div style="display:flex;gap:8px;align-items:center">
         <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
         <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
@@ -905,7 +905,7 @@
 
       <!-- Cuentos del padre -->
       <div class="own-kid-sh">
-        <span class="own-kid-st" style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:28px;height:28px;background-image:url('/sprites_kid_OWN.png');background-size:457px 341px;background-position:-22px -236px;background-repeat:no-repeat"></span>Cuentos de Papá/Mamá</span>
+        <span class="own-kid-st" style="display:flex;align-items:center;gap:8px"><span style="display:inline-block;width:28px;height:28px;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-41px -479px;background-repeat:no-repeat"></span>Cuentos de Papá/Mamá</span>
       </div>
       <div id="kidHomeStories" style="display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch"></div>
 
@@ -950,12 +950,11 @@
         <!-- Slideshow con marco dorado sprite -->
         <div style="position:relative;margin:0 16px 8px">
           <div style="position:relative">
-            <div class="slideshow-container" id="kidSlideshow" style="border-radius:18px;overflow:hidden;background:#F5EDE0;margin:10px">
+            <div class="slideshow-container" id="kidSlideshow" style="border-radius:16px;overflow:hidden;background:#F5EDE0;margin:10px">
               <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#9B7B6B;font-size:48px" id="slidePlaceholder">📖</div>
               <button class="slide-nav-btn" style="left:14px;background:rgba(201,168,76,0.85);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(-1)">‹</button>
               <button class="slide-nav-btn" style="right:14px;background:rgba(201,168,76,0.85);border-radius:50%;width:36px;height:36px;font-size:20px;z-index:3" onclick="slideKid(1)">›</button>
             </div>
-            <!-- Marco dorado del sprite encima -->
             <div style="position:absolute;inset:0;background-image:url('/sprites_kid_OWN.png');background-size:2000px 1493px;background-position:-47px -725px;background-repeat:no-repeat;pointer-events:none;z-index:2"></div>
           </div>
         </div>
@@ -1251,26 +1250,26 @@
     <div id="kTab-play" style="display:none;padding:16px;padding-bottom:80px">
       <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:12px;color:#5C4033">🎮 ¡A Jugar!</div>
 
-      <!-- Carrusel de juegos -->
+      <!-- Carrusel de juegos con tarjetas sprite -->
       <div style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:12px">
-        <div onclick="openKidGame('quiz')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #7BBFE8;background:#B8DFF0;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🧠</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Quiz</div>
+        <div onclick="openKidGame('quiz')" style="flex-shrink:0;width:130px;height:141px;border-radius:18px;background-image:url('/sprites_kid_OWN.png');background-size:978px 730px;background-position:-45px -178px;background-repeat:no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+          <div style="font-size:42px;margin-bottom:6px">🧠</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:2px">Quiz</div>
           <div style="font-size:9px;color:#5C9ABF;font-weight:700;text-align:center">¿Cuánto recordás?</div>
         </div>
-        <div onclick="openKidGame('memory')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #F4A261;background:#FDDCCA;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🃏</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Memoria</div>
+        <div onclick="openKidGame('memory')" style="flex-shrink:0;width:130px;height:141px;border-radius:18px;background-image:url('/sprites_kid_OWN.png');background-size:981px 733px;background-position:-194px -178px;background-repeat:no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+          <div style="font-size:42px;margin-bottom:6px">🃏</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:2px">Memoria</div>
           <div style="font-size:9px;color:#C47A3A;font-weight:700;text-align:center">¡Encontrá parejas!</div>
         </div>
-        <div onclick="openKidGame('words')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #52C77F;background:#C8EFD8;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🔤</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Palabras</div>
+        <div onclick="openKidGame('words')" style="flex-shrink:0;width:130px;height:141px;border-radius:18px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-346px -179px;background-repeat:no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+          <div style="font-size:42px;margin-bottom:6px">🔤</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:2px">Palabras</div>
           <div style="font-size:9px;color:#2E8B57;font-weight:700;text-align:center">Completá la historia</div>
         </div>
-        <div onclick="openKidGame('puzzle')" style="flex-shrink:0;width:140px;border-radius:20px;border:2.5px solid #A78BFA;background:#E8DFFF;display:flex;flex-direction:column;align-items:center;padding:20px 12px 14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.1)">
-          <div style="font-size:44px;margin-bottom:8px">🧩</div>
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#5C4033;text-align:center;margin-bottom:3px">Puzzle</div>
+        <div onclick="openKidGame('puzzle')" style="flex-shrink:0;width:130px;height:141px;border-radius:18px;background-image:url('/sprites_kid_OWN.png');background-size:987px 737px;background-position:-499px -179px;background-repeat:no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.15);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+          <div style="font-size:42px;margin-bottom:6px">🧩</div>
+          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;text-align:center;margin-bottom:2px">Puzzle</div>
           <div style="font-size:9px;color:#7B5EA7;font-weight:700;text-align:center">Ordená las escenas</div>
         </div>
       </div>
@@ -1373,16 +1372,16 @@
   </div>
 
   <div class="kid-bottom-nav own-kid-nav" id="kidNavBar" style="background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;position:fixed;bottom:0;left:0;right:0;z-index:200;display:none">
-    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span id="knav-icon-home" style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:457px 341px;background-position:-22px -236px;background-repeat:no-repeat;transition:transform .15s"></span>
+    <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+      <span id="knav-icon-home" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:855px 638px;background-position:-41px -479px;background-repeat:no-repeat;transition:transform .15s,opacity .15s"></span>
       <span>Escuchar</span>
     </button>
-    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span id="knav-icon-draw" style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:457px 341px;background-position:-59px -236px;background-repeat:no-repeat;opacity:0.6;transition:transform .15s,opacity .15s"></span>
+    <button class="kid-nav-btn" id="knav-draw" onclick="switchKidTab('draw');initKidDraw()" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+      <span id="knav-icon-draw" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:832px 621px;background-position:-107px -466px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s"></span>
       <span>Crear</span>
     </button>
-    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:4px">
-      <span id="knav-icon-play" style="display:inline-block;width:48px;height:48px;background-image:url('/sprites_kid_OWN.png');background-size:457px 341px;background-position:-98px -236px;background-repeat:no-repeat;opacity:0.6;transition:transform .15s,opacity .15s"></span>
+    <button class="kid-nav-btn" id="knav-play" onclick="switchKidTab('play')" style="flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0 12px;border:none;background:transparent;cursor:pointer;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
+      <span id="knav-icon-play" style="display:inline-block;width:52px;height:52px;background-image:url('/sprites_kid_OWN.png');background-size:499px 373px;background-position:-106px -258px;background-repeat:no-repeat;opacity:0.55;transition:transform .15s,opacity .15s"></span>
       <span>Jugar</span>
     </button>
   </div>
@@ -1410,69 +1409,32 @@
 <!-- OWN App -->
 <script src="app.js"></script>
 
-<!-- OWN Sprite UI -->
-<style>
-.own-spr-card { background-repeat:no-repeat !important; border:none !important; }
-.own-spr-card-0 { background-image:url('/sprites_kid_OWN.png') !important; background-size:975px 728px !important; background-position:-45px -177px !important; }
-.own-spr-card-1 { background-image:url('/sprites_kid_OWN.png') !important; background-size:981px 733px !important; background-position:-194px -178px !important; }
-.own-spr-card-2 { background-image:url('/sprites_kid_OWN.png') !important; background-size:987px 737px !important; background-position:-346px -179px !important; }
-.own-spr-card-3 { background-image:url('/sprites_kid_OWN.png') !important; background-size:987px 737px !important; background-position:-499px -179px !important; }
-</style>
+<!-- OWN Nav Sprite State -->
 <script>
-// ── Nav sprite active state ──
 (function(){
-  var ICONS = {home:'knav-icon-home', draw:'knav-icon-draw', play:'knav-icon-play'};
+  var ICONS={home:'knav-icon-home',draw:'knav-icon-draw',play:'knav-icon-play'};
   function setActive(tab){
     Object.keys(ICONS).forEach(function(k){
-      var el = document.getElementById(ICONS[k]);
-      var btn = document.getElementById('knav-' + k);
-      if(!el) return;
-      var on = k === tab;
-      el.style.opacity = on ? '1' : '0.5';
-      el.style.transform = on ? 'scale(1.1)' : 'scale(1)';
-      if(btn) btn.style.color = on ? '#C9A84C' : '#9B7B6B';
+      var el=document.getElementById(ICONS[k]);
+      var btn=document.getElementById('knav-'+k);
+      if(!el)return;
+      var on=k===tab;
+      el.style.opacity=on?'1':'0.5';
+      el.style.transform=on?'scale(1.1)':'scale(1)';
+      if(btn)btn.style.color=on?'#C9A84C':'#9B7B6B';
     });
   }
-  var t=0, iv=setInterval(function(){
+  var t=0,iv=setInterval(function(){
     t++;
-    if(typeof window.switchKidTab==='function' && !window.switchKidTab._spr){
+    if(typeof window.switchKidTab==='function'&&!window.switchKidTab._spr){
       var orig=window.switchKidTab;
-      window.switchKidTab=function(tab){ orig(tab); setActive(tab); };
+      window.switchKidTab=function(tab){orig(tab);setActive(tab);};
       window.switchKidTab._spr=true;
       clearInterval(iv);
     }
-    if(t>120) clearInterval(iv);
+    if(t>150)clearInterval(iv);
   },80);
 })();
-
-// ── Tarjetas clásicas con sprite ──
-(function(){
-  function applyCards(container){
-    if(!container) return;
-    var cards = container.querySelectorAll('[style*="cursor"]');
-    if(!cards.length) cards = container.children;
-    Array.from(cards).forEach(function(c,i){
-      if(!c.classList.contains('own-spr-card')){
-        c.classList.add('own-spr-card','own-spr-card-'+(i%4));
-      }
-    });
-  }
-  function watch(id){
-    var el = document.getElementById(id);
-    if(!el) return;
-    var obs = new MutationObserver(function(){ applyCards(el); });
-    obs.observe(el, {childList:true, subtree:false});
-    applyCards(el);
-  }
-  // Esperar a que el DOM esté listo
-  var t=0, iv=setInterval(function(){
-    t++;
-    var el = document.getElementById('kidClassicStories');
-    if(el){ watch('kidClassicStories'); watch('kidOwnClassicStories'); clearInterval(iv); }
-    if(t>80) clearInterval(iv);
-  },150);
-})();
 </script>
-
 </body>
 </html>
