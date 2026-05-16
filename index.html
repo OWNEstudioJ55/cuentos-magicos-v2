@@ -868,7 +868,7 @@
 <div class="screen" id="kidApp" style="background:url('/fondonn.png') top center/100% auto no-repeat fixed,#D9DFC3;">
 
   <!-- HEADER NIÑO -->
-  <div class="kid-header own-kid-header" style="padding:44px 16px 12px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7;position:relative">
+  <div class="kid-header own-kid-header" style="padding:44px 16px 12px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7;position:sticky;top:0;z-index:100">
     <!-- 3 columnas: izq | centro | der -->
     <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%">
 
@@ -1466,6 +1466,25 @@
 
 <!-- OWN App -->
 <script src="app.js"></script>
+<script>
+// Patch showScreen para asegurar que la nav tenga dimensiones
+var _ownShowScreen = null;
+function patchShowScreen(){
+  if(typeof showScreen === 'function' && _ownShowScreen === null){
+    _ownShowScreen = showScreen;
+    showScreen = function(id){
+      _ownShowScreen(id);
+      var nav = document.getElementById('kidNavBar');
+      if(nav && id === 'kidApp'){
+        nav.style.cssText += ';display:flex!important;width:100vw!important;height:64px!important;';
+      }
+    };
+    clearInterval(_patchInterval);
+  }
+}
+var _patchInterval = setInterval(patchShowScreen, 50);
+</script>
+
 
 
 <!-- OWN Sprite UI -->
