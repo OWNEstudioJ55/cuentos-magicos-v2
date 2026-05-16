@@ -1522,57 +1522,33 @@ function checkWordPuzzle(){
     <span id="kicon-jugar" style="display:inline-block;width:44px;height:44px;background-repeat:no-repeat;opacity:0.55"></span>
     <span>Jugar</span>
   </button>
-</div><script>
-function ownKidMenuActive(id){
-  document.querySelectorAll('#ownKidMenu button').forEach(function(b){b.classList.remove('active');});
-  var btn=document.getElementById(id); if(btn) btn.classList.add('active');
-}
-(function(){
-  function checkOwnMenu(){
-    var menu=document.getElementById('ownKidMenu');
-    var kid=document.getElementById('kidApp');
-    if(!menu||!kid) return;
-    menu.style.display=kid.classList.contains('active')?'flex':'none';
-  }
-  setInterval(checkOwnMenu,200);
-})();
-</script>
+</div>
 
+
+
+
+
+<div id="ownKidMenu" style="position:fixed;bottom:0;left:0;right:0;height:74px;background:rgba(255,248,235,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;display:flex;flex-direction:row;align-items:stretch;z-index:99999;box-sizing:border-box">
+  <button onclick="switchKidTab('home')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#C9A84C">
+    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat;background-repeat:no-repeat"></span>
+    Escuchar
+  </button>
+  <button onclick="switchKidTab('draw');if(typeof initKidDraw==='function')initKidDraw()" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
+    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat;background-repeat:no-repeat"></span>
+    Crear
+  </button>
+  <button onclick="switchKidTab('play')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
+    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat;background-repeat:no-repeat"></span>
+    Jugar
+  </button>
+</div>
 <script>
-(function(){
-  // Crear menú directo en body
-  var menu = document.createElement('div');
-  menu.id = 'ownKidMenu';
-  menu.style.cssText = 'position:fixed;bottom:0;left:0;right:0;height:74px;background:rgba(255,248,235,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;display:none;flex-direction:row;align-items:stretch;z-index:99999;box-sizing:border-box;';
-  
-  var btns = [
-    {id:'omk-home', bg:'url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat', label:'Escuchar', onclick:"switchKidTab('home')"},
-    {id:'omk-draw', bg:'url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat', label:'Crear', onclick:"switchKidTab('draw');if(typeof initKidDraw==='function')initKidDraw()"},
-    {id:'omk-play', bg:'url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat', label:'Jugar', onclick:"switchKidTab('play')"}
-  ];
-  
-  btns.forEach(function(b, i){
-    var btn = document.createElement('button');
-    btn.id = b.id;
-    btn.style.cssText = 'flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 0;font-family:Fredoka One,cursive;font-size:11px;color:' + (i===0?'#C9A84C':'#9B7B6B');
-    var icon = document.createElement('span');
-    icon.style.cssText = 'width:52px;height:52px;display:block;background:' + b.bg + ';background-repeat:no-repeat;';
-    var label = document.createElement('span');
-    label.textContent = b.label;
-    btn.appendChild(icon);
-    btn.appendChild(label);
-    btn.onclick = function(){ eval(b.onclick); btns.forEach(function(x){ var el=document.getElementById(x.id); if(el) el.style.color='#9B7B6B'; }); btn.style.color='#C9A84C'; };
-    menu.appendChild(btn);
-  });
-  
-  document.body.appendChild(menu);
-  
-  // Mostrar solo cuando kidApp está activo
-  setInterval(function(){
-    var kid = document.getElementById('kidApp');
-    if(kid) menu.style.display = kid.classList.contains('active') ? 'flex' : 'none';
-  }, 200);
-})();
+document.body.appendChild(document.getElementById('ownKidMenu'));
+setInterval(function(){
+  var m=document.getElementById('ownKidMenu');
+  var k=document.getElementById('kidApp');
+  if(m&&k) m.style.display=k.classList.contains('active')?'flex':'none';
+},200);
 </script>
 </body>
 </html>
