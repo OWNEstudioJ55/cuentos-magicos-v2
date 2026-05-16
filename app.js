@@ -770,7 +770,7 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   // Mostrar nav del niño solo en kidApp
   const kidNav = document.getElementById('kidNavBar');
-  if(kidNav) kidNav.style.display = id === 'kidApp' ? 'flex' : 'none';
+  if(kidNav){ kidNav.style.display = id === 'kidApp' ? 'flex' : 'none'; if(id==='kidApp'){kidNav.style.width='100%';kidNav.style.height='64px';} }
 }
 
 // ===================== GOOGLE LOGIN =====================
@@ -1334,7 +1334,7 @@ function injectNavSprites() {
   // Hero botón "Escuchar ahora"
   const heroBtn=document.getElementById('kidHeroBtnSig');
   if(heroBtn) heroBtn.style.cssText=`width:220px;height:48px;`+kidSpriteBg('btn_siguiente',48);
-  const kidPlay = document.getElementById('kidPlayBtn'); if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
+  if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   const kidPrev = document.getElementById('kidBtnPrev');
   if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_prev',56)}`; }
   const kidNext = document.getElementById('kidBtnNext');
