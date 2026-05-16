@@ -1579,17 +1579,12 @@ function ownKidMenuActive(id){
 })();
 </script>
 <script>
-function initOwnKidMenu(){
-  var m=document.getElementById('ownKidMenu');
+var _ownMenuTimer = setInterval(function(){
+  var m = document.getElementById('ownKidMenu');
   if(!m) return;
-  m.style.cssText='position:fixed;bottom:0;left:0;width:100vw;height:74px;background:rgba(255,248,235,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;display:none;flex-direction:row;align-items:stretch;z-index:99999;box-sizing:border-box;';
-  document.body.appendChild(m);
-  setInterval(function(){
-    var k=document.getElementById('kidApp');
-    if(k) m.style.display=k.classList.contains('active')?'flex':'none';
-  },200);
-}
-setTimeout(initOwnKidMenu, 100);
+  if(m.parentElement !== document.body) document.body.appendChild(m);
+  m.style.cssText = 'position:fixed!important;bottom:0!important;left:0!important;width:100vw!important;height:74px!important;background:rgba(255,248,235,0.97)!important;border-top:2px solid #E8D5B7!important;flex-direction:row!important;align-items:stretch!important;z-index:99999!important;box-sizing:border-box!important;display:' + (document.getElementById('kidApp') && document.getElementById('kidApp').classList.contains('active') ? 'flex' : 'none') + '!important';
+}, 300);
 </script>
 </body>
 </html>
