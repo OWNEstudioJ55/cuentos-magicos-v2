@@ -12,7 +12,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=Baloo+2:wght@700;800;900&display=swap" rel="stylesheet">
 <!-- OWN Styles -->
 <link rel="stylesheet" href="style.css">
-</head>
+<style>
+#kidApp.active ~ #ownKidMenu,
+body:has(#kidApp.active) #ownKidMenu {
+  display:flex !important;
+}
+</style></head>
 <body>
 
 <!-- TOAST -->
@@ -1524,22 +1529,66 @@ function checkWordPuzzle(){
   </button>
 </div>
 
-
-
-
-<div id="ownKidMenu" style="position:fixed;bottom:0;left:0;right:0;height:74px;background:rgba(255,248,235,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;display:flex;flex-direction:row;align-items:stretch;z-index:99999;box-sizing:border-box">
-  <button onclick="switchKidTab('home')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#C9A84C">
-    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat"></span>
+<style>
+#ownKidMenu {
+  position:fixed;bottom:0;left:0;right:0;
+  height:74px;
+  background:rgba(255,248,235,0.97);
+  backdrop-filter:blur(16px);
+  border-top:2px solid #E8D5B7;
+  display:none;
+  flex-direction:row;
+  align-items:stretch;
+  z-index:99999;
+  box-sizing:border-box;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#ownKidMenu button {
+  flex:1;border:none;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:6px 0;
+  font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B;
+}
+#ownKidMenu button.active { color:#C9A84C; }
+#ownKidMenu .micon {
+  width:52px;height:52px;display:block;background-repeat:no-repeat;
+}
+</style>
+<div id="ownKidMenu">
+  <button id="omk-home" onclick="switchKidTab('home');ownKidMenuActive('omk-home')" class="active">
+    <span class="micon" style="background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat"></span>
     Escuchar
   </button>
-  <button onclick="switchKidTab('draw')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
-    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat"></span>
+  <button id="omk-draw" onclick="switchKidTab('draw');initKidDraw();ownKidMenuActive('omk-draw')">
+    <span class="micon" style="background:url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat"></span>
     Crear
   </button>
-  <button onclick="switchKidTab('play')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
-    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat"></span>
+  <button id="omk-play" onclick="switchKidTab('play');ownKidMenuActive('omk-play')">
+    <span class="micon" style="background:url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat"></span>
     Jugar
   </button>
 </div>
+<script>
+function ownKidMenuActive(id){
+  document.querySelectorAll('#ownKidMenu button').forEach(function(b){b.classList.remove('active');});
+  var btn=document.getElementById(id); if(btn) btn.classList.add('active');
+}
+(function(){
+  function checkOwnMenu(){
+    var menu=document.getElementById('ownKidMenu');
+    var kid=document.getElementById('kidApp');
+    if(!menu||!kid) return;
+    menu.style.display=kid.classList.contains('active')?'flex':'none';
+  }
+  setInterval(checkOwnMenu,200);
+})();
+</script>
+<script>
+setInterval(function(){
+  var m=document.getElementById('ownKidMenu');
+  var k=document.getElementById('kidApp');
+  if(m&&k) m.style.display=k.classList.contains('active')?'flex':'none';
+},200);
+</script>
 </body>
 </html>
