@@ -770,7 +770,7 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   // Mostrar nav del niño solo en kidApp
   const kidNav = document.getElementById('kidNavBar');
-  if(kidNav){ kidNav.style.display = id==='kidApp'?'flex':'none'; if(id==='kidApp'){kidNav.style.width='100%';kidNav.style.height='64px';kidNav.style.flexDirection='row';} }
+  if(kidNav) kidNav.style.display = id === 'kidApp' ? 'flex' : 'none';
 }
 
 // ===================== GOOGLE LOGIN =====================
@@ -3522,17 +3522,14 @@ function loadKidAudioFromBlob(blob) {
 function buildClassicStories() {
   const el=document.getElementById('kidClassicStories');
   if(!el) return;
-  const bgColors=['#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF','#B8DFF0','#FDDCCA','#C8EFD8','#E8DFFF','#B8DFF0'];
-  const brdColors=['#7BBFE8','#F4A261','#52C77F','#A78BFA','#7BBFE8','#F4A261','#52C77F','#A78BFA','#7BBFE8'];
+  const cardClasses=['own-card-blue','own-card-salmon','own-card-mint','own-card-lavender'];
   el.style.cssText='display:flex;gap:12px;padding:0 16px 16px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch';
   el.innerHTML=CLASSIC_STORIES.map((s,idx)=>`
-    <div onclick="openClassicStory('${s.id}')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;border:2.5px solid ${brdColors[idx%4]};box-shadow:0 4px 14px rgba(0,0,0,0.1);cursor:pointer;background:${bgColors[idx%4]}">
-      <div style="width:150px;height:150px;display:flex;align-items:center;justify-content:center;font-size:64px;background:rgba(255,255,255,0.3)">
-        ${s.emoji}
-      </div>
-      <div style="padding:8px 10px 10px;background:rgba(255,255,255,0.85)">
-        <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033;line-height:1.3;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.title}</div>
-        <div style="font-size:9px;color:#9B7B6B;font-weight:600">📖 Clásico</div>
+    <div onclick="openClassicStory('${s.id}')" class="own-card-wrap ${cardClasses[idx%4]}" style="width:130px;height:160px">
+      <div style="position:absolute;top:10px;left:50%;transform:translateX(-50%);font-size:32px;z-index:4;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2))">${s.emoji}</div>
+      <div class="own-card-label">
+        <strong style="font-size:11px">${s.title}</strong>
+        <span class="own-card-sub">📖 Clásico</span>
       </div>
     </div>`).join('');
 
