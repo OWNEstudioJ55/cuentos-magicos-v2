@@ -12,12 +12,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&family=Baloo+2:wght@700;800;900&display=swap" rel="stylesheet">
 <!-- OWN Styles -->
 <link rel="stylesheet" href="style.css">
-<style>
-#kidApp.active ~ #ownKidMenu,
-body:has(#kidApp.active) #ownKidMenu {
-  display:flex !important;
-}
-</style></head>
+</head>
 <body>
 
 <!-- TOAST -->
@@ -1582,13 +1577,6 @@ function ownKidMenuActive(id){
   }
   setInterval(checkOwnMenu,200);
 })();
-</script>
-<script>
-setInterval(function(){
-  var m=document.getElementById('ownKidMenu');
-  var k=document.getElementById('kidApp');
-  if(m&&k) m.style.display=k.classList.contains('active')?'flex':'none';
-},200);
 </script>
 </body>
 </html>
