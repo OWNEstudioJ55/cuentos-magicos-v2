@@ -1468,123 +1468,6 @@
 .own-card-lavender{background-image:url('/sprites_kid_OWN.png')!important;background-size:987px 737px!important;background-position:-499px -179px!important;background-repeat:no-repeat!important;}
 </style>
 <script>
-(function(){
-  // ── Nav sprite active state ──
-  var ICONS={home:'knav-icon-home',draw:'knav-icon-draw',play:'knav-icon-play'};
-  function setActive(tab){
-    Object.keys(ICONS).forEach(function(k){
-      var el=document.getElementById(ICONS[k]);
-      var btn=document.getElementById('knav-'+k);
-      if(!el)return;
-      var on=k===tab;
-      el.style.opacity=on?'1':'0.5';
-      el.style.transform=on?'scale(1.1)':'scale(1)';
-      if(btn)btn.style.color=on?'#C9A84C':'#9B7B6B';
-    });
-  }
-
-  // ── Mostrar tab juegos ──
-  // openKidGame para los juegos en kTab-stars
-  window.openKidGame = window.openKidGame || function(type){
-    var area = document.getElementById('kidGameArea2');
-    var title = document.getElementById('kidGameTitle2');
-    if(!area) return;
-    ['quiz','memory','words','puzzle'].forEach(function(t){
-      var el=document.getElementById('gameArea2-'+t);
-      if(el) el.style.display='none';
-    });
-    var el=document.getElementById('gameArea2-'+type);
-    if(el){ el.style.display='block'; area.style.display='block'; }
-    if(title){
-      var names={quiz:'🧠 Quiz',memory:'🃏 Memoria',words:'🔤 Palabras',puzzle:'🧩 Puzzle'};
-      title.textContent=names[type]||type;
-    }
-    area.scrollIntoView({behavior:'smooth',block:'start'});
-  };
-  window.closeKidGame2 = function(){
-    var area=document.getElementById('kidGameArea2');
-    if(area) area.style.display='none';
-  };
-
-  window.ownShowGames = function(){
-    document.querySelectorAll('[id^="kTab-"]').forEach(function(el){
-      el.style.display='none';
-    });
-    var g=document.getElementById('kTab-play');
-    if(g){ g.style.display='block'; g.style.visibility='visible'; }
-    setActive('play');
-    var kc=document.getElementById('kidContent');
-    if(kc) kc.scrollTop=0;
-  };
-
-  // ── Parchar switchKidTab: ocultar kTab-games al cambiar de tab ──
-  var t=0,iv=setInterval(function(){
-    t++;
-    if(typeof window.switchKidTab==='function'&&!window.switchKidTab._spr){
-      var orig=window.switchKidTab;
-      window.switchKidTab=function(tab){
-        orig(tab);
-        // 'stars' es el tab de jugar
-        setActive(tab==='stars'?'play':tab);
-      };
-      window.switchKidTab._spr=true;
-      clearInterval(iv);
-    }
-    if(t>150)clearInterval(iv);
-  },80);
-
-  // ── Tarjetas clasicas con sprite + nombre ──
-  var COLORS=['blue','salmon','mint','lavender'];
-  function wrapCard(el,i){
-    if(!el||el.classList.contains('own-card-wrap')) return;
-    var color=COLORS[i%4];
-    var texts=[]; el.querySelectorAll('*').forEach(function(n){if(!n.children.length&&n.textContent.trim())texts.push(n.textContent.trim());});
-    var title=texts.sort(function(a,b){return b.length-a.length;})[0]||'';
-    var sub=texts.filter(function(t){return t!==title;})[0]||'';
-    var oc=el.getAttribute('onclick')||'';
-    var w=document.createElement('div');
-    w.className='own-card-wrap own-card-'+color;
-    w.setAttribute('onclick',oc);
-    var im=document.createElement('div');
-    im.className='own-card-img';
-    var lb=document.createElement('div');
-    lb.className='own-card-label';
-    var icons={'Caperucita':'🐺','chanchito':'🐷','Hansel':'🏠','Gretel':'🏠','Patito':'🦢','tortuga':'🐢','liebre':'🐰','Rapunzel':'👑','Blancanieves':'🍎','Cenicienta':'👠','Pinocho':'🪵','default':'📖'};
-    var icon='📖';
-    Object.keys(icons).forEach(function(k){if(title.toLowerCase().indexOf(k.toLowerCase())>-1)icon=icons[k];});
-    // Icono flotante encima del sprite
-    var ic=document.createElement('div');
-    ic.className='own-card-icon';
-    ic.textContent=icon;
-    w.appendChild(ic);
-    lb.innerHTML='<strong>'+title+'</strong>'+(sub?'<span class="own-card-sub">'+sub+'</span>':'');
-    w.appendChild(im); w.appendChild(lb);
-    el.parentNode.insertBefore(w,el);
-    el.parentNode.removeChild(el);
-  }
-  function applyCards(container){
-    if(!container)return;
-    Array.from(container.children).forEach(function(el,i){ wrapCard(el,i); });
-  }
-  function watch(id){
-    var el=document.getElementById(id);
-    if(!el)return;
-    applyCards(el);
-    new MutationObserver(function(){ applyCards(el); }).observe(el,{childList:true});
-  }
-  var tw=0,iw=setInterval(function(){
-    tw++;
-    if(document.getElementById('kidClassicStories')){
-      watch('kidClassicStories');
-      watch('kidOwnClassicStories');
-      clearInterval(iw);
-    }
-    if(tw>100)clearInterval(iw);
-  },200);
-})();
-</script>
-
-<script>
 var WP=[
   {e:"🐱",w:"GATO",b:"GA _ O",l:"T",h:"Hace miau"},
   {e:"🐶",w:"PERRO",b:"PE _ RO",l:"R",h:"Hace guau"},
@@ -1626,8 +1509,7 @@ function checkWordPuzzle(){
   }
 }
 </script>
-
-<div id="kidNavBar" style="display:none;position:fixed;bottom:0;left:0;width:100vw;height:64px;background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;z-index:9999;box-sizing:border-box;flex-direction:row;align-items:stretch">
+<div id="kidNavBar" style="display:none;position:fixed;bottom:0;left:0;width:100%;height:64px;background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;z-index:9999;box-sizing:border-box;flex-direction:row;align-items:stretch">
   <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 0 10px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
     <span id="kicon-escuchar" style="display:inline-block;width:44px;height:44px;background-repeat:no-repeat"></span>
     <span>Escuchar</span>

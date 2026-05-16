@@ -770,7 +770,7 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   // Mostrar nav del niño solo en kidApp
   const kidNav = document.getElementById('kidNavBar');
-  if(kidNav){ kidNav.style.display = id === 'kidApp' ? 'flex' : 'none'; if(id==='kidApp'){kidNav.style.width='100%';kidNav.style.height='64px';} }
+  if(kidNav){ kidNav.style.display = id==='kidApp'?'flex':'none'; if(id==='kidApp'){kidNav.style.width='100%';kidNav.style.height='64px';kidNav.style.flexDirection='row';} }
 }
 
 // ===================== GOOGLE LOGIN =====================
