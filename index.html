@@ -1527,28 +1527,19 @@ function checkWordPuzzle(){
 
 
 
-
 <div id="ownKidMenu" style="position:fixed;bottom:0;left:0;right:0;height:74px;background:rgba(255,248,235,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;display:flex;flex-direction:row;align-items:stretch;z-index:99999;box-sizing:border-box">
   <button onclick="switchKidTab('home')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#C9A84C">
-    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat;background-repeat:no-repeat"></span>
+    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat"></span>
     Escuchar
   </button>
-  <button onclick="switchKidTab('draw');if(typeof initKidDraw==='function')initKidDraw()" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
-    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat;background-repeat:no-repeat"></span>
+  <button onclick="switchKidTab('draw')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
+    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat"></span>
     Crear
   </button>
   <button onclick="switchKidTab('play')" style="flex:1;border:none;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">
-    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat;background-repeat:no-repeat"></span>
+    <span style="width:52px;height:52px;display:block;background:url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat"></span>
     Jugar
   </button>
 </div>
-<script>
-document.body.appendChild(document.getElementById('ownKidMenu'));
-setInterval(function(){
-  var m=document.getElementById('ownKidMenu');
-  var k=document.getElementById('kidApp');
-  if(m&&k) m.style.display=k.classList.contains('active')?'flex':'none';
-},200);
-</script>
 </body>
 </html>
