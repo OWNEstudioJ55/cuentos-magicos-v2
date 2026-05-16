@@ -1509,7 +1509,7 @@ function checkWordPuzzle(){
   }
 }
 </script>
-<div id="kidNavBar" style="display:flex;position:fixed;bottom:0;left:0;width:100%;height:64px;background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;z-index:9999;box-sizing:border-box;flex-direction:row;align-items:stretch">
+<div id="kidNavBar" style="display:none;position:fixed;bottom:0;left:0;width:100%;height:64px;background:rgba(255,248,240,0.97);backdrop-filter:blur(16px);border-top:2px solid #E8D5B7;z-index:9999;box-sizing:border-box;flex-direction:row;align-items:stretch">
   <button class="kid-nav-btn active" id="knav-home" onclick="switchKidTab('home')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:6px 0 10px;border:none;background:transparent;cursor:pointer;color:#C9A84C;font-family:'Fredoka One',cursive;font-size:11px;gap:3px">
     <span id="kicon-escuchar" style="display:inline-block;width:44px;height:44px;background-repeat:no-repeat"></span>
     <span>Escuchar</span>
@@ -1524,15 +1524,58 @@ function checkWordPuzzle(){
   </button>
 </div>
 
+<style>
+#ownKidMenu {
+  position:fixed;bottom:0;left:0;right:0;
+  height:74px;
+  background:rgba(255,248,235,0.97);
+  backdrop-filter:blur(16px);
+  border-top:2px solid #E8D5B7;
+  display:none;
+  flex-direction:row;
+  align-items:stretch;
+  z-index:99999;
+  box-sizing:border-box;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+#ownKidMenu button {
+  flex:1;border:none;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;padding:6px 0;
+  font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B;
+}
+#ownKidMenu button.active { color:#C9A84C; }
+#ownKidMenu .micon {
+  width:52px;height:52px;display:block;background-repeat:no-repeat;
+}
+</style>
+<div id="ownKidMenu">
+  <button id="omk-home" onclick="switchKidTab('home');ownKidMenuActive('omk-home')" class="active">
+    <span class="micon" style="background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat"></span>
+    Escuchar
+  </button>
+  <button id="omk-draw" onclick="switchKidTab('draw');initKidDraw();ownKidMenuActive('omk-draw')">
+    <span class="micon" style="background:url('/sprites2_OWN.png') -186px -158px/805px 537px no-repeat"></span>
+    Crear
+  </button>
+  <button id="omk-play" onclick="switchKidTab('play');ownKidMenuActive('omk-play')">
+    <span class="micon" style="background:url('/sprites2_OWN.png') -221px -147px/756px 504px no-repeat"></span>
+    Jugar
+  </button>
+</div>
 <script>
+function ownKidMenuActive(id){
+  document.querySelectorAll('#ownKidMenu button').forEach(function(b){b.classList.remove('active');});
+  var btn=document.getElementById(id); if(btn) btn.classList.add('active');
+}
 (function(){
-  var nav = document.getElementById('kidNavBar');
-  function checkNav(){
-    var kid = document.getElementById('kidApp');
-    if(!nav || !kid) return;
-    nav.style.display = kid.classList.contains('active') ? 'flex' : 'none';
+  function checkOwnMenu(){
+    var menu=document.getElementById('ownKidMenu');
+    var kid=document.getElementById('kidApp');
+    if(!menu||!kid) return;
+    menu.style.display=kid.classList.contains('active')?'flex':'none';
   }
-  setInterval(checkNav, 300);
+  setInterval(checkOwnMenu,200);
 })();
 </script>
 </body>
