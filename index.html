@@ -1531,7 +1531,7 @@ function checkWordPuzzle(){
   background:rgba(255,248,235,0.97);
   backdrop-filter:blur(16px);
   border-top:2px solid #E8D5B7;
-  display:none;
+  display:flex;
   flex-direction:row;
   align-items:stretch;
   z-index:99999;
@@ -1549,7 +1549,7 @@ function checkWordPuzzle(){
   width:52px;height:52px;display:block;background-repeat:no-repeat;
 }
 </style>
-<div id="ownKidMenu">
+<div id="ownKidMenu" style="display:flex!important">
   <button id="omk-home" onclick="switchKidTab('home');ownKidMenuActive('omk-home')" class="active">
     <span class="micon" style="background:url('/sprites2_OWN.png') -291px -83px/734px 489px no-repeat"></span>
     Escuchar
