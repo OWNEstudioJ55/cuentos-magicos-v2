@@ -868,23 +868,29 @@
 <div class="screen" id="kidApp" style="background:url('/fondonn.png') top center/100% auto no-repeat fixed,#D9DFC3;">
 
   <!-- HEADER NIÑO -->
-  <div class="kid-header own-kid-header" style="padding:44px 16px 10px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7">
-    <!-- Fila superior: saludo izq + campanita + estrellas + salir -->
-    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033">¡Hola, <span id="kidNameHeader">amigo</span>! 👋</div>
-        <button onclick="showParentNotifs()" style="position:relative;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;padding:5px 8px;border-radius:8px;font-size:16px;cursor:pointer;line-height:1">
+  <div class="kid-header own-kid-header" style="padding:44px 16px 12px;background:rgba(255,248,240,0.85);backdrop-filter:blur(12px);border-bottom:1.5px solid #E8D5B7;position:relative">
+    <!-- 3 columnas: izq | centro | der -->
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;width:100%">
+
+      <!-- IZQ: saludo + campanita debajo -->
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-width:80px">
+        <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033">¡Hola, <span id="kidNameHeader">amigo</span>! 👋</div>
+        <button onclick="showParentNotifs()" style="position:relative;background:rgba(201,168,76,0.15);border:1px solid rgba(201,168,76,0.3);color:#C9A84C;padding:5px 10px;border-radius:10px;font-size:18px;cursor:pointer;line-height:1">
           🔔<span id="kidNotifBadge" style="display:none;position:absolute;top:-4px;right:-4px;background:#f87171;color:white;font-size:9px;font-weight:800;border-radius:50%;width:14px;height:14px;align-items:center;justify-content:center;font-family:Nunito,sans-serif"></span>
         </button>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
-        <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
+
+      <!-- CENTRO: logo grande -->
+      <div style="display:flex;justify-content:center;flex:1">
+        <img src="/logooso.png" alt="OWN" style="height:104px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(92,64,51,0.3));margin-top:-8px">
       </div>
-    </div>
-    <!-- Logo centrado 2x más grande -->
-    <div style="display:flex;justify-content:center;width:100%">
-      <img src="/logooso.png" alt="OWN" style="height:104px;object-fit:contain;filter:drop-shadow(0 2px 8px rgba(92,64,51,0.3))">
+
+      <!-- DER: salir + estrellas debajo -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:80px">
+        <button class="btn-logout" onclick="doLogout()" style="background:rgba(92,64,51,0.1);color:#5C4033;border:1px solid rgba(92,64,51,0.2);border-radius:10px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700">Salir</button>
+        <div class="kid-stars-badge" style="background:#C9A84C;color:#1a1100;border:none;font-family:'Fredoka One',cursive;font-size:14px;padding:5px 12px;border-radius:20px">⭐ <span id="kidStars">0</span></div>
+      </div>
+
     </div>
   </div>
 
@@ -1332,40 +1338,42 @@
     <div id="kTab-play" style="display:none;padding:16px;padding-bottom:80px">
   <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:16px;color:#5C4033">🎮 ¡A Jugar!</div>
 
-  <!-- Carrusel de juegos -->
+  <!-- Carrusel de juegos grandes -->
+  <div style="margin-top:20px">
+  <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:12px">🎮 Juegos</div>
   <div style="display:flex;gap:14px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:8px">
 
-    <div onclick="openKidGame('quiz')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-      <div style="width:150px;height:130px;background-image:url('/sprites_kid_OWN.png');background-size:1125px 840px;background-position:-52px -204px;background-repeat:no-repeat;position:relative"></div>
-      <div style="padding:6px 8px 8px;text-align:center;background:rgba(255,255,255,0.9);position:relative;z-index:3;margin:0 10px 14px;border-radius:10px">
-        <div style="font-size:22px;margin-bottom:2px">🧠</div>
+    <div onclick="openKidGame('quiz')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s;position:relative" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div style="width:150px;height:150px;background-image:url('/sprites_kid_OWN.png');background-size:1125px 840px;background-position:-52px -204px;background-repeat:no-repeat"></div>
+      <div style="font-size:34px;position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2));line-height:1">🧠</div>
+      <div style="padding:5px 8px 8px;text-align:center;background:rgba(255,255,255,0.88);margin:0 10px 12px;border-radius:10px;position:relative;z-index:3">
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Quiz</div>
         <div style="font-size:10px;color:#5C9ABF;font-weight:700;margin-top:2px">¿Cuánto recordás?</div>
       </div>
     </div>
 
-    <div onclick="openKidGame('memory')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-      <div style="width:150px;height:130px;background-image:url('/sprites_kid_OWN.png');background-size:1132px 845px;background-position:-224px -206px;background-repeat:no-repeat;position:relative"></div>
-      <div style="padding:6px 8px 8px;text-align:center;background:rgba(255,255,255,0.9);position:relative;z-index:3;margin:0 10px 14px;border-radius:10px">
-        <div style="font-size:22px;margin-bottom:2px">🃏</div>
+    <div onclick="openKidGame('memory')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s;position:relative" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div style="width:150px;height:150px;background-image:url('/sprites_kid_OWN.png');background-size:1132px 845px;background-position:-224px -206px;background-repeat:no-repeat"></div>
+      <div style="font-size:34px;position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2));line-height:1">🃏</div>
+      <div style="padding:5px 8px 8px;text-align:center;background:rgba(255,255,255,0.88);margin:0 10px 12px;border-radius:10px;position:relative;z-index:3">
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Memoria</div>
         <div style="font-size:10px;color:#C47A3A;font-weight:700;margin-top:2px">¡Encontrá parejas!</div>
       </div>
     </div>
 
-    <div onclick="openKidGame('words')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-      <div style="width:150px;height:130px;background-image:url('/sprites_kid_OWN.png');background-size:1139px 851px;background-position:-399px -207px;background-repeat:no-repeat;position:relative"></div>
-      <div style="padding:6px 8px 8px;text-align:center;background:rgba(255,255,255,0.9);position:relative;z-index:3;margin:0 10px 14px;border-radius:10px">
-        <div style="font-size:22px;margin-bottom:2px">🔤</div>
+    <div onclick="openKidGame('words')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s;position:relative" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div style="width:150px;height:150px;background-image:url('/sprites_kid_OWN.png');background-size:1139px 851px;background-position:-399px -207px;background-repeat:no-repeat"></div>
+      <div style="font-size:34px;position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2));line-height:1">🔤</div>
+      <div style="padding:5px 8px 8px;text-align:center;background:rgba(255,255,255,0.88);margin:0 10px 12px;border-radius:10px;position:relative;z-index:3">
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Palabras</div>
         <div style="font-size:10px;color:#2E8B57;font-weight:700;margin-top:2px">Completá la historia</div>
       </div>
     </div>
 
-    <div onclick="openKidGame('puzzle')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-      <div style="width:150px;height:130px;background-image:url('/sprites_kid_OWN.png');background-size:1139px 851px;background-position:-576px -207px;background-repeat:no-repeat;position:relative"></div>
-      <div style="padding:6px 8px 8px;text-align:center;background:rgba(255,255,255,0.9);position:relative;z-index:3;margin:0 10px 14px;border-radius:10px">
-        <div style="font-size:22px;margin-bottom:2px">🧩</div>
+    <div onclick="openKidGame('puzzle')" style="flex-shrink:0;width:150px;border-radius:20px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.13);cursor:pointer;background:transparent;transition:transform .15s;position:relative" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div style="width:150px;height:150px;background-image:url('/sprites_kid_OWN.png');background-size:1139px 851px;background-position:-576px -207px;background-repeat:no-repeat"></div>
+      <div style="font-size:34px;position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2));line-height:1">🧩</div>
+      <div style="padding:5px 8px 8px;text-align:center;background:rgba(255,255,255,0.88);margin:0 10px 12px;border-radius:10px;position:relative;z-index:3">
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Puzzle</div>
         <div style="font-size:10px;color:#7B5EA7;font-weight:700;margin-top:2px">Ordená las escenas</div>
       </div>
@@ -1373,30 +1381,30 @@
 
   </div>
 
-  <!-- Juegos de palabras para niños de 4 años -->
+  <!-- Juegos de palabras para niños de 4 años — CARRUSEL -->
   <div style="margin-top:20px">
     <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:12px">🔤 Completá la palabra</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div style="display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:8px">
 
-      <div onclick="startWordPuzzle(0)" style="background:rgba(255,216,162,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(201,168,76,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div onclick="startWordPuzzle(0)" style="flex-shrink:0;width:130px;background:rgba(255,216,162,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(201,168,76,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
         <div style="font-size:36px;margin-bottom:6px">🐱</div>
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">GA _ O</div>
         <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
       </div>
 
-      <div onclick="startWordPuzzle(1)" style="background:rgba(162,216,255,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(100,180,240,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div onclick="startWordPuzzle(1)" style="flex-shrink:0;width:130px;background:rgba(162,216,255,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(100,180,240,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
         <div style="font-size:36px;margin-bottom:6px">🐶</div>
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">PE _ RO</div>
         <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
       </div>
 
-      <div onclick="startWordPuzzle(2)" style="background:rgba(162,255,196,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(100,200,130,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div onclick="startWordPuzzle(2)" style="flex-shrink:0;width:130px;background:rgba(162,255,196,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(100,200,130,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
         <div style="font-size:36px;margin-bottom:6px">🦁</div>
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">LE _ N</div>
         <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
       </div>
 
-      <div onclick="startWordPuzzle(3)" style="background:rgba(255,162,200,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(240,100,150,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      <div onclick="startWordPuzzle(3)" style="flex-shrink:0;width:130px;background:rgba(255,162,200,0.5);border-radius:16px;padding:14px;text-align:center;cursor:pointer;border:2px solid rgba(240,100,150,0.3);transition:transform .15s" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
         <div style="font-size:36px;margin-bottom:6px">🌈</div>
         <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">SOL _ </div>
         <div style="font-size:10px;color:#9B7B6B;margin-top:3px">¿Qué letra falta?</div>
@@ -1466,7 +1474,8 @@
 .own-card-wrap{flex-shrink:0!important;width:130px!important;height:141px!important;border-radius:18px!important;overflow:hidden!important;box-shadow:0 4px 14px rgba(0,0,0,0.13)!important;cursor:pointer!important;transition:transform .15s!important;display:inline-block!important;position:relative!important}
 .own-card-wrap:active{transform:scale(0.95)!important}
 .own-card-img{width:130px!important;height:141px!important;background-repeat:no-repeat!important;display:block!important;}
-.own-card-label{position:absolute!important;bottom:14px!important;left:8px!important;right:8px!important;padding:5px 6px!important;font-family:'Fredoka One',cursive!important;font-size:12px!important;color:#5C4033!important;text-align:center!important;line-height:1.3!important;background:rgba(255,255,255,0.88)!important;border-radius:10px!important;z-index:3!important;}
+.own-card-icon{position:absolute!important;top:10px!important;left:50%!important;transform:translateX(-50%)!important;font-size:32px!important;z-index:4!important;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.2))!important;line-height:1!important;}
+.own-card-label{position:absolute!important;bottom:10px!important;left:8px!important;right:8px!important;padding:4px 6px!important;font-family:'Fredoka One',cursive!important;font-size:11px!important;color:#5C4033!important;text-align:center!important;line-height:1.3!important;background:rgba(255,255,255,0.88)!important;border-radius:10px!important;z-index:3!important;}
 .own-card-sub{font-family:'Nunito',sans-serif!important;font-size:9px!important;color:#9B7B6B!important;font-weight:700!important;display:block!important}
 .own-card-blue{background-image:url('/sprites_kid_OWN.png')!important;background-size:978px 730px!important;background-position:-45px -178px!important;background-repeat:no-repeat!important;}
 .own-card-salmon{background-image:url('/sprites_kid_OWN.png')!important;background-size:981px 733px!important;background-position:-194px -178px!important;background-repeat:no-repeat!important;}
@@ -1558,7 +1567,12 @@
     var icons={'Caperucita':'🐺','chanchito':'🐷','Hansel':'🏠','Gretel':'🏠','Patito':'🦢','tortuga':'🐢','liebre':'🐰','Rapunzel':'👑','Blancanieves':'🍎','Cenicienta':'👠','Pinocho':'🪵','default':'📖'};
     var icon='📖';
     Object.keys(icons).forEach(function(k){if(title.toLowerCase().indexOf(k.toLowerCase())>-1)icon=icons[k];});
-    lb.innerHTML='<div style="font-size:28px;margin-bottom:3px">'+icon+'</div><strong>'+title+'</strong>'+(sub?'<span class="own-card-sub">'+sub+'</span>':'');
+    // Icono flotante encima del sprite
+    var ic=document.createElement('div');
+    ic.className='own-card-icon';
+    ic.textContent=icon;
+    w.appendChild(ic);
+    lb.innerHTML='<strong>'+title+'</strong>'+(sub?'<span class="own-card-sub">'+sub+'</span>':'');
     w.appendChild(im); w.appendChild(lb);
     el.parentNode.insertBefore(w,el);
     el.parentNode.removeChild(el);
@@ -1586,30 +1600,37 @@
 </script>
 
 <script>
-var WORD_PUZZLES=[
-  {emoji:'🐱',word:'GATO',blank:'GA_O',letter:'T',hint:'Hace miau'},
-  {emoji:'🐶',word:'PERRO',blank:'PE_RO',letter:'R',hint:'Hace guau'},
-  {emoji:'🦁',word:'LEON',blank:'LE_N',letter:'O',hint:'El rey de la selva'},
-  {emoji:'🌈',word:'SOL',blank:'SO_',letter:'L',hint:'Brilla de día'},
+var WP=[
+  {e:"🐱",w:"GATO",b:"GA _ O",l:"T",h:"Hace miau"},
+  {e:"🐶",w:"PERRO",b:"PE _ RO",l:"R",h:"Hace guau"},
+  {e:"🦁",w:"LEON",b:"LE _ N",l:"O",h:"El rey de la selva"},
+  {e:"🌈",w:"SOL",b:"SO _ ",l:"L",h:"Brilla de día"}
 ];
-function startWordPuzzle(idx){
-  var p=WORD_PUZZLES[idx];
-  var area=document.getElementById('wordPuzzleArea');
-  var content=document.getElementById('wordPuzzleContent');
-  area.style.display='block';
-  content.innerHTML='<div style="text-align:center;margin-bottom:16px"><div style="font-size:52px">'+p.emoji+'</div><div style="font-family:Fredoka One,cursive;font-size:18px;color:#5C4033;margin:8px 0">'+p.hint+'</div><div style="font-family:Fredoka One,cursive;font-size:28px;color:#C9A84C;letter-spacing:6px;margin-bottom:16px">'+p.blank+'</div></div>'
-  +'<div style="text-align:center;margin-bottom:12px"><input id="wpInput" maxlength="1" style="width:60px;height:60px;text-align:center;font-family:Fredoka One,cursive;font-size:32px;border:3px solid #C9A84C;border-radius:14px;color:#5C4033;text-transform:uppercase" placeholder="?"></div>'
-  +'<button onclick="checkWordPuzzle(''+p.letter+'',''+p.word+'')" style="width:100%;padding:12px;background:#C9A84C;border:none;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;color:#fff;cursor:pointer">✅ Verificar</button>';
-  area.scrollIntoView({behavior:'smooth',block:'start'});
+function startWordPuzzle(i){
+  var p=WP[i];
+  var area=document.getElementById("wordPuzzleArea");
+  var content=document.getElementById("wordPuzzleContent");
+  if(!area||!content)return;
+  area.style.display="block";
+  var html="<div style='text-align:center;margin-bottom:16px'>";
+  html+="<div style='font-size:52px'>"+p.e+"</div>";
+  html+="<div style='font-family:Fredoka One,cursive;font-size:18px;color:#5C4033;margin:8px 0'>"+p.h+"</div>";
+  html+="<div style='font-family:Fredoka One,cursive;font-size:28px;color:#C9A84C;letter-spacing:6px;margin-bottom:16px'>"+p.b+"</div></div>";
+  html+="<div style='text-align:center;margin-bottom:12px'><input id='wpInput' maxlength='1' style='width:60px;height:60px;text-align:center;font-family:Fredoka One,cursive;font-size:32px;border:3px solid #C9A84C;border-radius:14px;color:#5C4033;text-transform:uppercase' placeholder='?'></div>";
+  html+="<button onclick='checkWordPuzzle(""+p.l+"",""+p.w+"")' style='width:100%;padding:12px;background:#C9A84C;border:none;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;color:#fff;cursor:pointer'>✅ Verificar</button>";
+  content.innerHTML=html;
+  area.scrollIntoView({behavior:"smooth",block:"start"});
 }
 function checkWordPuzzle(correct,word){
-  var val=(document.getElementById('wpInput').value||'').toUpperCase().trim();
-  var content=document.getElementById('wordPuzzleContent');
+  var inp=document.getElementById("wpInput");
+  if(!inp)return;
+  var val=inp.value.toUpperCase().trim();
+  var content=document.getElementById("wordPuzzleContent");
   if(val===correct){
-    content.innerHTML+='<div style="text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:20px;color:#34d399">🎉 ¡Correcto! La palabra es '+word+' +3⭐</div>';
+    content.innerHTML+="<div style='text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:20px;color:#34d399'>🎉 ¡Correcto! La palabra es "+word+" +3⭐</div>";
     if(window.appState){appState.stars+=3;localStorage.setItem("ownStars",appState.stars);if(typeof updateStarDisplay==="function")updateStarDisplay();}
-  } else {
-    content.innerHTML+='<div style="text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:16px;color:#f87171">❌ Intentá de nuevo — la letra es '+correct+'</div>';
+  }else{
+    content.innerHTML+="<div style='text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:16px;color:#f87171'>❌ Intentá de nuevo</div>";
   }
 }
 </script>
