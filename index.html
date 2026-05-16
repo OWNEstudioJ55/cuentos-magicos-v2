@@ -1610,27 +1610,34 @@ function startWordPuzzle(i){
   var p=WP[i];
   var area=document.getElementById("wordPuzzleArea");
   var content=document.getElementById("wordPuzzleContent");
-  if(!area||!content)return;
+  if(!area||!content) return;
   area.style.display="block";
-  var html="<div style='text-align:center;margin-bottom:16px'>";
+  var html="";
+  html+="<div style='text-align:center;margin-bottom:16px'>";
   html+="<div style='font-size:52px'>"+p.e+"</div>";
   html+="<div style='font-family:Fredoka One,cursive;font-size:18px;color:#5C4033;margin:8px 0'>"+p.h+"</div>";
-  html+="<div style='font-family:Fredoka One,cursive;font-size:28px;color:#C9A84C;letter-spacing:6px;margin-bottom:16px'>"+p.b+"</div></div>";
-  html+="<div style='text-align:center;margin-bottom:12px'><input id='wpInput' maxlength='1' style='width:60px;height:60px;text-align:center;font-family:Fredoka One,cursive;font-size:32px;border:3px solid #C9A84C;border-radius:14px;color:#5C4033;text-transform:uppercase' placeholder='?'></div>";
-  html+="<button onclick='checkWordPuzzle(""+p.l+"",""+p.w+"")' style='width:100%;padding:12px;background:#C9A84C;border:none;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;color:#fff;cursor:pointer'>✅ Verificar</button>";
+  html+="<div style='font-family:Fredoka One,cursive;font-size:28px;color:#C9A84C;letter-spacing:6px;margin-bottom:16px'>"+p.b+"</div>";
+  html+="</div>";
+  html+="<div style='text-align:center;margin-bottom:12px'>";
+  html+="<input id='wpInput' data-correct='"+p.l+"' data-word='"+p.w+"' maxlength='1' style='width:60px;height:60px;text-align:center;font-family:Fredoka One,cursive;font-size:32px;border:3px solid #C9A84C;border-radius:14px;color:#5C4033;text-transform:uppercase' placeholder='?'>";
+  html+="</div>";
+  html+="<button onclick='checkWordPuzzle()' style='width:100%;padding:12px;background:#C9A84C;border:none;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;color:#fff;cursor:pointer'>Verificar</button>";
+  html+="<div id='wpResult'></div>";
   content.innerHTML=html;
   area.scrollIntoView({behavior:"smooth",block:"start"});
 }
-function checkWordPuzzle(correct,word){
+function checkWordPuzzle(){
   var inp=document.getElementById("wpInput");
-  if(!inp)return;
+  var res=document.getElementById("wpResult");
+  if(!inp||!res) return;
   var val=inp.value.toUpperCase().trim();
-  var content=document.getElementById("wordPuzzleContent");
+  var correct=inp.getAttribute("data-correct");
+  var word=inp.getAttribute("data-word");
   if(val===correct){
-    content.innerHTML+="<div style='text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:20px;color:#34d399'>🎉 ¡Correcto! La palabra es "+word+" +3⭐</div>";
+    res.innerHTML="<div style='text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:20px;color:#34d399'>Correcto! La palabra es "+word+" +3</div>";
     if(window.appState){appState.stars+=3;localStorage.setItem("ownStars",appState.stars);if(typeof updateStarDisplay==="function")updateStarDisplay();}
-  }else{
-    content.innerHTML+="<div style='text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:16px;color:#f87171'>❌ Intentá de nuevo</div>";
+  } else {
+    res.innerHTML="<div style='text-align:center;margin-top:12px;font-family:Fredoka One,cursive;font-size:16px;color:#f87171'>Intentá de nuevo</div>";
   }
 }
 </script>
