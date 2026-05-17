@@ -260,7 +260,80 @@
   <div class="content" id="parentContent">
 
     <!-- HOME TAB -->
-    <div id="pTab-home">
+    
+      <!-- Planes detallados -->
+      <div id="pTab-planes" style="display:none;padding:16px;padding-bottom:100px">
+        <div style="font-family:'Fredoka One',cursive;font-size:22px;color:var(--text);margin-bottom:6px">📦 Nuestros Planes</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:20px">Elegí el plan que mejor se adapte a tu familia</div>
+
+        <!-- Plan Gratis -->
+        <div style="background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid rgba(255,255,255,0.08)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="font-size:32px">🌱</div>
+            <div>
+              <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text)">Plan Gratuito</div>
+              <div style="font-size:22px;font-weight:900;color:var(--accent3)">$0 <span style="font-size:12px;font-weight:400;color:var(--text2)">/mes</span></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;color:var(--text2)">✅ Grabar y enviar cuentos al niño</div>
+            <div style="font-size:13px;color:var(--text2)">✅ 3 voces básicas</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Biblioteca de cuentos clásicos</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Juegos básicos para el niño</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Seguimiento de progreso</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.3)">❌ Generación IA de cuentos</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.3)">❌ Voces de personajes</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.3)">❌ Rutina automática</div>
+          </div>
+        </div>
+
+        <!-- Plan Básico -->
+        <div style="background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid rgba(100,180,240,0.4)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="font-size:32px">⭐</div>
+            <div>
+              <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text)">Plan Familia</div>
+              <div style="font-size:22px;font-weight:900;color:#38bdf8">$4.99 <span style="font-size:12px;font-weight:400;color:var(--text2)">/mes</span></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;color:var(--text2)">✅ Todo del plan gratuito</div>
+            <div style="font-size:13px;color:var(--text2)">✅ 8 voces con personajes</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Generación IA de cuentos</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Foto a dibujo animado</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Generación de imágenes IA</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.3)">❌ Rutina automática</div>
+            <div style="font-size:13px;color:rgba(255,255,255,0.3)">❌ Cuento de Oro</div>
+          </div>
+          <button class="btn btn-full" style="margin-top:14px;background:linear-gradient(135deg,#38bdf8,#0284c7);color:white;font-weight:800" onclick="showToast('📧 Escribinos por WhatsApp para activar')">Activar Plan Familia</button>
+        </div>
+
+        <!-- Plan Premium -->
+        <div style="background:linear-gradient(135deg,rgba(251,191,36,0.15),rgba(201,168,76,0.1));border-radius:20px;padding:18px;margin-bottom:14px;border:2px solid rgba(251,191,36,0.5)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="font-size:32px">👑</div>
+            <div>
+              <div style="font-family:'Fredoka One',cursive;font-size:18px;color:var(--text)">Plan Premium</div>
+              <div style="font-size:22px;font-weight:900;color:var(--gold)">$9.99 <span style="font-size:12px;font-weight:400;color:var(--text2)">/mes</span></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;color:var(--text2)">✅ Todo del plan Familia</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Rutina automática de cuentos</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Cuento de Oro (formato libro)</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Voces distorsionadas de personajes</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Soporte prioritario</div>
+            <div style="font-size:13px;color:var(--text2)">✅ Acceso anticipado a nuevas funciones</div>
+          </div>
+          <button class="btn btn-gold btn-full" style="margin-top:14px;font-weight:800" onclick="showToast('📧 Escribinos por WhatsApp para activar')">👑 Activar Premium</button>
+        </div>
+
+        <div style="text-align:center;font-size:12px;color:var(--text2);padding:8px">
+          💬 Escribinos a WhatsApp para activar tu plan
+        </div>
+      </div>
+
+      <div id="pTab-home">
 
       <!-- LOGO HEADER — estilo mockup -->
       <div class="own-logo-header">
@@ -346,7 +419,8 @@
 
       <!-- PROGRESO -->
       <div class="own-sh"><span class="own-st">📊 Crecimiento de <span id="homeKidName2">tu hijo</span></span></div>
-      <div id="parentProgressSummary" style="padding:0 16px 16px"></div>
+      <div id="parentProgressTimeline" style="margin-bottom:20px"></div>
+        <div id="parentProgressSummary" style="padding:0 16px 16px"></div>
 
     </div>
 
@@ -605,9 +679,9 @@
       <span class="nav-icon own-nav-icon" id="picon-library"></span>
       <span class="own-nav-label">Ver</span>
     </button>
-    <button class="nav-btn" id="pnav-settings" onclick="showToast('⚙️ Ajustes próximamente')">
+    <button class="nav-btn" id="pnav-settings" onclick="_doSwitchParentTab('planes')">
       <span style="font-size:24px">⚙️</span>
-      <span class="own-nav-label">Ajustes</span>
+      <span class="own-nav-label">⭐ Premium</span>
     </button>
   </div>
 </div>
@@ -652,6 +726,8 @@
             <option value="9">8-9 años</option>
           </select>
         </div>
+        <div class="prem-subtitle" style="margin-top:10px">✍️ Agregá tu toque personal (opcional)</div>
+        <textarea id="aiExtraText" rows="2" placeholder="Ej: que el dragón se llame Fede y viva en la montaña..." style="margin-bottom:10px;font-size:13px"></textarea>
         <button class="btn btn-premium btn-full" onclick="generateStoryTextAI()">🤖 Generar cuento ahora</button>
 
         <!-- Texto generado -->
@@ -1466,6 +1542,36 @@
 .own-card-salmon{background-image:url('/sprites_kid_OWN.png')!important;background-size:981px 733px!important;background-position:-194px -178px!important;background-repeat:no-repeat!important;}
 .own-card-mint{background-image:url('/sprites_kid_OWN.png')!important;background-size:987px 737px!important;background-position:-346px -179px!important;background-repeat:no-repeat!important;}
 .own-card-lavender{background-image:url('/sprites_kid_OWN.png')!important;background-size:987px 737px!important;background-position:-499px -179px!important;background-repeat:no-repeat!important;}
+
+.progress-timeline {
+  position:relative;padding:16px 0;margin:16px 0;
+}
+.progress-timeline::before {
+  content:'';position:absolute;left:20px;top:0;bottom:0;
+  width:3px;background:rgba(167,139,250,0.2);border-radius:2px;
+}
+.progress-milestone {
+  position:relative;display:flex;align-items:center;gap:12px;
+  margin-bottom:20px;padding-left:52px;
+}
+.progress-milestone::before {
+  content:'';position:absolute;left:12px;
+  width:18px;height:18px;border-radius:50%;
+  border:3px solid rgba(167,139,250,0.3);
+  background:var(--bg);z-index:1;
+}
+.progress-milestone.done::before {
+  background:var(--accent2);border-color:var(--accent2);
+  box-shadow:0 0 12px rgba(255,107,107,0.5);
+}
+.progress-milestone.active::before {
+  background:var(--gold);border-color:var(--gold);
+  box-shadow:0 0 12px rgba(255,209,102,0.6);
+  animation:pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%,100%{transform:scale(1);} 50%{transform:scale(1.2);}
+}
 </style>
 <script>
 var WP=[
