@@ -319,9 +319,26 @@ const PLANS = {
   premium: { id:'premium', label:'Premium',  color:'#d97706', cuentos:999, imgRegens:999, voicesPremium:true, aiGen:true },
 };
 
-function getUserPlan() { return localStorage.getItem('ownPlan') || 'premium'; } // BETA: premium desbloqueado
-function getPlanData() { return PLANS[getUserPlan()] || PLANS.premium; }
-function isPremium() { return true; } // BETA: siempre premium
+function getUserPlan() { return localStorage.getItem('ownPlan') || 'free'; }
+function getPlanData() { return PLANS[getUserPlan()] || PLANS.free; }
+function isPremium() { return localStorage.getItem('ownPlan') === 'premium'; }
+function isFamilia() { return localStorage.getItem('ownPlan') === 'familia' || isPremium(); }
+
+function activarConClave(clave) {
+  if(clave === '1111') {
+    localStorage.setItem('ownPlan','premium');
+    showToast('👑 Premium activado correctamente');
+    if(typeof showPremiumScreen === 'function') showPremiumScreen();
+    return true;
+  }
+  if(clave === '2222') {
+    localStorage.setItem('ownPlan','familia');
+    showToast('⭐ Plan Familia activado');
+    return true;
+  }
+  showToast('❌ Clave incorrecta');
+  return false;
+}
 
 // ===================== IMAGE GENERATION =====================
 const ARCHIVE_IMAGES = {
