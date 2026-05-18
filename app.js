@@ -1201,7 +1201,7 @@ function showParentApp() {
   buildTokenShop();
   buildTokenPurchaseGrid();
   loadParentLibrary();
-  buildProgressTimeline(); buildProgressSummary();
+  buildProgressSummary();
   parentSequenceData=[{},{},{},{},{}];
   parentSelectedCelebration='fiesta';
   buildParentSequenceScenes();
@@ -1280,7 +1280,7 @@ function _doSwitchParentTab(tab) {
     if(nav) nav.classList.toggle('active',t===tab);
   });
   if(tab==='library') { loadParentLibrary(); loadParentKidMessages(); }
-  if(tab==='home') { loadParentHomeStories(); buildProgressTimeline(); buildProgressSummary(); loadParentKidMessages(); }
+  if(tab==='home') { loadParentHomeStories(); buildProgressSummary(); loadParentKidMessages(); }
   if(tab==='record') showRecTab();
 }
 
@@ -1431,6 +1431,19 @@ function goRecStep(n) {
     const tab=document.getElementById('rstab-'+i);
     if(tab) { tab.classList.toggle('active',i===n); tab.classList.toggle('done',i<n); }
   });
+  if(n===2) {
+    // Si estamos editando y ya hay imágenes, mostrarlas y habilitar siguiente
+    if(appState._editingStoryId && appState.currentStoryImages && appState.currentStoryImages.length) {
+      const thumbRow=document.getElementById('scenesThumbRow');
+      const preview=document.getElementById('scenesPreviewGrid');
+      const nextBtn=document.getElementById('btnGoStep3');
+      const genBtn=document.getElementById('btnGenScenes');
+      if(thumbRow) thumbRow.innerHTML=appState.currentStoryImages.map((u,i)=>`<img src="${u}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover" title="Escena ${i+1}">`).join('');
+      if(preview) preview.style.display='block';
+      if(nextBtn) nextBtn.disabled=false;
+      if(genBtn) genBtn.textContent='🔄 Regenerar imágenes (opcional)';
+    }
+  }
   if(n===3) {
     // Sync title from step 1 to step 3 editable field
     const t1=document.getElementById('storyTitle');
@@ -1532,9 +1545,6 @@ async function toggleRecord() {
       stopAutoAdvance();
     };
     appState.mediaRecorder.start(100);
-    // Al grabar nuevo, limpiar audio anterior
-    appState.recordedBlob=null; appState.originalBlob=null;
-    if(appState.recAudio){ try{appState.recAudio.pause();}catch(e){} appState.recAudio=null; }
     appState.isRecording=true;
     appState.recordSeconds=0;
     const btn=document.getElementById('recBtn');
@@ -1800,7 +1810,8 @@ async function editStory(id) {
   const story=await dbGet('stories',id);
   if(!story){ showToast('❌ No se encontró el cuento'); return; }
   appState._editingStoryId=id;
-  // NO borramos recordedBlob ni recAudio — se cargan del audio existente
+  appState.recordedBlob=null; // clear so save dialog doesn't trigger
+  appState.recAudio=null;
   appState.selectedChar=story.char||'🐉';
   appState.selectedVoice=story.voice||'normal';
   appState.currentStoryImages=story.images||[];
@@ -1816,22 +1827,6 @@ async function editStory(id) {
   if(appState.currentStoryImages.length) {
     buildRecSlideshow(appState.currentStoryImages);
   }
-  // Cargar audio existente
-  appState.recordedBlob=null; appState.recAudio=null;
-  dbGetAudio(id).then(data=>{
-    if(data&&data.blob){
-      const url=URL.createObjectURL(data.blob);
-      const audio=new Audio(); audio.preload='auto'; audio.src=url; audio.load();
-      audio.onloadedmetadata=()=>{
-        const td=document.getElementById('recTimeDisplay');
-        if(td) td.textContent='0:00 / '+formatTime(audio.duration||0);
-      };
-      appState.recAudio=audio; appState.recAudioUrl=url;
-      appState.originalBlob=data.blob; appState.recordedBlob=data.blob;
-      const pb=document.getElementById('recPlayback'); if(pb) pb.style.display='block';
-      const rs=document.getElementById('recStatus'); if(rs) rs.textContent='✅ Audio cargado — podés escucharlo o grabar uno nuevo';
-    }
-  }).catch(()=>{});
   _doSwitchParentTab('record');
   goRecStep(1);
   showToast('✏️ Editando cuento — guardá al terminar');
@@ -1966,55 +1961,8 @@ function giftStarsToKid() {
 }
 
 // ===================== PROGRESS =====================
-
-function buildProgressTimeline() {
-  const el = document.getElementById('parentProgressSummary');
-  if(!el) return;
-  const p = getKidProgress();
-  const stars = appState.stars || 0;
-
-  const milestones = [
-    { label:'Primer cuento escuchado', icon:'📖', done: p.storiesListened >= 1 },
-    { label:'5 cuentos escuchados', icon:'🎧', done: p.storiesListened >= 5 },
-    { label:'Primer quiz completado', icon:'🧠', done: p.quizDone >= 1 },
-    { label:'Quiz perfecto', icon:'💯', done: p.perfectQuiz >= 1 },
-    { label:'Primera historia escrita', icon:'✍️', done: p.writingsSaved >= 1 },
-    { label:'3 historias escritas', icon:'📝', done: p.writingsSaved >= 3 },
-    { label:'5 juegos jugados', icon:'🎮', done: p.gamesPlayed >= 5 },
-    { label:'20 estrellitas', icon:'⭐', done: stars >= 20 },
-    { label:'Explorador de cuentos', icon:'🗺️', done: p.classicsListened >= 3 },
-    { label:'Super lector', icon:'🏆', done: p.storiesListened >= 10 },
-  ];
-
-  const doneCount = milestones.filter(m=>m.done).length;
-  const pct = Math.round(doneCount/milestones.length*100);
-  const activeIdx = milestones.findIndex(m=>!m.done);
-
-  el.innerHTML = `
-    <div style="margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <div style="font-family:'Fredoka One',cursive;font-size:15px;color:var(--text)">Camino de ${appState.kidName||'tu hijo'}</div>
-        <div style="font-size:13px;font-weight:800;color:var(--gold)">${doneCount}/${milestones.length} logros</div>
-      </div>
-      <div style="background:rgba(255,255,255,0.08);border-radius:20px;height:10px;overflow:hidden">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#a78bfa,#ffd166);border-radius:20px;transition:width 1s ease"></div>
-      </div>
-      <div style="font-size:11px;color:var(--text2);margin-top:4px;text-align:right">${pct}% del camino recorrido</div>
-    </div>
-    <div class="progress-timeline">
-      ${milestones.map((m,i)=>`
-        <div class="progress-milestone ${m.done?'done':i===activeIdx?'active':''}">
-          <div style="font-size:20px;min-width:24px">${m.icon}</div>
-          <div>
-            <div style="font-size:13px;font-weight:${m.done?'800':'600'};color:${m.done?'var(--text)':'var(--text2)'}">${m.label}</div>
-            <div style="font-size:10px;color:${m.done?'var(--accent3)':i===activeIdx?'var(--gold)':'rgba(255,255,255,0.2)'}">${m.done?'✅ Completado':i===activeIdx?'👈 Próximo objetivo':'Por alcanzar'}</div>
-          </div>
-        </div>`).join('')}
-    </div>`;
-}
-
 function buildProgressSummary() {
-  const el=document.getElementById('parentProgressTimeline')||document.getElementById('parentProgressSummary');
+  const el=document.getElementById('parentProgressSummary');
   if(!el) return;
   const p=getKidProgress();
   el.innerHTML=`
@@ -2228,7 +2176,7 @@ async function generarYEnviarCuentoAuto(temas, personaje, kidName) {
   try {
     const age = appState.kidAge || 7;
     const longitud = age <= 5 ? '4 párrafos medianos' : age <= 8 ? '5 párrafos desarrollados' : '6 párrafos largos';
-    const aiPrompt = `Escribí un cuento infantil en español para ${kidName}, que tiene ${age} años. El cuento debe tener ${longitud}. El personaje principal es ${charName}. El tema central (MUY IMPORTANTE, el cuento debe girar completamente alrededor de esto): "${temas}". Final feliz y emotivo.${extraText?" Incluí esta idea del papá/mamá: "+extraText+".":""} Solo el texto del cuento, sin título ni explicaciones.\`;
+    const aiPrompt = `Escribí un cuento infantil en español para ${kidName}, que tiene ${age} años. El cuento debe tener ${longitud}. El personaje principal es ${charName}. El tema central (MUY IMPORTANTE, el cuento debe girar completamente alrededor de esto): "${temas}". Final feliz y emotivo. Solo el texto del cuento, sin título ni explicaciones.`;
     const response = await fetch('/api/generar-cuento', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2370,7 +2318,6 @@ function buildPremVoicePills() {
 // ── AI Story Generation ──
 async function generateStoryTextAI() {
   const prompt = document.getElementById('aiStoryPrompt').value.trim();
-  const extraText = document.getElementById('aiExtraText')?.value?.trim() || '';
   const char = document.getElementById('aiStoryChar').value;
   const age = document.getElementById('aiStoryAge').value;
   if(!prompt){ showToast('❌ Escribí de qué trata el cuento'); return; }
