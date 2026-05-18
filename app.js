@@ -3126,13 +3126,25 @@ function seekMsgAudio(msgIdx, event) {
 }
 
 async function downloadMsgAudio(audioKey, title) {
-  if(!isPremium()){ showToast('🔒 Solo Premium'); return; }
-  const data=await dbGetAudio(audioKey);
-  if(!data||!data.blob){ showToast('❌ No se encontró el audio'); return; }
-  const url=URL.createObjectURL(data.blob);
-  const a=document.createElement('a');
-  a.href=url; a.download=(title||'cuento_nino').replace(/[^a-zA-Z0-9]/g,'_')+'.webm'; a.click();
-  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  showToast('⏳ Preparando descarga...');
+  let url = null;
+  // 1. Intentar local
+  const data = await dbGetAudio(audioKey).catch(()=>null);
+  if(data && data.blob && data.blob.size>0) {
+    url = URL.createObjectURL(data.blob);
+  }
+  // 2. Fallback Supabase
+  if(!url) {
+    const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
+    const m = msgs.find(x=>x.audioKey===audioKey||x.id===audioKey);
+    if(m && m.audioFile && supa) {
+      url = await supaGetAudioUrl(m.audioFile).catch(()=>null);
+    }
+  }
+  if(!url) { showToast('❌ No se encontró el audio'); return; }
+  const a = document.createElement('a');
+  a.href=url; a.download=(title||'cuento_nino').replace(/[^a-zA-Z0-9]/g,'_')+'.webm';
+  a.target='_blank'; a.click();
   showToast('📥 Descargando audio...');
 }
 
