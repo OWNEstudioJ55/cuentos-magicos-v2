@@ -598,17 +598,8 @@
           <div style="font-weight:800;font-size:15px;display:none" id="recFinalTitle">Sin título</div>
         </div>
 
-        <!-- Voz del narrador -->
-        <div class="card" style="margin-bottom:14px">
-          <div class="card-title">🎭 Voz del narrador</div>
-          <div class="voice-pills" id="parentVoicePills"></div>
-          <div style="display:flex;gap:8px;margin-top:10px">
-            <button class="btn btn-accent btn-sm btn-full" onclick="previewVoiceWithChar()" id="btnPreviewVoice">👂 Probar voz</button>
-            <div id="recApplyVoiceWrap" style="display:none;flex:1">
-              <button class="btn btn-purple btn-sm btn-full" onclick="applyVoiceToRecording()">✨ Aplicar voz</button>
-            </div>
-          </div>
-        </div>
+        <!-- Panel distorsión voz — se muestra después de grabar -->
+        <div id="recApplyVoiceWrap" style="display:none"></div>
 
         <!-- Texto del cuento (opcional) -->
         <div class="card" style="margin-bottom:14px;border-color:rgba(167,139,250,0.25)">
