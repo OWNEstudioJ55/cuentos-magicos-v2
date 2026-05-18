@@ -1431,6 +1431,23 @@ function goRecStep(n) {
     const tab=document.getElementById('rstab-'+i);
     if(tab) { tab.classList.toggle('active',i===n); tab.classList.toggle('done',i<n); }
   });
+  if(n===2) {
+    // Si estamos editando y ya hay imágenes, habilitar el botón siguiente
+    const nextBtn=document.getElementById('btnGoStep3');
+    const genBtn=document.getElementById('btnGenScenes');
+    if(appState._editingStoryId && appState.currentStoryImages && appState.currentStoryImages.length) {
+      const thumbRow=document.getElementById('scenesThumbRow');
+      const preview=document.getElementById('scenesPreviewGrid');
+      if(thumbRow) thumbRow.innerHTML=appState.currentStoryImages.map((u,i)=>`<img src="${u}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover" title="Escena ${i+1}">`).join('');
+      if(preview) preview.style.display='block';
+      if(nextBtn) nextBtn.disabled=false;
+      if(genBtn) genBtn.textContent='🔄 Regenerar imágenes (opcional)';
+    } else if(!appState._editingStoryId) {
+      // Cuento nuevo — resetear
+      if(nextBtn) nextBtn.disabled=true;
+      if(genBtn) genBtn.textContent='✨ Generar las 5 imágenes';
+    }
+  }
   if(n===3) {
     // Sync title from step 1 to step 3 editable field
     const t1=document.getElementById('storyTitle');
