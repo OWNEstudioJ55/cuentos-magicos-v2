@@ -249,7 +249,7 @@
     <!-- DERECHA: monedas + premium + salir -->
     <div style="display:flex;align-items:center;gap:8px">
       <div class="token-badge" onclick="switchParentTab('tokens')">🪙 <span id="parentTokens">0</span></div>
-      <button onclick="showPremiumScreen()" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
+      <button onclick="_doSwitchParentTab('planes')" style="background:linear-gradient(135deg,#92400e,#d97706);border:1px solid rgba(251,191,36,0.4);color:#fff7ed;padding:5px 12px;border-radius:8px;font-size:11px;font-weight:800;cursor:pointer;font-family:Nunito,sans-serif;box-shadow:0 0 12px rgba(251,191,36,0.3)">✨ PREMIUM</button>
       <button class="btn-logout" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -670,9 +670,9 @@
       <span class="nav-icon own-nav-icon" id="picon-library"></span>
       <span class="own-nav-label">Ver</span>
     </button>
-    <button class="nav-btn" id="pnav-settings" onclick="_doSwitchParentTab('planes')">
-      <span style="font-size:24px">⚙️</span>
-      <span class="own-nav-label">⭐ Premium</span>
+    <button class="nav-btn" id="pnav-settings" onclick="showPremiumScreen()">
+      <span style="font-size:24px">⭐</span>
+      <span class="own-nav-label">Premium</span>
     </button>
   </div>
 </div>
@@ -873,38 +873,7 @@
       <button class="btn btn-gold btn-sm btn-full" onclick="claimDailyCoins()" id="dailyCoinBtn">🎁 Reclamar monedas del día</button>
     </div>
 
-    <!-- ══ PLANES (separado, al fondo) ══ -->
-    <div class="prem-card">
-      <div class="prem-title">🏆 Planes</div>
-      <div class="plan-card free-plan" onclick="selectPlan('free')" style="margin-bottom:10px">
-        <div class="plan-name" style="color:var(--text2)">🆓 Gratis</div>
-        <div class="plan-price" style="color:var(--text2);font-size:26px">/bin/sh<span style="font-size:13px;font-weight:400">/mes</span></div>
-        <div style="height:1px;background:rgba(255,255,255,.08);margin:8px 0"></div>
-        <div class="plan-feature">✅ 3 cuentos grabados</div>
-        <div class="plan-feature">✅ Imágenes de archivo</div>
-        <div class="plan-feature">✅ Juegos y quiz</div>
-        <div class="plan-feature disabled">❌ Generación con IA</div>
-        <div class="plan-feature disabled">❌ Foto a dibujo</div>
-        <div class="plan-feature disabled">❌ Voces premium</div>
-      </div>
-      <div class="plan-card premium-plan" onclick="selectPlan('premium')">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <div class="plan-name" style="color:var(--gold)">⭐ Premium</div>
-          <div class="ai-exclusive-badge">Recomendado</div>
-        </div>
-        <div class="plan-price" style="color:var(--gold);font-size:26px">.99<span style="font-size:13px;font-weight:400">/mes</span></div>
-        <div style="height:1px;background:rgba(251,191,36,.15);margin:8px 0"></div>
-        <div class="plan-feature highlight">✨ Generación con IA</div>
-        <div class="plan-feature highlight">📸 Foto a dibujo cartoon</div>
-        <div class="plan-feature highlight">🎙️ Voces premium desbloqueadas</div>
-        <div class="plan-feature highlight">🎨 Generación libre de imágenes</div>
-        <div class="plan-feature highlight">♾️ Cuentos ilimitados</div>
-        <div class="plan-feature highlight">📥 Descarga audio + imágenes</div>
-      </div>
-      <div id="activatePlanBtn" style="display:none;margin-top:12px">
-        <button class="btn btn-premium btn-full" onclick="activateSelectedPlan()" style="font-size:16px;padding:16px">✨ Activar Premium — $9.99/mes</button>
-        <p style="font-size:11px;color:rgba(255,209,102,.5);text-align:center;margin-top:8px">Pago seguro · Cancelá cuando quieras</p>
-      </div>
+    <!-- Planes movidos a pTab-planes -->
 
       <!-- Token packages -->
       <div style="margin-top:14px">
