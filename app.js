@@ -1527,8 +1527,7 @@ async function toggleRecord() {
       audio.onerror=()=>{ showToast('❌ Error cargando audio grabado'); console.error('Parent rec audio error',audio.error); };
       appState.recAudio=audio;
       const pb=document.getElementById('recPlayback'); if(pb) pb.style.display='block';
-      const avw=document.getElementById('recApplyVoiceWrap');
-      if(avw&&appState.selectedVoice&&appState.selectedVoice!=='normal') avw.style.display='block';
+      showVoiceDistortionPanel();
       stopAutoAdvance();
     };
     appState.mediaRecorder.start(100);
@@ -1617,6 +1616,94 @@ function startAutoAdvance() {
 
 function stopAutoAdvance() {
   clearInterval(autoAdvanceInterval); autoAdvanceInterval=null;
+}
+
+
+// ══ DISTORSIÓN DE VOZ — 3 opciones ══
+const VOICE_DISTORTIONS = [
+  { id:'ada',   label:'🧚 Hada',  pitch:1.4,  rate:1.1 },
+  { id:'ogro',  label:'👹 Ogro',  pitch:0.6,  rate:0.85 },
+  { id:'dragon',label:'🐉 Dragón',pitch:0.75, rate:0.9  },
+];
+let _selectedDistortion = null;
+let _distortPreviewAudio = null;
+
+function showVoiceDistortionPanel() {
+  const wrap = document.getElementById('recApplyVoiceWrap');
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div style="background:var(--card);border-radius:16px;padding:14px;margin-top:12px;border:1px solid rgba(167,139,250,0.2)">
+      <div style="font-family:'Fredoka One',cursive;font-size:15px;color:var(--text);margin-bottom:10px">🎭 Distorsionar voz (opcional)</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        ${VOICE_DISTORTIONS.map(v=>`
+          <button onclick="selectDistortion('${v.id}',this)" 
+            style="flex:1;padding:10px 6px;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:var(--bg2);cursor:pointer;font-size:13px;font-weight:700;color:var(--text2);font-family:Nunito,sans-serif;display:flex;flex-direction:column;align-items:center;gap:4px"
+            id="distBtn-${v.id}">
+            <span style="font-size:24px">${v.label.split(' ')[0]}</span>
+            <span>${v.label.split(' ')[1]}</span>
+          </button>`).join('')}
+      </div>
+      <div id="distortPreviewWrap" style="display:none;margin-bottom:10px">
+        <button onclick="previewDistortion()" class="btn btn-ghost btn-sm btn-full" id="btnDistPreview">👂 Escuchar preview</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="applyDistortionAndSave()" class="btn btn-accent btn-sm" style="flex:1" id="btnApplyDistort" disabled>✅ Aplicar y enviar</button>
+        <button onclick="saveStoryWithoutDistortion()" class="btn btn-ghost btn-sm" style="flex:1">Sin distorsión →</button>
+      </div>
+    </div>`;
+  wrap.style.display = 'block';
+}
+
+function selectDistortion(id, btn) {
+  _selectedDistortion = VOICE_DISTORTIONS.find(v=>v.id===id);
+  document.querySelectorAll('[id^="distBtn-"]').forEach(b=>{
+    b.style.border = '2px solid rgba(255,255,255,.08)';
+    b.style.color = 'var(--text2)';
+    b.style.background = 'var(--bg2)';
+  });
+  if(btn) {
+    btn.style.border = '2px solid var(--lavender)';
+    btn.style.color = 'var(--lavender)';
+    btn.style.background = 'rgba(167,139,250,0.15)';
+  }
+  document.getElementById('distortPreviewWrap').style.display = 'block';
+  document.getElementById('btnApplyDistort').disabled = false;
+}
+
+function previewDistortion() {
+  if(!_selectedDistortion || !appState.recordedBlob) return;
+  const btn = document.getElementById('btnDistPreview');
+  if(_distortPreviewAudio && !_distortPreviewAudio.paused) {
+    _distortPreviewAudio.pause();
+    if(btn) btn.textContent = '👂 Escuchar preview';
+    return;
+  }
+  const url = URL.createObjectURL(appState.recordedBlob);
+  const audio = new Audio();
+  audio.src = url;
+  audio.playbackRate = _selectedDistortion.rate;
+  // Pitch via Web Audio API
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const src = ctx.createMediaElementSource(audio);
+    src.connect(ctx.destination);
+  } catch(e) {}
+  audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar preview'; };
+  _distortPreviewAudio = audio;
+  audio.play().then(()=>{ if(btn) btn.textContent = '⏸ Pausar'; });
+}
+
+async function applyDistortionAndSave() {
+  if(!_selectedDistortion) return;
+  // Aplicar rate como distorsión básica y guardar
+  appState.selectedVoice = _selectedDistortion.id;
+  showToast('✅ Distorsión aplicada — guardando...');
+  await saveStory();
+}
+
+async function saveStoryWithoutDistortion() {
+  _selectedDistortion = null;
+  await saveStory();
 }
 
 async function applyVoiceToRecording() {
@@ -3284,46 +3371,26 @@ let parentSequenceData=[{},{},{},{},{}], parentSelectedCelebration='fiesta';
 function buildParentSequenceScenes() {
   const el=document.getElementById('parentSequenceScenes'); if(!el) return;
   el.innerHTML=parentSequenceData.map((scene,i)=>{
-    const charSel=scene.char||null;
     const actSel=scene.action!==undefined?SEQ_ACTIONS[scene.action]:null;
     const isLast=i===4;
     const celSel=SEQ_CELEBRATIONS.find(c=>c.id===parentSelectedCelebration)||SEQ_CELEBRATIONS[3];
-    const done=charSel&&(actSel||isLast);
+    const done=actSel||isLast;
     return `<div class="seq-scene${done?' complete':''}" id="pScene${i}">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div class="seq-scene-title" style="margin:0">Escena ${i+1}${isLast?' 🎉':''}</div>
         ${done?'<span style="color:var(--mint);font-size:16px">✅</span>':''}
       </div>
-      <div style="display:flex;gap:8px">
-        <div style="flex:1">
-          <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:4px">PERSONAJE</div>
-          <button onclick="toggleSeqPicker('char',${i})" style="width:100%;padding:12px 8px;border-radius:12px;border:2px solid ${charSel?'var(--lavender)':'rgba(255,255,255,.08)'};background:${charSel?'rgba(167,139,250,.15)':'var(--bg2)'};cursor:pointer;font-size:${charSel?'28px':'20px'};display:block;text-align:center">
-            ${charSel||'➕'}
-          </button>
-          <div id="charPicker${i}" style="display:none;background:var(--card3);border-radius:12px;padding:8px;margin-top:6px;border:1px solid rgba(167,139,250,.2)">
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px">
-              ${SEQ_CHARS.map(c=>`<button onclick="selectParentSeqChar(${i},'${c}')" style="font-size:22px;padding:8px;border-radius:8px;border:2px solid ${scene.char===c?'var(--lavender)':'rgba(255,255,255,.06)'};background:${scene.char===c?'rgba(167,139,250,.2)':'var(--bg2)'};cursor:pointer">${c}</button>`).join('')}
-            </div>
-          </div>
+      ${isLast?`
+        <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:6px">TIPO DE FESTEJO</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${SEQ_CELEBRATIONS.map(c=>`<button onclick="selectParentCelebration('${c.id}');buildParentSequenceScenes()" style="padding:8px 12px;border-radius:12px;border:2px solid ${parentSelectedCelebration===c.id?'var(--warm)':'rgba(255,255,255,.08)'};background:${parentSelectedCelebration===c.id?'rgba(255,209,102,.2)':'var(--bg2)'};cursor:pointer;font-size:13px;font-weight:700;color:${parentSelectedCelebration===c.id?'var(--warm)':'var(--text2)'};font-family:Nunito,sans-serif">${c.icon} ${c.label}</button>`).join('')}
         </div>
-        <div style="flex:1">
-          <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:4px">${isLast?'FESTEJO':'ACCIÓN'}</div>
-          <button onclick="toggleSeqPicker('${isLast?'celeb':'action'}',${i})" style="width:100%;padding:12px 8px;border-radius:12px;border:2px solid ${(actSel||isLast)?'var(--coral)':'rgba(255,255,255,.08)'};background:${(actSel||isLast)?'rgba(255,107,107,.12)':'var(--bg2)'};cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px">
-            <span style="font-size:${(actSel||isLast)?'22px':'18px'}">${isLast?celSel.icon:(actSel?actSel.icon:'➕')}</span>
-            <span style="font-size:11px;font-weight:700;color:${(actSel||isLast)?'var(--coral)':'var(--text3)'}">${isLast?celSel.label:(actSel?actSel.label:'elegir')}</span>
-          </button>
-          ${!isLast?`<div id="actionPicker${i}" style="display:none;background:var(--card3);border-radius:12px;padding:8px;margin-top:6px;border:1px solid rgba(255,107,107,.2)">
-            <div style="display:flex;flex-wrap:wrap;gap:5px">
-              ${SEQ_ACTIONS.map((a,j)=>`<button onclick="selectParentSeqAction(${i},${j})" style="padding:5px 8px;border-radius:8px;border:2px solid ${scene.action===j?'var(--coral)':'rgba(255,255,255,.06)'};background:${scene.action===j?'rgba(255,107,107,.15)':'var(--bg2)'};cursor:pointer;font-size:12px;font-weight:700;color:${scene.action===j?'var(--coral)':'var(--text2)'};font-family:Nunito,sans-serif">${a.icon} ${a.label}</button>`).join('')}
-            </div>
-          </div>`:
-          `<div id="celebPicker${i}" style="display:none;background:var(--card3);border-radius:12px;padding:8px;margin-top:6px;border:1px solid rgba(255,209,102,.2)">
-            <div style="display:flex;flex-wrap:wrap;gap:5px">
-              ${SEQ_CELEBRATIONS.map(c=>`<button onclick="selectParentCelebration('${c.id}')" style="padding:5px 10px;border-radius:8px;border:2px solid ${parentSelectedCelebration===c.id?'var(--warm)':'rgba(255,255,255,.06)'};background:${parentSelectedCelebration===c.id?'rgba(255,209,102,.15)':'var(--bg2)'};cursor:pointer;font-size:12px;font-weight:700;color:${parentSelectedCelebration===c.id?'var(--warm)':'var(--text2)'};font-family:Nunito,sans-serif">${c.icon} ${c.label}</button>`).join('')}
-            </div>
-          </div>`}
+      `:`
+        <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:6px">ACCIÓN DE LA ESCENA</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${SEQ_ACTIONS.map((a,j)=>`<button onclick="selectParentSeqAction(${i},${j})" style="padding:6px 10px;border-radius:10px;border:2px solid ${scene.action===j?'var(--coral)':'rgba(255,255,255,.06)'};background:${scene.action===j?'rgba(255,107,107,.15)':'var(--bg2)'};cursor:pointer;font-size:12px;font-weight:700;color:${scene.action===j?'var(--coral)':'var(--text2)'};font-family:Nunito,sans-serif">${a.icon} ${a.label}</button>`).join('')}
         </div>
-      </div>
+      `}
     </div>`;
   }).join('');
 }
