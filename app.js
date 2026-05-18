@@ -2990,9 +2990,8 @@ function openMsgDetail(i) {
   const actEl = document.getElementById('msgDetailActions');
   if(actEl) {
     actEl.innerHTML =
-      `${(m.audioKey||m.audioFile)?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey||m.id}','${m.title||'mensaje'}')">📥 Descargar audio</button>`:''}
-      ${m.images&&m.images.length?`<button class="btn btn-ghost btn-sm" onclick="downloadMsgImages(${i})">🖼️ Imágenes</button>`:''}
-      <button class="btn btn-green btn-sm" onclick="openMsgDetailQuiz(${i})">🧠 Quiz</button>`;
+      `<button class="btn btn-gold btn-sm btn-full" onclick="downloadMsgAll(${i})" style="font-size:15px;padding:14px">📥 Descargar todo (ZIP)</button>
+      <button class="btn btn-green btn-sm btn-full" onclick="openMsgDetailQuiz(${i})" style="margin-top:8px">🧠 Quiz</button>`;
   }
   const quizEl = document.getElementById('msgDetailQuizArea');
   if(quizEl) quizEl.innerHTML='';
