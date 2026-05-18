@@ -1431,19 +1431,6 @@ function goRecStep(n) {
     const tab=document.getElementById('rstab-'+i);
     if(tab) { tab.classList.toggle('active',i===n); tab.classList.toggle('done',i<n); }
   });
-  if(n===2) {
-    // Si estamos editando y ya hay imágenes, mostrarlas y habilitar siguiente
-    if(appState._editingStoryId && appState.currentStoryImages && appState.currentStoryImages.length) {
-      const thumbRow=document.getElementById('scenesThumbRow');
-      const preview=document.getElementById('scenesPreviewGrid');
-      const nextBtn=document.getElementById('btnGoStep3');
-      const genBtn=document.getElementById('btnGenScenes');
-      if(thumbRow) thumbRow.innerHTML=appState.currentStoryImages.map((u,i)=>`<img src="${u}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover" title="Escena ${i+1}">`).join('');
-      if(preview) preview.style.display='block';
-      if(nextBtn) nextBtn.disabled=false;
-      if(genBtn) genBtn.textContent='🔄 Regenerar imágenes (opcional)';
-    }
-  }
   if(n===3) {
     // Sync title from step 1 to step 3 editable field
     const t1=document.getElementById('storyTitle');
@@ -1768,6 +1755,7 @@ async function loadParentLibrary() {
         <div class="story-meta">${s.created||''} ${s.hasAudio?'🔊':'📝'} ${isRead?'<span style="color:var(--mint);font-weight:800">✅ Leído</span>':'<span style="color:var(--text3)">⏳ Sin leer</span>'}</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
+        ${s.hasAudio?`<button class="btn btn-accent btn-sm" id="plib-play-${s.id}" onclick="event.stopPropagation();playParentStoryQuick('${s.id}',this)">▶</button>`:''}
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();editStory('${s.id}')">✏️</button>
         <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();deleteStory('${s.id}')">🗑</button>
       </div>
@@ -1830,6 +1818,49 @@ async function editStory(id) {
   _doSwitchParentTab('record');
   goRecStep(1);
   showToast('✏️ Editando cuento — guardá al terminar');
+}
+
+
+// Reproducir cuento del padre sin entrar a editar
+let _parentQuickAudio = null;
+let _parentQuickPlayingId = null;
+
+async function playParentStoryQuick(id, btn) {
+  // Si ya está reproduciendo este cuento, pausar
+  if(_parentQuickPlayingId === id && _parentQuickAudio) {
+    if(!_parentQuickAudio.paused) {
+      _parentQuickAudio.pause();
+      if(btn) btn.textContent='▶';
+      return;
+    } else {
+      _parentQuickAudio.play().then(()=>{ if(btn) btn.textContent='⏸'; });
+      return;
+    }
+  }
+  // Parar el anterior si existía
+  if(_parentQuickAudio) { _parentQuickAudio.pause(); _parentQuickAudio=null; }
+  document.querySelectorAll('[id^="plib-play-"]').forEach(b=>b.textContent='▶');
+  if(btn) btn.textContent='⏳';
+  _parentQuickPlayingId = id;
+  try {
+    let audioUrl = null;
+    const data = await dbGetAudio(id).catch(()=>null);
+    if(data && data.blob && data.blob.size>0) {
+      audioUrl = URL.createObjectURL(data.blob);
+    } else {
+      const story = await dbGet('stories', id);
+      if(story && story.audioFile) audioUrl = await supaGetAudioUrl(story.audioFile).catch(()=>null);
+    }
+    if(!audioUrl) { showToast('❌ Sin audio'); if(btn) btn.textContent='▶'; return; }
+    const audio = new Audio(); audio.preload='auto'; audio.src=audioUrl; audio.load();
+    audio.onended = () => { if(btn) btn.textContent='▶'; _parentQuickPlayingId=null; };
+    audio.onerror = () => { showToast('❌ Error de audio'); if(btn) btn.textContent='▶'; };
+    _parentQuickAudio = audio;
+    audio.play().then(()=>{ if(btn) btn.textContent='⏸'; }).catch(()=>{ if(btn) btn.textContent='▶'; });
+  } catch(e) {
+    showToast('❌ Error: '+e.message);
+    if(btn) btn.textContent='▶';
+  }
 }
 
 async function deleteStory(id) {
