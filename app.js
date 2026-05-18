@@ -2926,171 +2926,40 @@ async function loadParentKidMessages() {
   msgs.slice(0,10).forEach((_,i)=>{ window._msgSlideIdx[i]=0; });
 }
 
-let _msgDetailIdx = null;
-let _msgDetailAudio = null;
-
 function openMsgDetail(i) {
   const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
   const m = msgs[i]; if(!m) return;
-  _msgDetailIdx = i;
-
-  // Parar audio anterior
-  if(_msgDetailAudio) { _msgDetailAudio.pause(); _msgDetailAudio=null; }
-
-  // Ir a pantalla dedicada
-  showScreen('msgDetailScreen');
-  document.getElementById('msgDetailScreen').style.display='flex';
-
-  // Título
-  const titleEl = document.getElementById('msgDetailTitle');
-  if(titleEl) titleEl.textContent = m.title||'Mensaje';
-
-  // Imágenes
-  const imgsEl = document.getElementById('msgDetailImgs');
-  if(imgsEl) {
-    if(m.images && m.images.length) {
-      let imgIdx = 0;
-      imgsEl.innerHTML = `
-        <div style="position:relative;width:100%;aspect-ratio:1;border-radius:18px;overflow:hidden;background:var(--card)">
-          ${m.images.map((u,j)=>`<img src="${u}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:${j===0?'block':'none'}" id="mdImg${j}">`).join('')}
+  const area = document.getElementById('msgDetailArea');
+  if(!area) return;
+  // Toggle — si ya está abierto el mismo, cerrar
+  if(area.dataset.open === String(i)) { area.innerHTML=''; area.dataset.open=''; return; }
+  area.dataset.open = String(i);
+  area.innerHTML = `
+    <div class="own-card" style="margin-bottom:12px">
+      <div style="font-weight:800;font-size:15px;color:#fff;margin-bottom:6px">${m.title||'Mensaje'}</div>
+      ${m.text?`<div style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;margin-bottom:10px">${m.text}</div>`:''}
+      ${m.images&&m.images.length?`
+        <div style="position:relative;width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;margin-bottom:10px" id="msgSlide${i}">
+          ${m.images.map((u,j)=>`<img src="${u}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:${j===0?'block':'none'}" id="msgImg${i}_${j}">`).join('')}
           ${m.images.length>1?`
-            <button onclick="slideMsgDetailImg(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:white;font-size:22px;cursor:pointer">‹</button>
-            <button onclick="slideMsgDetailImg(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:white;font-size:22px;cursor:pointer">›</button>
-            <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px" id="mdDots">
-              ${m.images.map((_,j)=>`<div style="width:8px;height:8px;border-radius:50%;background:${j===0?'white':'rgba(255,255,255,0.4)'}" id="mdDot${j}"></div>`).join('')}
-            </div>`:''}
-        </div>`;
-    } else {
-      imgsEl.innerHTML = '';
-    }
-  }
-
-  // Texto
-  const textEl = document.getElementById('msgDetailText');
-  if(textEl) {
-    if(m.text) { textEl.textContent = m.text; textEl.style.display='block'; }
-    else { textEl.style.display='none'; }
-  }
-
-  // Reproductor
-  const playerEl = document.getElementById('msgDetailPlayer');
-  if(playerEl) {
-    if(m.audioKey||m.audioFile) {
-      playerEl.style.display='block';
-      const playBtn = document.getElementById('msgDetailPlayBtn');
-      if(playBtn) playBtn.textContent='▶';
-      document.getElementById('msgDetailProgress').style.width='0%';
-      document.getElementById('msgDetailTime').textContent='0:00';
-      // Precargar audio
-      loadMsgDetailAudio(i, m.audioKey||'', m.audioFile||'');
-    } else {
-      playerEl.style.display='none';
-    }
-  }
-
-  // Acciones
-  const actEl = document.getElementById('msgDetailActions');
-  if(actEl) {
-    actEl.innerHTML = `
-      ${(m.audioKey||m.audioFile)?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey||m.id}','${m.title||'mensaje'}')">📥 Descargar audio</button>`:''}
-      ${m.images&&m.images.length?`<button class="btn btn-ghost btn-sm" onclick="downloadMsgImages(${i})">🖼️ Descargar imágenes</button>`:''}
-      <button class="btn btn-green btn-sm" onclick="openParentQuizForMessageDetail(${i})">🧠 Quiz</button>`;
-  }
-
-  // Quiz area
-  const quizEl = document.getElementById('msgDetailQuizArea');
-  if(quizEl) quizEl.innerHTML='';
-}
-
-function closeMsgDetail() {
-  if(_msgDetailAudio) { _msgDetailAudio.pause(); _msgDetailAudio=null; }
-  showScreen('parentApp');
-  _doSwitchParentTab('library');
-}
-
-let _mdSlideIdx = 0;
-function slideMsgDetailImg(dir) {
-  const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
-  const m = msgs[_msgDetailIdx]; if(!m||!m.images) return;
-  const n = m.images.length;
-  _mdSlideIdx = (_mdSlideIdx+dir+n)%n;
-  for(let j=0;j<n;j++){
-    const img=document.getElementById(`mdImg${j}`);
-    if(img) img.style.display=j===_mdSlideIdx?'block':'none';
-    const dot=document.getElementById(`mdDot${j}`);
-    if(dot) dot.style.background=j===_mdSlideIdx?'white':'rgba(255,255,255,0.4)';
-  }
-}
-
-async function loadMsgDetailAudio(i, audioKey, audioFile) {
-  let audioUrl = null;
-  if(audioKey) {
-    const data=await dbGetAudio(audioKey).catch(()=>null);
-    if(data&&data.blob&&data.blob.size>0) audioUrl=URL.createObjectURL(data.blob);
-  }
-  if(!audioUrl && audioFile && supa) {
-    audioUrl = await supaGetAudioUrl(audioFile).catch(()=>null);
-  }
-  if(!audioUrl) return;
-  const audio = new Audio(); audio.preload='auto'; audio.src=audioUrl; audio.load();
-  audio.onloadedmetadata=()=>{
-    const t=document.getElementById('msgDetailTime');
-    if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
-  };
-  audio.ontimeupdate=()=>{
-    const p=document.getElementById('msgDetailProgress');
-    const t=document.getElementById('msgDetailTime');
-    if(p&&audio.duration) p.style.width=(audio.currentTime/audio.duration*100)+'%';
-    if(t) t.textContent=formatTime(audio.currentTime)+' / '+formatTime(audio.duration||0);
-  };
-  audio.onended=()=>{
-    const btn=document.getElementById('msgDetailPlayBtn');
-    if(btn) btn.textContent='▶';
-  };
-  _msgDetailAudio = audio;
-}
-
-async function toggleMsgDetailAudio() {
-  const btn = document.getElementById('msgDetailPlayBtn');
-  if(!_msgDetailAudio) { if(btn) btn.textContent='⏳'; return; }
-  if(!_msgDetailAudio.paused) {
-    _msgDetailAudio.pause();
-    if(btn) btn.textContent='▶';
-  } else {
-    _msgDetailAudio.play().then(()=>{ if(btn) btn.textContent='⏸'; });
-  }
-}
-
-function seekMsgDetailAudio(e) {
-  if(!_msgDetailAudio||!_msgDetailAudio.duration) return;
-  const bar=e.currentTarget;
-  const rect=bar.getBoundingClientRect();
-  const pct=(e.clientX-rect.left)/rect.width;
-  _msgDetailAudio.currentTime=pct*_msgDetailAudio.duration;
-}
-
-function openParentQuizForMessageDetail(i) {
-  const msgs=JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
-  const msg=msgs[i]; if(!msg) return;
-  const el=document.getElementById('msgDetailQuizArea');
-  if(!el) return;
-  el.innerHTML=`
-    <div style="margin-top:16px">
-      <div style="font-size:13px;font-weight:800;color:var(--accent3);margin-bottom:10px">🧠 Quiz para ${appState.kidName||'el niño'}</div>
-      <input type="text" id="mdpq0" placeholder="Pregunta 1" style="font-size:13px;margin-bottom:8px">
-      <input type="text" id="mdpq1" placeholder="Pregunta 2" style="font-size:13px;margin-bottom:8px">
-      <input type="text" id="mdpq2" placeholder="Pregunta 3" style="font-size:13px;margin-bottom:8px">
-      <button class="btn btn-gold btn-full btn-sm" onclick="saveMsgDetailQuiz(${i})">💾 Guardar quiz</button>
-      <div id="mdpqSaved" style="display:none;font-size:12px;color:var(--accent3);margin-top:6px">✅ Quiz guardado</div>
+          <button onclick="slideMsgImg(${i},-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:white;font-size:20px;cursor:pointer">‹</button>
+          <button onclick="slideMsgImg(${i},1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);border:none;color:white;font-size:20px;cursor:pointer">›</button>`:''}
+        </div>`:''}
+      ${m.audioKey||m.audioFile?`
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border-radius:12px;padding:10px">
+          <button id="msgPlayBtn${i}" class="msg-play-btn" onclick="toggleMsgAudio(${i},'${m.audioKey||''}','${m.audioFile||''}')">▶</button>
+          <div style="flex:1">
+            <div class="msg-progress-bar" onclick="seekMsgAudio(${i},event)"><div id="msgProgress${i}" class="msg-progress-fill"></div></div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4)" id="msgTime${i}">0:00</div>
+          </div>
+        </div>
+        <div class="msg-actions" style="margin-top:10px">
+          ${isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-gold btn-sm" onclick="downloadMsgAudio('${m.audioKey||m.id}','${m.title}')">📥 Descargar</button>`:''}
+          ${!isPremium()&&(m.audioKey||m.audioFile)?`<button class="btn btn-ghost btn-sm" onclick="showPremiumScreen()" style="opacity:0.6">🔒 Descargar (Premium)</button>`:''}
+          <button class="btn btn-green btn-sm" onclick="openParentQuizForMessage(${i})" style="margin-left:auto">🧠 Quiz</button>
+        </div>`:`<div style="font-size:12px;color:rgba(255,255,255,0.35)">Sin audio</div>`}
+      <div id="parentQuizArea${i}" style="display:none;padding-top:10px"></div>
     </div>`;
-}
-
-function saveMsgDetailQuiz(i) {
-  const qs=[0,1,2].map(j=>document.getElementById(`mdpq${j}`)?.value?.trim()).filter(Boolean);
-  const msgs=JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
-  if(msgs[i]) { msgs[i].parentQuiz=qs; localStorage.setItem('ownKidMessages',JSON.stringify(msgs)); }
-  const saved=document.getElementById('mdpqSaved');
-  if(saved) saved.style.display='block';
 }
 
 // Message slideshow
