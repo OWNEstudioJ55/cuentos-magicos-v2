@@ -2913,7 +2913,7 @@ async function loadParentKidMessages() {
       ${(m.audioKey||m.audioFile)?`
         <button class="own-msg-play" onclick="event.stopPropagation();toggleMsgAudio(${i},'${m.audioKey||''}','${m.audioFile||''}')" id="msgPlayBtn${i}">▶</button>
         ${isPremium()
-          ? `<button class="own-msg-download" onclick="event.stopPropagation();downloadMsgAudio('${m.audioKey||m.id}','${m.title}')">📥</button>`
+          ? `<button class="own-msg-download" onclick="event.stopPropagation();downloadMsgAudio('${m.audioKey||m.id}','${m.title}','${m.audioFile||''}')">📥</button>`
           : `<button class="own-msg-download locked" onclick="event.stopPropagation();showPremiumScreen()">🔒</button>`
         }`:''}
     </div>`).join('')}
@@ -3125,7 +3125,7 @@ function seekMsgAudio(msgIdx, event) {
   audio.currentTime=pct*audio.duration;
 }
 
-async function downloadMsgAudio(audioKey, title) {
+async function downloadMsgAudio(audioKey, title, audioFile) {
   showToast('⏳ Preparando descarga...');
   let url = null;
   // 1. Intentar local
@@ -3133,19 +3133,21 @@ async function downloadMsgAudio(audioKey, title) {
   if(data && data.blob && data.blob.size>0) {
     url = URL.createObjectURL(data.blob);
   }
-  // 2. Fallback Supabase
+  // 2. Fallback Supabase con audioFile directo
+  if(!url && audioFile && supa) {
+    url = await supaGetAudioUrl(audioFile).catch(()=>null);
+  }
+  // 3. Buscar audioFile en mensajes guardados
   if(!url) {
     const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
     const m = msgs.find(x=>x.audioKey===audioKey||x.id===audioKey);
-    if(m && m.audioFile && supa) {
-      url = await supaGetAudioUrl(m.audioFile).catch(()=>null);
-    }
+    if(m && m.audioFile && supa) url = await supaGetAudioUrl(m.audioFile).catch(()=>null);
   }
   if(!url) { showToast('❌ No se encontró el audio'); return; }
   const a = document.createElement('a');
   a.href=url; a.download=(title||'cuento_nino').replace(/[^a-zA-Z0-9]/g,'_')+'.webm';
   a.target='_blank'; a.click();
-  showToast('📥 Descargando audio...');
+  showToast('📥 Descargando...');
 }
 
 function downloadMsgImages(msgIdx) {
