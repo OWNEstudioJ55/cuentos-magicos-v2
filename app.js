@@ -3125,6 +3125,48 @@ function seekMsgAudio(msgIdx, event) {
   audio.currentTime=pct*audio.duration;
 }
 
+
+async function downloadMsgAll(msgIdx) {
+  const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
+  const m = msgs[msgIdx]; if(!m) return;
+  showToast('⏳ Preparando descarga...');
+  let count = 0;
+
+  // 1. Descargar audio
+  if(m.audioKey || m.audioFile) {
+    let audioUrl = null;
+    const data = await dbGetAudio(m.audioKey||'').catch(()=>null);
+    if(data && data.blob && data.blob.size>0) audioUrl = URL.createObjectURL(data.blob);
+    if(!audioUrl && m.audioFile && supa) audioUrl = await supaGetAudioUrl(m.audioFile).catch(()=>null);
+    if(audioUrl) {
+      const a = document.createElement('a');
+      a.href=audioUrl;
+      a.download=((m.title||'audio').replace(/[^a-zA-Z0-9]/g,'_'))+'.webm';
+      a.target='_blank';
+      a.click();
+      count++;
+    }
+  }
+
+  // 2. Descargar imágenes con delay
+  if(m.images && m.images.length) {
+    m.images.forEach((url, i) => {
+      setTimeout(() => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `imagen_${i+1}.png`;
+        a.target = '_blank';
+        a.click();
+        count++;
+      }, (i+1) * 800);
+    });
+  }
+
+  setTimeout(()=>{
+    showToast(`📥 Descargando ${count + (m.images?.length||0)} archivo${count>1?'s':''}...`);
+  }, 500);
+}
+
 async function downloadMsgAudio(audioKey, title, audioFile) {
   showToast('⏳ Preparando descarga...');
   let url = null;
