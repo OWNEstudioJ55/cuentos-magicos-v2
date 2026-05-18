@@ -1269,18 +1269,14 @@ function showSaveBeforeLeaveDialog(targetTab) {
 
 function _doSwitchParentTab(tab) {
   if(tab==='progress'||tab==='tokens') tab='library';
-  ['home','record','library','tokens','progress'].forEach(t=>{
-    const el=document.getElementById('pTab-'+t);
-    if(el) el.style.display=t===tab||((t==='tokens'||t==='progress')&&tab==='library')?'none':'none';
-  });
-  ['home','record','library'].forEach(t=>{
+  ['home','record','library','planes'].forEach(t=>{
     const el=document.getElementById('pTab-'+t);
     if(el) el.style.display=t===tab?'block':'none';
     const nav=document.getElementById('pnav-'+t);
     if(nav) nav.classList.toggle('active',t===tab);
   });
   if(tab==='library') { loadParentLibrary(); loadParentKidMessages(); }
-  if(tab==='home') { loadParentHomeStories(); buildProgressSummary(); loadParentKidMessages(); }
+  if(tab==='home') { loadParentHomeStories(); buildProgressTimeline(); buildProgressSummary(); loadParentKidMessages(); }
   if(tab==='record') showRecTab();
 }
 
