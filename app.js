@@ -3129,42 +3129,53 @@ function seekMsgAudio(msgIdx, event) {
 async function downloadMsgAll(msgIdx) {
   const msgs = JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
   const m = msgs[msgIdx]; if(!m) return;
-  showToast('⏳ Preparando descarga...');
-  let count = 0;
+  showToast('⏳ Preparando ZIP...');
 
-  // 1. Descargar audio
-  if(m.audioKey || m.audioFile) {
-    let audioUrl = null;
-    const data = await dbGetAudio(m.audioKey||'').catch(()=>null);
-    if(data && data.blob && data.blob.size>0) audioUrl = URL.createObjectURL(data.blob);
-    if(!audioUrl && m.audioFile && supa) audioUrl = await supaGetAudioUrl(m.audioFile).catch(()=>null);
-    if(audioUrl) {
-      const a = document.createElement('a');
-      a.href=audioUrl;
-      a.download=((m.title||'audio').replace(/[^a-zA-Z0-9]/g,'_'))+'.webm';
-      a.target='_blank';
-      a.click();
-      count++;
-    }
-  }
-
-  // 2. Descargar imágenes con delay
-  if(m.images && m.images.length) {
-    m.images.forEach((url, i) => {
-      setTimeout(() => {
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `imagen_${i+1}.png`;
-        a.target = '_blank';
-        a.click();
-        count++;
-      }, (i+1) * 800);
+  // Cargar JSZip dinámicamente
+  if(!window.JSZip) {
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=res; s.onerror=rej;
+      document.head.appendChild(s);
     });
   }
 
-  setTimeout(()=>{
-    showToast(`📥 Descargando ${count + (m.images?.length||0)} archivo${count>1?'s':''}...`);
-  }, 500);
+  const zip = new window.JSZip();
+  const nombre = (m.title||'mensaje').replace(/[^a-zA-Z0-9]/g,'_');
+  let archivos = 0;
+
+  // 1. Audio
+  if(m.audioKey || m.audioFile) {
+    let blob = null;
+    const data = await dbGetAudio(m.audioKey||'').catch(()=>null);
+    if(data && data.blob && data.blob.size>0) { blob = data.blob; }
+    if(!blob && m.audioFile && supa) {
+      const url = await supaGetAudioUrl(m.audioFile).catch(()=>null);
+      if(url) {
+        blob = await fetch(url).then(r=>r.blob()).catch(()=>null);
+      }
+    }
+    if(blob) { zip.file(`${nombre}_audio.webm`, blob); archivos++; }
+  }
+
+  // 2. Imágenes
+  if(m.images && m.images.length) {
+    for(let i=0; i<m.images.length; i++) {
+      const blob = await fetch(m.images[i]).then(r=>r.blob()).catch(()=>null);
+      if(blob) { zip.file(`imagen_${i+1}.jpg`, blob); archivos++; }
+    }
+  }
+
+  if(archivos === 0) { showToast('❌ No se encontraron archivos'); return; }
+
+  showToast(`📦 Comprimiendo ${archivos} archivo${archivos>1?'s':''}...`);
+  const zipBlob = await zip.generateAsync({type:'blob'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(zipBlob);
+  a.download = `${nombre}_OWN.zip`;
+  a.click();
+  showToast('✅ ZIP descargado!');
 }
 
 async function downloadMsgAudio(audioKey, title, audioFile) {
