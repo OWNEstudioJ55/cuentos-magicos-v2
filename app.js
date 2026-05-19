@@ -4844,23 +4844,23 @@ function showQuizResults() {
   if(quizScore===quizData.length){ updateKidProgress('perfectQuiz'); checkAchievements(); }
 
   const reviewHTML=quizAnswers.map((a,i)=>`
-    <div style="background:${a.isCorrect?'rgba(52,211,153,0.1)':'rgba(239,68,68,0.08)'};border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid ${a.isCorrect?'var(--accent3)':'#f87171'}">
-      <div style="font-size:12px;font-weight:800;color:${a.isCorrect?'var(--accent3)':'#f87171'};margin-bottom:4px">${a.isCorrect?'✅ Correcto':'❌ Incorrecto'} — Pregunta ${i+1}</div>
-      <div style="font-size:13px;font-weight:700;margin-bottom:4px">${a.q}</div>
-      ${!a.isCorrect?`<div style="font-size:12px;color:var(--text2)">Tu respuesta: <span style="color:#f87171">${a.chosenText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>
-      <div style="font-size:12px;color:var(--accent3)">Correcta: <span style="font-weight:800">${a.correctText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>`:''}
+    <div style="background:${a.isCorrect?'rgba(52,211,153,0.1)':'rgba(239,68,68,0.08)'};border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid ${a.isCorrect?'#34d399':'#f87171'}">
+      <div style="font-size:12px;font-weight:800;color:${a.isCorrect?'#059669':'#f87171'};margin-bottom:4px">${a.isCorrect?'✅ Correcto':'❌ Incorrecto'} — Pregunta ${i+1}</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:#5C4033">${a.q}</div>
+      ${!a.isCorrect?`<div style="font-size:12px;color:#5C4033">Tu respuesta: <span style="color:#f87171">${a.chosenText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>
+      <div style="font-size:12px;color:#059669">Correcta: <span style="font-weight:800">${a.correctText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>`:''}
     </div>`).join('');
 
   el.innerHTML=`
     <div style="text-align:center;margin-bottom:16px">
       <div style="font-size:56px;margin-bottom:8px">${pct===100?'🏆':pct>=50?'⭐':'📖'}</div>
-      <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;margin-bottom:4px">${quizScore}/${quizData.length} correctas</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:8px">${pct===100?'¡Perfecto! ¡Sos un genio de los cuentos!':pct>=50?'¡Muy bien! Seguí practicando':'¡Seguí leyendo para aprender más!'}</div>
-      <div style="font-size:18px;color:var(--gold);font-weight:800">+${stars} ⭐</div>
+      <div style="font-family:'Fredoka One',cursive;font-size:24px;font-weight:800;margin-bottom:4px;color:#5C4033">${quizScore}/${quizData.length} correctas</div>
+      <div style="font-size:14px;color:#9B7B6B;margin-bottom:8px">${pct===100?'¡Perfecto! ¡Sos un genio de los cuentos!':pct>=50?'¡Muy bien! Seguí practicando':'¡Seguí leyendo para aprender más!'}</div>
+      <div style="font-size:18px;color:#C9A84C;font-weight:800">+${stars} ⭐</div>
     </div>
-    <div style="font-size:14px;font-weight:800;margin-bottom:10px">📋 Revisión:</div>
+    <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:#5C4033">📋 Revisión:</div>
     ${reviewHTML}
-    <button class="btn btn-accent btn-full" style="margin-top:12px" onclick="buildQuizGame()">🔄 Jugar de nuevo</button>`;
+    <button style="width:100%;padding:14px;background:linear-gradient(135deg,#C9A84C,#e8c97a);border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:18px;color:white;cursor:pointer;margin-top:12px" onclick="buildQuizGame()">🔄 Jugar de nuevo</button>`;
 }
 
 // Writing game (in-game quick write)
@@ -4903,8 +4903,8 @@ function buildMemoryGame() {
   memoryCards=pairs.map((e,i)=>({id:i,emoji:e,flipped:false,matched:false}));
   memoryFlipped=[]; memoryMatched=0; memoryMoves=0;
   el.innerHTML=`
-    <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:8px;color:var(--accent3)">🃏 Memoria</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Encontrá todas las parejas</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:8px;color:#5C4033;text-align:center">🃏 Memoria</div>
+    <div style="font-size:13px;color:#9B7B6B;margin-bottom:12px;text-align:center">Encontrá todas las parejas</div>
     <div id="memBoard" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>`;
   renderMemoryBoard();
 }
@@ -4913,7 +4913,7 @@ function renderMemoryBoard() {
   const el=document.getElementById('memBoard');
   if(!el) return;
   el.innerHTML=memoryCards.map((c,i)=>`
-    <button onclick="flipCard(${i})" style="aspect-ratio:1;border-radius:12px;border:2px solid rgba(167,139,250,0.3);background:${c.matched?'rgba(52,211,153,0.2)':c.flipped?'rgba(167,139,250,0.2)':'var(--bg2)'};font-size:${c.flipped||c.matched?'28px':'0'};transition:all 0.3s;cursor:${c.matched||c.flipped?'default':'pointer'}" ${c.matched?'disabled':''}>
+    <button onclick="flipCard(${i})" style="aspect-ratio:1;border-radius:12px;border:2px solid rgba(201,168,76,0.3);background:${c.matched?'rgba(52,211,153,0.2)':c.flipped?'rgba(201,168,76,0.2)':'#FFF8E7'};font-size:${c.flipped||c.matched?'28px':'0'};transition:all 0.3s;cursor:${c.matched||c.flipped?'default':'pointer'};color:#5C4033" ${c.matched?'disabled':''}>
       ${c.flipped||c.matched?c.emoji:'❓'}
     </button>`).join('');
 }
@@ -4931,7 +4931,7 @@ function flipCard(idx) {
         appState.stars+=stars; localStorage.setItem('ownStars',appState.stars);
         updateStarDisplay(); updateKidProgress('gamesPlayed');
         setTimeout(()=>{
-          document.getElementById('gameArea-memory').innerHTML+=`<div style="text-align:center;margin-top:12px"><div style="font-size:36px">🏆</div><div style="font-family:'Baloo 2',cursive;font-size:20px">¡Ganaste! +${stars}⭐</div><button class="btn btn-accent btn-sm" style="margin-top:8px" onclick="buildMemoryGame()">Jugar de nuevo</button></div>`;
+          document.getElementById('gameArea-memory').innerHTML+=`<div style="text-align:center;margin-top:12px"><div style="font-size:36px">🏆</div><div style="font-family:'Fredoka One',cursive;font-size:20px;color:#5C4033">¡Ganaste! +${stars}⭐</div><button style="margin-top:8px;padding:10px 20px;background:linear-gradient(135deg,#C9A84C,#e8c97a);border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:16px;color:white;cursor:pointer" onclick="buildMemoryGame()">Jugar de nuevo</button></div>`;
         },400);
       }
     } else {
@@ -5167,11 +5167,11 @@ function checkPuzzleNew() {
   updateStarDisplay(); updateKidProgress('gamesPlayed'); checkAchievements();
   const el=document.getElementById('gameArea-puzzle');
   const msg=isRight?'🏆 ¡Orden perfecto! ¡Sos increíble!':'👏 ¡Buen intento! El orden correcto era 1→5';
-  el.innerHTML+=`<div style="text-align:center;margin-top:14px;background:rgba(167,139,250,0.1);border-radius:14px;padding:16px">
+  el.innerHTML+=`<div style="text-align:center;margin-top:14px;background:rgba(201,168,76,0.1);border-radius:14px;padding:16px;border:2px solid rgba(201,168,76,0.2)">
     <div style="font-size:36px;margin-bottom:6px">${isRight?'🏆':'⭐'}</div>
-    <div style="font-family:'Baloo 2',cursive;font-size:18px;margin-bottom:6px">${msg}</div>
-    <div style="color:var(--gold);font-weight:800;font-size:16px;margin-bottom:12px">+${stars} ⭐</div>
-    <button class="btn btn-accent btn-sm" onclick="buildPuzzleGame()">Jugar de nuevo</button>
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;margin-bottom:6px;color:#5C4033">${msg}</div>
+    <div style="color:#C9A84C;font-weight:800;font-size:16px;margin-bottom:12px">+${stars} ⭐</div>
+    <button style="padding:10px 24px;background:linear-gradient(135deg,#C9A84C,#e8c97a);border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:16px;color:white;cursor:pointer" onclick="buildPuzzleGame()">Jugar de nuevo</button>
   </div>`;
 }
 
