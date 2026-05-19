@@ -250,7 +250,7 @@ function kidSpriteBg(key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;`;
 }
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
@@ -3882,7 +3882,7 @@ async function openKidStory(id) {
   // Reset player state
   if(appState.kidAudio){ appState.kidAudio.pause(); appState.kidAudio=null; }
   appState.kidIsPlaying=false;
-  const pb2=document.getElementById('kidPlayBtn'); if(pb2) pb2.textContent='▶';
+  const pb2=document.getElementById('kidPlayBtn'); if(pb2){ pb2.textContent=''; pb2.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   const pr=document.getElementById('kidProgress'); if(pr) pr.style.width='0%';
   const td0=document.getElementById('kidTimeDisplay'); if(td0) td0.textContent='0:00';
 
@@ -4130,12 +4130,12 @@ function toggleKidPlay() {
   if(appState.kidIsPlaying) {
     appState.kidAudio.pause();
     appState.kidIsPlaying=false;
-    const btn=document.getElementById('kidPlayBtn'); if(btn) btn.textContent='▶';
+    const btn=document.getElementById('kidPlayBtn'); if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   } else {
     appState.kidAudio.play()
       .then(()=>{
         appState.kidIsPlaying=true;
-        const btn=document.getElementById('kidPlayBtn'); if(btn) btn.textContent='⏸';
+        const btn=document.getElementById('kidPlayBtn'); if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
       })
       .catch(e=>{
         appState.kidIsPlaying=false;
