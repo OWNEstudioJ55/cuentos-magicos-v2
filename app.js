@@ -4177,6 +4177,24 @@ function seekKid(secs) {
   appState.kidAudio.currentTime=Math.max(0,appState.kidAudio.currentTime+secs);
 }
 
+function playPrevKidStory() {
+  const stories = appState._kidStories || [];
+  if(!stories.length) return;
+  const currentId = appState.currentStory && appState.currentStory.id;
+  const idx = stories.findIndex(s => s.id === currentId);
+  const prevIdx = idx <= 0 ? stories.length - 1 : idx - 1;
+  openKidStory(stories[prevIdx].id);
+}
+
+function playNextKidStory() {
+  const stories = appState._kidStories || [];
+  if(!stories.length) return;
+  const currentId = appState.currentStory && appState.currentStory.id;
+  const idx = stories.findIndex(s => s.id === currentId);
+  const nextIdx = idx === -1 || idx === stories.length - 1 ? 0 : idx + 1;
+  openKidStory(stories[nextIdx].id);
+}
+
 function buildKidVoiceRow() {
   const el=document.getElementById('kidVoiceRow');
   if(!el) return;
