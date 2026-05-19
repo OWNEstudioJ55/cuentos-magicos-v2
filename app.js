@@ -250,7 +250,7 @@ function kidSpriteBg(key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;`;
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
 }
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
@@ -1323,15 +1323,15 @@ function injectNavSprites() {
     if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
   });
 
-  // Kid nav — sprites OWN (cara oso, mano, joystick)
+  // Kid nav — sprites peluche
   const kidNavItems = [
-    ['kicon-escuchar', 'happy',    44],
-    ['kicon-crear',    'nav_draw', 44],
-    ['kicon-jugar',    'nav_game', 44],
+    ['kicon-escuchar', 'nav_escuchar', 44],
+    ['kicon-crear',    'nav_crear',    44],
+    ['kicon-jugar',    'nav_jugar',    44],
   ];
   kidNavItems.forEach(([id,key,size])=>{
     const el=document.getElementById(id);
-    if(el) el.style.cssText=`width:${size}px;height:${size}px;`+sprite2Bg(key,size);
+    if(el) el.style.cssText=`width:${size}px;height:${size}px;`+kidSpriteBg(key,size);
   });
 
   // Hero botón "Escuchar ahora"
@@ -1415,10 +1415,11 @@ function selectParentChar(e) {
 let currentRecStep = 1, autoAdvanceInterval = null;
 
 function showRecTab() {
-  // Show guide on first visit
   const seen = localStorage.getItem('ownRecGuideSeen');
   if(!seen) document.getElementById('recGuide').style.display='block';
   goRecStep(1);
+  // Verificar si hay borrador guardado
+  restoreDraft();
 }
 
 function dismissRecGuide() {
@@ -1428,6 +1429,8 @@ function dismissRecGuide() {
 
 function goRecStep(n) {
   currentRecStep=n;
+  // Autosave borrador al avanzar pasos
+  autoSaveDraft();
   [1,2,3,4].forEach(i=>{
     const step=document.getElementById('recStep-'+i);
     if(step) step.style.display=i===n?'block':'none';
@@ -1462,6 +1465,69 @@ function goRecStep(n) {
   const content=document.getElementById('parentContent');
   if(content) content.scrollTo(0,0);
 }
+
+// ===================== AUTOSAVE BORRADOR =====================
+function autoSaveDraft() {
+  try {
+    const draft = {
+      title: document.getElementById('storyTitle')?.value||'',
+      char: appState.selectedChar||'',
+      voice: appState.selectedVoice||'',
+      images: appState.currentStoryImages||[],
+      portada: appState.portadaUrl||null,
+      storyText: document.getElementById('storyTextInput')?.value||'',
+      step: currentRecStep,
+      ts: Date.now(),
+    };
+    localStorage.setItem('ownDraft', JSON.stringify(draft));
+  } catch(e) { console.warn('autoSaveDraft:', e); }
+}
+
+function restoreDraft() {
+  try {
+    const raw = localStorage.getItem('ownDraft');
+    if(!raw) return false;
+    const draft = JSON.parse(raw);
+    // Solo restaurar si tiene menos de 24 horas
+    if(Date.now()-draft.ts > 86400000) { localStorage.removeItem('ownDraft'); return false; }
+    if(!draft.title) return false;
+    // Mostrar banner de borrador
+    const banner = document.getElementById('draftRestoreBanner');
+    if(banner) {
+      banner.style.display='flex';
+      document.getElementById('draftRestoreTitle').textContent=draft.title||'Sin título';
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+function applyDraft() {
+  try {
+    const raw = localStorage.getItem('ownDraft');
+    if(!raw) return;
+    const draft = JSON.parse(raw);
+    const titleEl=document.getElementById('storyTitle');
+    if(titleEl) titleEl.value=draft.title||'';
+    if(draft.char) appState.selectedChar=draft.char;
+    if(draft.voice) appState.selectedVoice=draft.voice;
+    if(draft.images) appState.currentStoryImages=draft.images;
+    if(draft.portada) appState.portadaUrl=draft.portada;
+    const textEl=document.getElementById('storyTextInput');
+    if(textEl&&draft.storyText) textEl.value=draft.storyText;
+    const banner=document.getElementById('draftRestoreBanner');
+    if(banner) banner.style.display='none';
+    goRecStep(draft.step||1);
+    showToast('✅ Borrador restaurado');
+    localStorage.removeItem('ownDraft');
+  } catch(e) { showToast('❌ No se pudo restaurar el borrador'); }
+}
+
+function discardDraft() {
+  localStorage.removeItem('ownDraft');
+  const banner=document.getElementById('draftRestoreBanner');
+  if(banner) banner.style.display='none';
+}
+
 
 function updateRecStep4Summary() {
   const title=document.getElementById('storyTitle')?.value||'Sin título';
@@ -1821,6 +1887,7 @@ async function saveStory() {
     appState._editingStoryId=null;
     appState.recordedBlob=null;
     appState.recAudio=null;
+    localStorage.removeItem('ownDraft');
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
     showCelebration('🎉 ¡Cuento enviado a ' + (appState.kidName||'tu hijo') + '!');
     setTimeout(()=>_doSwitchParentTab('library'), 2000);
@@ -2398,21 +2465,26 @@ function showKidReceiveCelebration(storyTitle) {
 
 function showCelebration(msg) {
   const div=document.createElement('div');
+  div.style.cssText='position:fixed;inset:0;background:linear-gradient(135deg,rgba(201,168,76,0.97),rgba(92,64,51,0.97));z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px';
   div.innerHTML=`
     <div style="font-size:80px;margin-bottom:16px;animation:bounceIn .5s ease">🎉</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:26px;color:white;text-align:center;margin-bottom:8px;padding:0 24px">${msg}</div>
-    <div style="font-size:14px;color:rgba(255,255,255,.7)">El cuento ya está disponible para ${appState.kidName||'tu hijo'} 🎙️</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:28px;color:white;text-align:center;margin-bottom:12px;padding:0 24px">${msg}</div>
+    <div style="background:rgba(255,255,255,0.2);border-radius:16px;padding:16px 24px;text-align:center;margin-bottom:16px">
+      <div style="font-size:36px;margin-bottom:6px">📱</div>
+      <div style="font-size:15px;color:white;font-weight:700;font-family:'Fredoka One',cursive">Ya está disponible para ${appState.kidName||'tu hijo'}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-top:4px">Cuando abra la app va a ver el cuento nuevo 🧸</div>
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.7)">Yendo a tu biblioteca...</div>
   `;
   document.body.appendChild(div);
-  // Confetti effect
-  for(let i=0;i<20;i++){
+  for(let i=0;i<25;i++){
     const c=document.createElement('div');
     const colors=['#ff6b6b','#ffd166','#06d6a0','#a78bfa','#38bdf8'];
-    c.style.cssText=`position:fixed;width:10px;height:10px;border-radius:50%;background:${colors[i%5]};left:${Math.random()*100}vw;top:-10px;z-index:10000;animation:confettiFall ${1+Math.random()*2}s ease forwards ${Math.random()}s`;
+    c.style.cssText=`position:fixed;width:10px;height:10px;border-radius:50%;background:${colors[i%5]};left:${Math.random()*100}vw;top:-10px;z-index:100000;animation:confettiFall ${1+Math.random()*2}s ease forwards ${Math.random()}s`;
     document.body.appendChild(c);
     setTimeout(()=>c.remove(), 3000);
   }
-  setTimeout(()=>{ div.style.opacity='0'; div.style.transition='opacity .4s'; setTimeout(()=>div.remove(),400); }, 2200);
+  setTimeout(()=>{ div.style.opacity='0'; div.style.transition='opacity .5s'; setTimeout(()=>div.remove(),500); }, 2500);
 }
 
 function showPremiumScreen() {
@@ -3882,7 +3954,7 @@ async function openKidStory(id) {
   // Reset player state
   if(appState.kidAudio){ appState.kidAudio.pause(); appState.kidAudio=null; }
   appState.kidIsPlaying=false;
-  const pb2=document.getElementById('kidPlayBtn'); if(pb2){ pb2.textContent=''; pb2.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
+  const pb2=document.getElementById('kidPlayBtn'); if(pb2) pb2.textContent='▶';
   const pr=document.getElementById('kidProgress'); if(pr) pr.style.width='0%';
   const td0=document.getElementById('kidTimeDisplay'); if(td0) td0.textContent='0:00';
 
@@ -4130,12 +4202,12 @@ function toggleKidPlay() {
   if(appState.kidIsPlaying) {
     appState.kidAudio.pause();
     appState.kidIsPlaying=false;
-    const btn=document.getElementById('kidPlayBtn'); if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
+    const btn=document.getElementById('kidPlayBtn'); if(btn) btn.textContent='▶';
   } else {
     appState.kidAudio.play()
       .then(()=>{
         appState.kidIsPlaying=true;
-        const btn=document.getElementById('kidPlayBtn'); if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
+        const btn=document.getElementById('kidPlayBtn'); if(btn) btn.textContent='⏸';
       })
       .catch(e=>{
         appState.kidIsPlaying=false;
@@ -4175,24 +4247,6 @@ function updateKidProgress2() {
 function seekKid(secs) {
   if(!appState.kidAudio) return;
   appState.kidAudio.currentTime=Math.max(0,appState.kidAudio.currentTime+secs);
-}
-
-function playPrevKidStory() {
-  const stories = appState._kidStories || [];
-  if(!stories.length) return;
-  const currentId = appState.currentStory && appState.currentStory.id;
-  const idx = stories.findIndex(s => s.id === currentId);
-  const prevIdx = idx <= 0 ? stories.length - 1 : idx - 1;
-  openKidStory(stories[prevIdx].id);
-}
-
-function playNextKidStory() {
-  const stories = appState._kidStories || [];
-  if(!stories.length) return;
-  const currentId = appState.currentStory && appState.currentStory.id;
-  const idx = stories.findIndex(s => s.id === currentId);
-  const nextIdx = idx === -1 || idx === stories.length - 1 ? 0 : idx + 1;
-  openKidStory(stories[nextIdx].id);
 }
 
 function buildKidVoiceRow() {
@@ -4775,17 +4829,13 @@ function openGame(gameId) {
 let quizData=null, quizIdx=0, quizScore=0, quizAnswers=[];
 function buildQuizGame() {
   const el=document.getElementById('gameArea-quiz');
-  if(!el) return;
   const story=CLASSIC_STORIES[Math.floor(Math.random()*CLASSIC_STORIES.length)];
+  // Shuffle questions
   const shuffled=[...story.quiz].sort(()=>Math.random()-0.5);
   quizData=shuffled; quizIdx=0; quizScore=0; quizAnswers=[];
   el.innerHTML=`
-    <div style="text-align:center;margin-bottom:12px;font-size:40px">${story.emoji}</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#C9A84C;text-align:center;margin-bottom:6px">${story.title}</div>
-    <div style="background:rgba(201,168,76,0.1);border-radius:14px;padding:12px;margin-bottom:14px;font-size:13px;color:#5C4033;line-height:1.6;max-height:120px;overflow-y:auto;border:1px solid rgba(201,168,76,0.2)">
-      ${story.text.substring(0,300)}...
-    </div>
-    <div style="font-size:12px;color:#9B7B6B;text-align:center;margin-bottom:12px">Respondé todas las preguntas y al final ves los resultados</div>
+    <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:4px;color:var(--accent2)">🧠 ${story.title}</div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Respondé todas las preguntas y al final ves los resultados</div>
     <div id="quizContent"></div>`;
   renderQuizQuestion();
 }
@@ -4795,25 +4845,18 @@ function renderQuizQuestion() {
   if(!el||!quizData) return;
   if(quizIdx>=quizData.length) { showQuizResults(); return; }
   const q=quizData[quizIdx];
+  // Shuffle options but track correct answer
   const opts=q.opts.map((text,i)=>({text,origIdx:i})).sort(()=>Math.random()-0.5);
   const shuffledCorrect=opts.findIndex(o=>o.origIdx===q.correct);
-  const letters=['A','B','C','D'];
-  const colors=['rgba(99,102,241,0.15)','rgba(201,168,76,0.15)','rgba(239,68,68,0.15)','rgba(52,211,153,0.15)'];
   el.innerHTML=`
-    <div style="background:rgba(201,168,76,0.1);border-radius:14px;padding:14px;margin-bottom:14px;border-left:4px solid #C9A84C">
-      <div style="font-size:11px;color:#9B7B6B;margin-bottom:6px;font-weight:700">Pregunta ${quizIdx+1} de ${quizData.length}</div>
-      <div style="font-size:17px;font-weight:800;line-height:1.4;color:#5C4033;font-family:'Fredoka One',cursive">${q.q}</div>
+    <div style="background:rgba(167,139,250,0.1);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Pregunta ${quizIdx+1} de ${quizData.length}</div>
+      <div style="font-size:16px;font-weight:800;line-height:1.4;font-family:'Baloo 2',cursive">${q.q}</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       ${opts.map((opt,i)=>`
-        <button class="quiz-option" id="qOpt${i}" onclick="answerQuiz(${i},${shuffledCorrect},this)"
-          style="font-size:15px;padding:14px 16px;border-radius:14px;text-align:left;font-weight:700;
-                 background:${colors[i]};border:2px solid rgba(201,168,76,0.3);
-                 color:#5C4033;cursor:pointer;display:flex;align-items:center;gap:12px;
-                 font-family:'Fredoka One',cursive;transition:all 0.2s">
-          <span style="display:inline-flex;width:32px;height:32px;border-radius:50%;
-                       background:#C9A84C;color:white;align-items:center;justify-content:center;
-                       font-size:14px;font-weight:800;flex-shrink:0">${letters[i]}</span>
+        <button class="quiz-option" id="qOpt${i}" onclick="answerQuiz(${i},${shuffledCorrect},this)" style="font-size:15px;padding:16px;border-radius:14px;text-align:left;font-weight:700">
+          <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:rgba(167,139,250,0.2);text-align:center;line-height:28px;font-size:13px;margin-right:8px;font-family:Nunito,sans-serif">${['A','B','C','D'][i]}</span>
           ${opt.text}
         </button>`).join('')}
     </div>`;
@@ -4844,23 +4887,23 @@ function showQuizResults() {
   if(quizScore===quizData.length){ updateKidProgress('perfectQuiz'); checkAchievements(); }
 
   const reviewHTML=quizAnswers.map((a,i)=>`
-    <div style="background:${a.isCorrect?'rgba(52,211,153,0.1)':'rgba(239,68,68,0.08)'};border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid ${a.isCorrect?'#34d399':'#f87171'}">
-      <div style="font-size:12px;font-weight:800;color:${a.isCorrect?'#059669':'#f87171'};margin-bottom:4px">${a.isCorrect?'✅ Correcto':'❌ Incorrecto'} — Pregunta ${i+1}</div>
-      <div style="font-size:13px;font-weight:700;margin-bottom:4px;color:#5C4033">${a.q}</div>
-      ${!a.isCorrect?`<div style="font-size:12px;color:#5C4033">Tu respuesta: <span style="color:#f87171">${a.chosenText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>
-      <div style="font-size:12px;color:#059669">Correcta: <span style="font-weight:800">${a.correctText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>`:''}
+    <div style="background:${a.isCorrect?'rgba(52,211,153,0.1)':'rgba(239,68,68,0.08)'};border-radius:12px;padding:12px;margin-bottom:8px;border-left:4px solid ${a.isCorrect?'var(--accent3)':'#f87171'}">
+      <div style="font-size:12px;font-weight:800;color:${a.isCorrect?'var(--accent3)':'#f87171'};margin-bottom:4px">${a.isCorrect?'✅ Correcto':'❌ Incorrecto'} — Pregunta ${i+1}</div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:4px">${a.q}</div>
+      ${!a.isCorrect?`<div style="font-size:12px;color:var(--text2)">Tu respuesta: <span style="color:#f87171">${a.chosenText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>
+      <div style="font-size:12px;color:var(--accent3)">Correcta: <span style="font-weight:800">${a.correctText.replace(/^[ABCD]\s*/,'').substring(0,50)}</span></div>`:''}
     </div>`).join('');
 
   el.innerHTML=`
     <div style="text-align:center;margin-bottom:16px">
       <div style="font-size:56px;margin-bottom:8px">${pct===100?'🏆':pct>=50?'⭐':'📖'}</div>
-      <div style="font-family:'Fredoka One',cursive;font-size:24px;font-weight:800;margin-bottom:4px;color:#5C4033">${quizScore}/${quizData.length} correctas</div>
-      <div style="font-size:14px;color:#9B7B6B;margin-bottom:8px">${pct===100?'¡Perfecto! ¡Sos un genio de los cuentos!':pct>=50?'¡Muy bien! Seguí practicando':'¡Seguí leyendo para aprender más!'}</div>
-      <div style="font-size:18px;color:#C9A84C;font-weight:800">+${stars} ⭐</div>
+      <div style="font-family:'Baloo 2',cursive;font-size:24px;font-weight:800;margin-bottom:4px">${quizScore}/${quizData.length} correctas</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:8px">${pct===100?'¡Perfecto! ¡Sos un genio de los cuentos!':pct>=50?'¡Muy bien! Seguí practicando':'¡Seguí leyendo para aprender más!'}</div>
+      <div style="font-size:18px;color:var(--gold);font-weight:800">+${stars} ⭐</div>
     </div>
-    <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:#5C4033">📋 Revisión:</div>
+    <div style="font-size:14px;font-weight:800;margin-bottom:10px">📋 Revisión:</div>
     ${reviewHTML}
-    <button style="width:100%;padding:14px;background:linear-gradient(135deg,#C9A84C,#e8c97a);border:none;border-radius:14px;font-family:'Fredoka One',cursive;font-size:18px;color:white;cursor:pointer;margin-top:12px" onclick="buildQuizGame()">🔄 Jugar de nuevo</button>`;
+    <button class="btn btn-accent btn-full" style="margin-top:12px" onclick="buildQuizGame()">🔄 Jugar de nuevo</button>`;
 }
 
 // Writing game (in-game quick write)
@@ -4903,8 +4946,8 @@ function buildMemoryGame() {
   memoryCards=pairs.map((e,i)=>({id:i,emoji:e,flipped:false,matched:false}));
   memoryFlipped=[]; memoryMatched=0; memoryMoves=0;
   el.innerHTML=`
-    <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:8px;color:#5C4033;text-align:center">🃏 Memoria</div>
-    <div style="font-size:13px;color:#9B7B6B;margin-bottom:12px;text-align:center">Encontrá todas las parejas</div>
+    <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:8px;color:var(--accent3)">🃏 Memoria</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Encontrá todas las parejas</div>
     <div id="memBoard" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>`;
   renderMemoryBoard();
 }
@@ -4913,7 +4956,7 @@ function renderMemoryBoard() {
   const el=document.getElementById('memBoard');
   if(!el) return;
   el.innerHTML=memoryCards.map((c,i)=>`
-    <button onclick="flipCard(${i})" style="aspect-ratio:1;border-radius:12px;border:2px solid rgba(201,168,76,0.3);background:${c.matched?'rgba(52,211,153,0.2)':c.flipped?'rgba(201,168,76,0.2)':'#FFF8E7'};font-size:${c.flipped||c.matched?'28px':'0'};transition:all 0.3s;cursor:${c.matched||c.flipped?'default':'pointer'};color:#5C4033" ${c.matched?'disabled':''}>
+    <button onclick="flipCard(${i})" style="aspect-ratio:1;border-radius:12px;border:2px solid rgba(167,139,250,0.3);background:${c.matched?'rgba(52,211,153,0.2)':c.flipped?'rgba(167,139,250,0.2)':'var(--bg2)'};font-size:${c.flipped||c.matched?'28px':'0'};transition:all 0.3s;cursor:${c.matched||c.flipped?'default':'pointer'}" ${c.matched?'disabled':''}>
       ${c.flipped||c.matched?c.emoji:'❓'}
     </button>`).join('');
 }
@@ -4931,7 +4974,7 @@ function flipCard(idx) {
         appState.stars+=stars; localStorage.setItem('ownStars',appState.stars);
         updateStarDisplay(); updateKidProgress('gamesPlayed');
         setTimeout(()=>{
-          document.getElementById('gameArea-memory').innerHTML+=`<div style="text-align:center;margin-top:12px"><div style="font-size:36px">🏆</div><div style="font-family:'Fredoka One',cursive;font-size:20px;color:#5C4033">¡Ganaste! +${stars}⭐</div><button style="margin-top:8px;padding:10px 20px;background:linear-gradient(135deg,#C9A84C,#e8c97a);border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:16px;color:white;cursor:pointer" onclick="buildMemoryGame()">Jugar de nuevo</button></div>`;
+          document.getElementById('gameArea-memory').innerHTML+=`<div style="text-align:center;margin-top:12px"><div style="font-size:36px">🏆</div><div style="font-family:'Baloo 2',cursive;font-size:20px">¡Ganaste! +${stars}⭐</div><button class="btn btn-accent btn-sm" style="margin-top:8px" onclick="buildMemoryGame()">Jugar de nuevo</button></div>`;
         },400);
       }
     } else {
@@ -4941,69 +4984,34 @@ function flipCard(idx) {
 }
 
 // Words game - fill in the blank
-const WORDS_TEMPLATES = [
-  {text:'El dragón', blank:'voló', resto:'sobre el castillo mientras la hada cantaba.', hint:'🐉 ¿Qué hizo el dragón?'},
-  {text:'Caperucita', blank:'caminaba', resto:'por el bosque cuando vio al lobo.', hint:'🐺 ¿Cómo iba Caperucita?'},
-  {text:'Los tres chanchitos', blank:'construyeron', resto:'sus casas con paja y madera.', hint:'🐷 ¿Qué hicieron los chanchitos?'},
-  {text:'La tortuga', blank:'ganó', resto:'la carrera porque nunca se rindió.', hint:'🐢 ¿Quién ganó?'},
-  {text:'Blancanieves', blank:'durmió', resto:'después de comer la manzana envenenada.', hint:'🍎 ¿Qué le pasó a Blancanieves?'},
-  {text:'El patito feo se convirtió en un hermoso', blank:'cisne', resto:'cuando llegó la primavera.', hint:'🦢 ¿En qué se convirtió?'},
-  {text:'Hansel dejó', blank:'piedritas', resto:'en el camino para encontrar la casa.', hint:'🪨 ¿Qué dejó Hansel?'},
-  {text:'El gato con botas engañó al', blank:'ogro', resto:'para quedarse con su castillo.', hint:'👢 ¿A quién engañó?'},
-  {text:'La liebre se durmió y la tortuga llegó', blank:'primero', resto:'a la meta.', hint:'🏁 ¿Quién llegó antes?'},
-  {text:'El lobo sopló y sopló pero no pudo tirar la casa de', blank:'ladrillos', resto:'de Fofó.', hint:'🧱 ¿De qué era la casa fuerte?'},
-];
-
 function buildWordsGame() {
+  const templates=[
+    {text:'El dragón {?} sobre el castillo mientras la hada {?} una canción mágica.', words:['volaba','cantaba']},
+    {text:'Caperucita {?} por el bosque cuando encontró un {?} muy amigable.', words:['caminaba','lobo']},
+    {text:'Los tres chanchitos {?} sus casas con {?} y madera.', words:['construyeron','paja']},
+  ];
+  const t=templates[Math.floor(Math.random()*templates.length)];
+  let idx=0;
   const el=document.getElementById('gameArea-words');
-  if(!el) return;
-  // Elegir 3 frases aleatorias diferentes cada vez
-  const shuffled=[...WORDS_TEMPLATES].sort(()=>Math.random()-0.5).slice(0,3);
+  const parts=t.text.split('{?}');
   el.innerHTML=`
-    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#C9A84C;margin-bottom:6px;text-align:center">🔤 Palabras Mágicas</div>
-    <div style="font-size:13px;color:#9B7B6B;margin-bottom:16px;text-align:center">Completá las frases con la palabra correcta</div>
-    ${shuffled.map((t,i)=>`
-      <div style="background:rgba(201,168,76,0.08);border-radius:16px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
-        <div style="font-size:12px;color:#9B7B6B;margin-bottom:8px;font-weight:700">${t.hint}</div>
-        <div style="font-size:16px;color:#5C4033;line-height:1.8;font-weight:700;font-family:'Fredoka One',cursive">
-          ${t.text} <input id="wordInput${i}" data-answer="${t.blank}"
-            style="width:120px;font-size:16px;text-align:center;
-                   background:white;border:3px dashed #C9A84C;
-                   border-radius:10px;padding:6px 8px;color:#5C4033;
-                   font-family:'Fredoka One',cursive;outline:none"
-            placeholder="_ _ _ _"> ${t.resto}
-        </div>
-      </div>`).join('')}
-    <button onclick="checkWordsNew(${shuffled.length})"
-      style="width:100%;padding:14px;background:linear-gradient(135deg,#C9A84C,#e8c97a);
-             border:none;border-radius:14px;font-family:'Fredoka One',cursive;
-             font-size:18px;color:white;cursor:pointer;margin-top:4px">
-      ✅ Verificar respuestas
-    </button>`;
+    <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--gold)">🔤 Palabras Mágicas</div>
+    <div style="font-size:15px;line-height:2;margin-bottom:16px">${parts.map((p,i)=>p+(i<t.words.length?`<input id="wordInput${i}" style="width:100px;text-align:center;background:rgba(167,139,250,0.15);border:2px dashed rgba(167,139,250,0.5);border-radius:8px;padding:4px;color:var(--text);font-family:Nunito,sans-serif;font-size:14px" placeholder="...">`:'')).join('')}</div>
+    <button class="btn btn-accent btn-full" onclick="checkWords(${JSON.stringify(t.words).replace(/"/g,"'")})">✅ Verificar</button>`;
 }
 
-function checkWordsNew(count) {
+function checkWords(words) {
   let correct=0;
-  for(let i=0;i<count;i++){
+  words.forEach((w,i)=>{
     const inp=document.getElementById('wordInput'+i);
-    if(!inp) continue;
+    if(!inp) return;
     const val=inp.value.trim().toLowerCase();
-    const ans=inp.dataset.answer.toLowerCase();
-    if(val===ans||ans.includes(val)&&val.length>=3){
-      inp.style.borderColor='#34d399';
-      inp.style.background='rgba(52,211,153,0.1)';
-      correct++;
-    } else {
-      inp.style.borderColor='#ef4444';
-      inp.style.background='rgba(239,68,68,0.08)';
-      inp.placeholder=inp.dataset.answer;
-    }
-  }
-  const stars=correct===count?6:correct>0?3:0;
-  if(stars>0){ appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay(); }
-  const msg=correct===count?`🏆 ¡Perfecto! +${stars}⭐`:correct>0?`✨ ${correct}/${count} correctas. +${stars}⭐`:`❌ Ninguna correcta. ¡Intentá de nuevo!`;
-  showToast(msg);
-  if(correct===count) setTimeout(()=>buildWordsGame(),1800);
+    if(val===w.toLowerCase()||w.toLowerCase().includes(val)) { inp.style.borderColor='#34d399'; correct++; }
+    else { inp.style.borderColor='#ef4444'; inp.placeholder=w; }
+  });
+  const stars=correct===words.length?5:correct>0?2:0;
+  if(stars>0) { appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay(); }
+  showToast(correct===words.length?`✅ ¡Perfecto! +${stars}⭐`:`Revisá las marcadas en rojo. +${stars}⭐`);
 }
 
 // Draw game - simple canvas with save
@@ -5076,26 +5084,26 @@ function initCanvas() {
 
 // Puzzle game - order scenes with images + text + number controls
 const PUZZLE_SCENES_DATA = [
-  { story:'Caperucita Roja', emoji:'🐺', scenes:[
-    { text:'Mamá le da la canasta a Caperucita para la abuelita', emoji:'🧺' },
-    { text:'Caperucita camina sola por el bosque', emoji:'🌲' },
-    { text:'El lobo astuto habla con Caperucita', emoji:'🐺' },
-    { text:'El lobo se disfraza de abuelita en la cama', emoji:'👵' },
-    { text:'El cazador rescata a Caperucita y la abuelita', emoji:'🪓' },
+  { story:'Caperucita Roja', scenes:[
+    { text:'Mamá le da la canasta a Caperucita', emoji:'🧺', img:'https://picsum.photos/seed/cap_1/200/200' },
+    { text:'Caperucita camina por el bosque', emoji:'🌲', img:'https://picsum.photos/seed/cap_2/200/200' },
+    { text:'El lobo habla con Caperucita', emoji:'🐺', img:'https://picsum.photos/seed/cap_3/200/200' },
+    { text:'El lobo se disfraza de abuelita', emoji:'👵', img:'https://picsum.photos/seed/cap_4/200/200' },
+    { text:'El cazador rescata a todos', emoji:'🪓', img:'https://picsum.photos/seed/cap_5/200/200' },
   ]},
-  { story:'Los 3 Chanchitos', emoji:'🐷', scenes:[
-    { text:'Los tres chanchitos salen a construir sus casas', emoji:'🐷' },
-    { text:'Fifi construye su casa de paja muy rápido', emoji:'🌾' },
-    { text:'El lobo sopla y derrumba la casa de paja', emoji:'💨' },
-    { text:'Los chanchitos corren a la casa de ladrillos de Fofó', emoji:'🧱' },
-    { text:'El lobo cae en la olla caliente y se va para siempre', emoji:'🏃' },
+  { story:'Los 3 Chanchitos', scenes:[
+    { text:'Los chanchitos salen a construir casas', emoji:'🐷', img:'https://picsum.photos/seed/pig_1/200/200' },
+    { text:'Fifi hace su casa de paja', emoji:'🌾', img:'https://picsum.photos/seed/pig_2/200/200' },
+    { text:'El lobo sopla y derrumba la casa', emoji:'💨', img:'https://picsum.photos/seed/pig_3/200/200' },
+    { text:'Los chanchitos corren a la casa de ladrillos', emoji:'🧱', img:'https://picsum.photos/seed/pig_4/200/200' },
+    { text:'El lobo cae en la olla y se va', emoji:'🏃', img:'https://picsum.photos/seed/pig_5/200/200' },
   ]},
-  { story:'Hansel y Gretel', emoji:'🏠', scenes:[
-    { text:'La madrastra lleva a los niños al bosque', emoji:'🌳' },
-    { text:'Hansel deja piedritas para encontrar el camino', emoji:'🪨' },
-    { text:'Los niños encuentran la casa hecha de dulces', emoji:'🍬' },
-    { text:'La bruja malvada atrapa a Hansel', emoji:'🧙' },
-    { text:'Gretel empuja a la bruja al horno y escapan', emoji:'🎉' },
+  { story:'Hansel y Gretel', scenes:[
+    { text:'Los niños entran al bosque con el papá', emoji:'🌳', img:'https://picsum.photos/seed/han_1/200/200' },
+    { text:'Hansel deja piedritas en el camino', emoji:'🪨', img:'https://picsum.photos/seed/han_2/200/200' },
+    { text:'Encuentran la casa de dulces', emoji:'🏠', img:'https://picsum.photos/seed/han_3/200/200' },
+    { text:'La bruja atrapa a Hansel', emoji:'🧙', img:'https://picsum.photos/seed/han_4/200/200' },
+    { text:'Gretel empuja a la bruja y escapan', emoji:'🎉', img:'https://picsum.photos/seed/han_5/200/200' },
   ]},
 ];
 let puzzleSceneOrder=[], puzzleCorrectOrder=[], puzzleStoryIdx=0;
@@ -5104,7 +5112,8 @@ function buildPuzzleGame() {
   puzzleStoryIdx=Math.floor(Math.random()*PUZZLE_SCENES_DATA.length);
   const storyData=PUZZLE_SCENES_DATA[puzzleStoryIdx];
   puzzleCorrectOrder=[0,1,2,3,4];
-  const shuffled=Array.from({length:storyData.scenes.length},(_,i)=>i).sort(()=>Math.random()-0.5);
+  // Shuffle
+  const shuffled=[...storyData.scenes.keys()].sort(()=>Math.random()-0.5);
   puzzleSceneOrder=[...shuffled];
   renderPuzzleGame();
 }
@@ -5113,16 +5122,10 @@ function renderPuzzleGame() {
   const storyData=PUZZLE_SCENES_DATA[puzzleStoryIdx];
   const el=document.getElementById('gameArea-puzzle');
   el.innerHTML=`
-    <div style="text-align:center;margin-bottom:6px;font-size:36px">${storyData.emoji||'🧩'}</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#C9A84C;text-align:center;margin-bottom:6px">🧩 ${storyData.story}</div>
-    <div style="font-size:13px;color:#9B7B6B;text-align:center;margin-bottom:14px">Usá las flechas ▲▼ para ordenar las escenas del cuento</div>
+    <div style="font-family:'Baloo 2',cursive;font-size:19px;margin-bottom:6px;color:var(--accent2)">🧩 ${storyData.story}</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Cambiá los números para ordenar las escenas del cuento:</p>
     <div id="puzzleCards" style="display:flex;flex-direction:column;gap:10px"></div>
-    <button onclick="checkPuzzleNew()"
-      style="width:100%;margin-top:14px;padding:14px;background:linear-gradient(135deg,#C9A84C,#e8c97a);
-             border:none;border-radius:14px;font-family:'Fredoka One',cursive;
-             font-size:18px;color:white;cursor:pointer">
-      ✅ ¡Este es el orden!
-    </button>`;
+    <button class="btn btn-accent btn-full" style="margin-top:14px" onclick="checkPuzzleNew()">✅ ¡Así es el orden!</button>`;
   renderPuzzleCards();
 }
 
@@ -5132,22 +5135,19 @@ function renderPuzzleCards() {
   if(!el) return;
   el.innerHTML=puzzleSceneOrder.map((sceneIdx,pos)=>{
     const sc=storyData.scenes[sceneIdx];
-    return `<div style="background:white;border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center;border:2px solid rgba(201,168,76,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.06)" id="pzCard${pos}">
-      <!-- Flechas -->
+    return `<div style="background:var(--bg2);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;border:2px solid rgba(167,139,250,0.2)" id="pzCard${pos}">
+      <!-- Number selector -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-        <button onclick="movePuzzleScene(${pos},-1)"
-          style="width:34px;height:34px;border-radius:50%;background:${pos===0?'rgba(200,200,200,0.2)':'rgba(201,168,76,0.2)'};border:none;color:#5C4033;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800"
-          ${pos===0?'disabled':''}>▲</button>
-        <div style="font-family:'Fredoka One',cursive;font-size:26px;color:#C9A84C;line-height:1;min-width:28px;text-align:center">${pos+1}</div>
-        <button onclick="movePuzzleScene(${pos},1)"
-          style="width:34px;height:34px;border-radius:50%;background:${pos===puzzleSceneOrder.length-1?'rgba(200,200,200,0.2)':'rgba(201,168,76,0.2)'};border:none;color:#5C4033;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800"
-          ${pos===puzzleSceneOrder.length-1?'disabled':''}>▼</button>
+        <button onclick="movePuzzleScene(${pos},-1)" style="width:30px;height:30px;border-radius:50%;background:rgba(167,139,250,0.2);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">▲</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--accent2);line-height:1;min-width:28px;text-align:center">${pos+1}</div>
+        <button onclick="movePuzzleScene(${pos},1)" style="width:30px;height:30px;border-radius:50%;background:rgba(167,139,250,0.2);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">▼</button>
       </div>
-      <!-- Emoji grande -->
-      <div style="font-size:40px;flex-shrink:0;width:52px;text-align:center">${sc.emoji}</div>
-      <!-- Texto -->
+      <!-- Image -->
+      <img src="${sc.img}" style="width:72px;height:72px;border-radius:10px;object-fit:cover;flex-shrink:0">
+      <!-- Text + emoji -->
       <div style="flex:1;min-width:0">
-        <div style="font-size:15px;font-weight:800;line-height:1.4;color:#5C4033;font-family:'Fredoka One',cursive">${sc.text}</div>
+        <div style="font-size:28px;margin-bottom:4px">${sc.emoji}</div>
+        <div style="font-size:13px;font-weight:700;line-height:1.3">${sc.text}</div>
       </div>
     </div>`;
   }).join('');
@@ -5167,11 +5167,11 @@ function checkPuzzleNew() {
   updateStarDisplay(); updateKidProgress('gamesPlayed'); checkAchievements();
   const el=document.getElementById('gameArea-puzzle');
   const msg=isRight?'🏆 ¡Orden perfecto! ¡Sos increíble!':'👏 ¡Buen intento! El orden correcto era 1→5';
-  el.innerHTML+=`<div style="text-align:center;margin-top:14px;background:rgba(201,168,76,0.1);border-radius:14px;padding:16px;border:2px solid rgba(201,168,76,0.2)">
+  el.innerHTML+=`<div style="text-align:center;margin-top:14px;background:rgba(167,139,250,0.1);border-radius:14px;padding:16px">
     <div style="font-size:36px;margin-bottom:6px">${isRight?'🏆':'⭐'}</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:18px;margin-bottom:6px;color:#5C4033">${msg}</div>
-    <div style="color:#C9A84C;font-weight:800;font-size:16px;margin-bottom:12px">+${stars} ⭐</div>
-    <button style="padding:10px 24px;background:linear-gradient(135deg,#C9A84C,#e8c97a);border:none;border-radius:12px;font-family:'Fredoka One',cursive;font-size:16px;color:white;cursor:pointer" onclick="buildPuzzleGame()">Jugar de nuevo</button>
+    <div style="font-family:'Baloo 2',cursive;font-size:18px;margin-bottom:6px">${msg}</div>
+    <div style="color:var(--gold);font-weight:800;font-size:16px;margin-bottom:12px">+${stars} ⭐</div>
+    <button class="btn btn-accent btn-sm" onclick="buildPuzzleGame()">Jugar de nuevo</button>
   </div>`;
 }
 
