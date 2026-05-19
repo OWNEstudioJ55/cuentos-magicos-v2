@@ -1323,15 +1323,15 @@ function injectNavSprites() {
     if(el) el.style.cssText=`width:${sizes[idx]}px;height:${sizes[idx]}px;display:inline-block;`+sprite2Bg('estrella',sizes[idx]);
   });
 
-  // Kid nav — sprites peluche
+  // Kid nav — sprites OWN (cara oso, mano, joystick)
   const kidNavItems = [
-    ['kicon-escuchar', 'nav_escuchar', 44],
-    ['kicon-crear',    'nav_crear',    44],
-    ['kicon-jugar',    'nav_jugar',    44],
+    ['kicon-escuchar', 'happy',    44],
+    ['kicon-crear',    'nav_draw', 44],
+    ['kicon-jugar',    'nav_game', 44],
   ];
   kidNavItems.forEach(([id,key,size])=>{
     const el=document.getElementById(id);
-    if(el) el.style.cssText=`width:${size}px;height:${size}px;`+kidSpriteBg(key,size);
+    if(el) el.style.cssText=`width:${size}px;height:${size}px;`+sprite2Bg(key,size);
   });
 
   // Hero botón "Escuchar ahora"
