@@ -4775,13 +4775,17 @@ function openGame(gameId) {
 let quizData=null, quizIdx=0, quizScore=0, quizAnswers=[];
 function buildQuizGame() {
   const el=document.getElementById('gameArea-quiz');
+  if(!el) return;
   const story=CLASSIC_STORIES[Math.floor(Math.random()*CLASSIC_STORIES.length)];
-  // Shuffle questions
   const shuffled=[...story.quiz].sort(()=>Math.random()-0.5);
   quizData=shuffled; quizIdx=0; quizScore=0; quizAnswers=[];
   el.innerHTML=`
-    <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:4px;color:var(--accent2)">🧠 ${story.title}</div>
-    <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Respondé todas las preguntas y al final ves los resultados</div>
+    <div style="text-align:center;margin-bottom:12px;font-size:40px">${story.emoji}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#C9A84C;text-align:center;margin-bottom:6px">${story.title}</div>
+    <div style="background:rgba(201,168,76,0.1);border-radius:14px;padding:12px;margin-bottom:14px;font-size:13px;color:#5C4033;line-height:1.6;max-height:120px;overflow-y:auto;border:1px solid rgba(201,168,76,0.2)">
+      ${story.text.substring(0,300)}...
+    </div>
+    <div style="font-size:12px;color:#9B7B6B;text-align:center;margin-bottom:12px">Respondé todas las preguntas y al final ves los resultados</div>
     <div id="quizContent"></div>`;
   renderQuizQuestion();
 }
@@ -4791,18 +4795,25 @@ function renderQuizQuestion() {
   if(!el||!quizData) return;
   if(quizIdx>=quizData.length) { showQuizResults(); return; }
   const q=quizData[quizIdx];
-  // Shuffle options but track correct answer
   const opts=q.opts.map((text,i)=>({text,origIdx:i})).sort(()=>Math.random()-0.5);
   const shuffledCorrect=opts.findIndex(o=>o.origIdx===q.correct);
+  const letters=['A','B','C','D'];
+  const colors=['rgba(99,102,241,0.15)','rgba(201,168,76,0.15)','rgba(239,68,68,0.15)','rgba(52,211,153,0.15)'];
   el.innerHTML=`
-    <div style="background:rgba(167,139,250,0.1);border-radius:12px;padding:12px;margin-bottom:12px">
-      <div style="font-size:11px;color:var(--text2);margin-bottom:6px">Pregunta ${quizIdx+1} de ${quizData.length}</div>
-      <div style="font-size:16px;font-weight:800;line-height:1.4;font-family:'Baloo 2',cursive">${q.q}</div>
+    <div style="background:rgba(201,168,76,0.1);border-radius:14px;padding:14px;margin-bottom:14px;border-left:4px solid #C9A84C">
+      <div style="font-size:11px;color:#9B7B6B;margin-bottom:6px;font-weight:700">Pregunta ${quizIdx+1} de ${quizData.length}</div>
+      <div style="font-size:17px;font-weight:800;line-height:1.4;color:#5C4033;font-family:'Fredoka One',cursive">${q.q}</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
       ${opts.map((opt,i)=>`
-        <button class="quiz-option" id="qOpt${i}" onclick="answerQuiz(${i},${shuffledCorrect},this)" style="font-size:15px;padding:16px;border-radius:14px;text-align:left;font-weight:700">
-          <span style="display:inline-block;width:28px;height:28px;border-radius:50%;background:rgba(167,139,250,0.2);text-align:center;line-height:28px;font-size:13px;margin-right:8px;font-family:Nunito,sans-serif">${['A','B','C','D'][i]}</span>
+        <button class="quiz-option" id="qOpt${i}" onclick="answerQuiz(${i},${shuffledCorrect},this)"
+          style="font-size:15px;padding:14px 16px;border-radius:14px;text-align:left;font-weight:700;
+                 background:${colors[i]};border:2px solid rgba(201,168,76,0.3);
+                 color:#5C4033;cursor:pointer;display:flex;align-items:center;gap:12px;
+                 font-family:'Fredoka One',cursive;transition:all 0.2s">
+          <span style="display:inline-flex;width:32px;height:32px;border-radius:50%;
+                       background:#C9A84C;color:white;align-items:center;justify-content:center;
+                       font-size:14px;font-weight:800;flex-shrink:0">${letters[i]}</span>
           ${opt.text}
         </button>`).join('')}
     </div>`;
@@ -4930,34 +4941,69 @@ function flipCard(idx) {
 }
 
 // Words game - fill in the blank
+const WORDS_TEMPLATES = [
+  {text:'El dragón', blank:'voló', resto:'sobre el castillo mientras la hada cantaba.', hint:'🐉 ¿Qué hizo el dragón?'},
+  {text:'Caperucita', blank:'caminaba', resto:'por el bosque cuando vio al lobo.', hint:'🐺 ¿Cómo iba Caperucita?'},
+  {text:'Los tres chanchitos', blank:'construyeron', resto:'sus casas con paja y madera.', hint:'🐷 ¿Qué hicieron los chanchitos?'},
+  {text:'La tortuga', blank:'ganó', resto:'la carrera porque nunca se rindió.', hint:'🐢 ¿Quién ganó?'},
+  {text:'Blancanieves', blank:'durmió', resto:'después de comer la manzana envenenada.', hint:'🍎 ¿Qué le pasó a Blancanieves?'},
+  {text:'El patito feo se convirtió en un hermoso', blank:'cisne', resto:'cuando llegó la primavera.', hint:'🦢 ¿En qué se convirtió?'},
+  {text:'Hansel dejó', blank:'piedritas', resto:'en el camino para encontrar la casa.', hint:'🪨 ¿Qué dejó Hansel?'},
+  {text:'El gato con botas engañó al', blank:'ogro', resto:'para quedarse con su castillo.', hint:'👢 ¿A quién engañó?'},
+  {text:'La liebre se durmió y la tortuga llegó', blank:'primero', resto:'a la meta.', hint:'🏁 ¿Quién llegó antes?'},
+  {text:'El lobo sopló y sopló pero no pudo tirar la casa de', blank:'ladrillos', resto:'de Fofó.', hint:'🧱 ¿De qué era la casa fuerte?'},
+];
+
 function buildWordsGame() {
-  const templates=[
-    {text:'El dragón {?} sobre el castillo mientras la hada {?} una canción mágica.', words:['volaba','cantaba']},
-    {text:'Caperucita {?} por el bosque cuando encontró un {?} muy amigable.', words:['caminaba','lobo']},
-    {text:'Los tres chanchitos {?} sus casas con {?} y madera.', words:['construyeron','paja']},
-  ];
-  const t=templates[Math.floor(Math.random()*templates.length)];
-  let idx=0;
   const el=document.getElementById('gameArea-words');
-  const parts=t.text.split('{?}');
+  if(!el) return;
+  // Elegir 3 frases aleatorias diferentes cada vez
+  const shuffled=[...WORDS_TEMPLATES].sort(()=>Math.random()-0.5).slice(0,3);
   el.innerHTML=`
-    <div style="font-family:'Baloo 2',cursive;font-size:20px;margin-bottom:12px;color:var(--gold)">🔤 Palabras Mágicas</div>
-    <div style="font-size:15px;line-height:2;margin-bottom:16px">${parts.map((p,i)=>p+(i<t.words.length?`<input id="wordInput${i}" style="width:100px;text-align:center;background:rgba(167,139,250,0.15);border:2px dashed rgba(167,139,250,0.5);border-radius:8px;padding:4px;color:var(--text);font-family:Nunito,sans-serif;font-size:14px" placeholder="...">`:'')).join('')}</div>
-    <button class="btn btn-accent btn-full" onclick="checkWords(${JSON.stringify(t.words).replace(/"/g,"'")})">✅ Verificar</button>`;
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#C9A84C;margin-bottom:6px;text-align:center">🔤 Palabras Mágicas</div>
+    <div style="font-size:13px;color:#9B7B6B;margin-bottom:16px;text-align:center">Completá las frases con la palabra correcta</div>
+    ${shuffled.map((t,i)=>`
+      <div style="background:rgba(201,168,76,0.08);border-radius:16px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
+        <div style="font-size:12px;color:#9B7B6B;margin-bottom:8px;font-weight:700">${t.hint}</div>
+        <div style="font-size:16px;color:#5C4033;line-height:1.8;font-weight:700;font-family:'Fredoka One',cursive">
+          ${t.text} <input id="wordInput${i}" data-answer="${t.blank}"
+            style="width:120px;font-size:16px;text-align:center;
+                   background:white;border:3px dashed #C9A84C;
+                   border-radius:10px;padding:6px 8px;color:#5C4033;
+                   font-family:'Fredoka One',cursive;outline:none"
+            placeholder="_ _ _ _"> ${t.resto}
+        </div>
+      </div>`).join('')}
+    <button onclick="checkWordsNew(${shuffled.length})"
+      style="width:100%;padding:14px;background:linear-gradient(135deg,#C9A84C,#e8c97a);
+             border:none;border-radius:14px;font-family:'Fredoka One',cursive;
+             font-size:18px;color:white;cursor:pointer;margin-top:4px">
+      ✅ Verificar respuestas
+    </button>`;
 }
 
-function checkWords(words) {
+function checkWordsNew(count) {
   let correct=0;
-  words.forEach((w,i)=>{
+  for(let i=0;i<count;i++){
     const inp=document.getElementById('wordInput'+i);
-    if(!inp) return;
+    if(!inp) continue;
     const val=inp.value.trim().toLowerCase();
-    if(val===w.toLowerCase()||w.toLowerCase().includes(val)) { inp.style.borderColor='#34d399'; correct++; }
-    else { inp.style.borderColor='#ef4444'; inp.placeholder=w; }
-  });
-  const stars=correct===words.length?5:correct>0?2:0;
-  if(stars>0) { appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay(); }
-  showToast(correct===words.length?`✅ ¡Perfecto! +${stars}⭐`:`Revisá las marcadas en rojo. +${stars}⭐`);
+    const ans=inp.dataset.answer.toLowerCase();
+    if(val===ans||ans.includes(val)&&val.length>=3){
+      inp.style.borderColor='#34d399';
+      inp.style.background='rgba(52,211,153,0.1)';
+      correct++;
+    } else {
+      inp.style.borderColor='#ef4444';
+      inp.style.background='rgba(239,68,68,0.08)';
+      inp.placeholder=inp.dataset.answer;
+    }
+  }
+  const stars=correct===count?6:correct>0?3:0;
+  if(stars>0){ appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay(); }
+  const msg=correct===count?`🏆 ¡Perfecto! +${stars}⭐`:correct>0?`✨ ${correct}/${count} correctas. +${stars}⭐`:`❌ Ninguna correcta. ¡Intentá de nuevo!`;
+  showToast(msg);
+  if(correct===count) setTimeout(()=>buildWordsGame(),1800);
 }
 
 // Draw game - simple canvas with save
@@ -5030,26 +5076,26 @@ function initCanvas() {
 
 // Puzzle game - order scenes with images + text + number controls
 const PUZZLE_SCENES_DATA = [
-  { story:'Caperucita Roja', scenes:[
-    { text:'Mamá le da la canasta a Caperucita', emoji:'🧺', img:'https://picsum.photos/seed/cap_1/200/200' },
-    { text:'Caperucita camina por el bosque', emoji:'🌲', img:'https://picsum.photos/seed/cap_2/200/200' },
-    { text:'El lobo habla con Caperucita', emoji:'🐺', img:'https://picsum.photos/seed/cap_3/200/200' },
-    { text:'El lobo se disfraza de abuelita', emoji:'👵', img:'https://picsum.photos/seed/cap_4/200/200' },
-    { text:'El cazador rescata a todos', emoji:'🪓', img:'https://picsum.photos/seed/cap_5/200/200' },
+  { story:'Caperucita Roja', emoji:'🐺', scenes:[
+    { text:'Mamá le da la canasta a Caperucita para la abuelita', emoji:'🧺' },
+    { text:'Caperucita camina sola por el bosque', emoji:'🌲' },
+    { text:'El lobo astuto habla con Caperucita', emoji:'🐺' },
+    { text:'El lobo se disfraza de abuelita en la cama', emoji:'👵' },
+    { text:'El cazador rescata a Caperucita y la abuelita', emoji:'🪓' },
   ]},
-  { story:'Los 3 Chanchitos', scenes:[
-    { text:'Los chanchitos salen a construir casas', emoji:'🐷', img:'https://picsum.photos/seed/pig_1/200/200' },
-    { text:'Fifi hace su casa de paja', emoji:'🌾', img:'https://picsum.photos/seed/pig_2/200/200' },
-    { text:'El lobo sopla y derrumba la casa', emoji:'💨', img:'https://picsum.photos/seed/pig_3/200/200' },
-    { text:'Los chanchitos corren a la casa de ladrillos', emoji:'🧱', img:'https://picsum.photos/seed/pig_4/200/200' },
-    { text:'El lobo cae en la olla y se va', emoji:'🏃', img:'https://picsum.photos/seed/pig_5/200/200' },
+  { story:'Los 3 Chanchitos', emoji:'🐷', scenes:[
+    { text:'Los tres chanchitos salen a construir sus casas', emoji:'🐷' },
+    { text:'Fifi construye su casa de paja muy rápido', emoji:'🌾' },
+    { text:'El lobo sopla y derrumba la casa de paja', emoji:'💨' },
+    { text:'Los chanchitos corren a la casa de ladrillos de Fofó', emoji:'🧱' },
+    { text:'El lobo cae en la olla caliente y se va para siempre', emoji:'🏃' },
   ]},
-  { story:'Hansel y Gretel', scenes:[
-    { text:'Los niños entran al bosque con el papá', emoji:'🌳', img:'https://picsum.photos/seed/han_1/200/200' },
-    { text:'Hansel deja piedritas en el camino', emoji:'🪨', img:'https://picsum.photos/seed/han_2/200/200' },
-    { text:'Encuentran la casa de dulces', emoji:'🏠', img:'https://picsum.photos/seed/han_3/200/200' },
-    { text:'La bruja atrapa a Hansel', emoji:'🧙', img:'https://picsum.photos/seed/han_4/200/200' },
-    { text:'Gretel empuja a la bruja y escapan', emoji:'🎉', img:'https://picsum.photos/seed/han_5/200/200' },
+  { story:'Hansel y Gretel', emoji:'🏠', scenes:[
+    { text:'La madrastra lleva a los niños al bosque', emoji:'🌳' },
+    { text:'Hansel deja piedritas para encontrar el camino', emoji:'🪨' },
+    { text:'Los niños encuentran la casa hecha de dulces', emoji:'🍬' },
+    { text:'La bruja malvada atrapa a Hansel', emoji:'🧙' },
+    { text:'Gretel empuja a la bruja al horno y escapan', emoji:'🎉' },
   ]},
 ];
 let puzzleSceneOrder=[], puzzleCorrectOrder=[], puzzleStoryIdx=0;
@@ -5058,8 +5104,7 @@ function buildPuzzleGame() {
   puzzleStoryIdx=Math.floor(Math.random()*PUZZLE_SCENES_DATA.length);
   const storyData=PUZZLE_SCENES_DATA[puzzleStoryIdx];
   puzzleCorrectOrder=[0,1,2,3,4];
-  // Shuffle
-  const shuffled=[...storyData.scenes.keys()].sort(()=>Math.random()-0.5);
+  const shuffled=Array.from({length:storyData.scenes.length},(_,i)=>i).sort(()=>Math.random()-0.5);
   puzzleSceneOrder=[...shuffled];
   renderPuzzleGame();
 }
@@ -5068,10 +5113,16 @@ function renderPuzzleGame() {
   const storyData=PUZZLE_SCENES_DATA[puzzleStoryIdx];
   const el=document.getElementById('gameArea-puzzle');
   el.innerHTML=`
-    <div style="font-family:'Baloo 2',cursive;font-size:19px;margin-bottom:6px;color:var(--accent2)">🧩 ${storyData.story}</div>
-    <p style="font-size:12px;color:var(--text2);margin-bottom:12px">Cambiá los números para ordenar las escenas del cuento:</p>
+    <div style="text-align:center;margin-bottom:6px;font-size:36px">${storyData.emoji||'🧩'}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:20px;color:#C9A84C;text-align:center;margin-bottom:6px">🧩 ${storyData.story}</div>
+    <div style="font-size:13px;color:#9B7B6B;text-align:center;margin-bottom:14px">Usá las flechas ▲▼ para ordenar las escenas del cuento</div>
     <div id="puzzleCards" style="display:flex;flex-direction:column;gap:10px"></div>
-    <button class="btn btn-accent btn-full" style="margin-top:14px" onclick="checkPuzzleNew()">✅ ¡Así es el orden!</button>`;
+    <button onclick="checkPuzzleNew()"
+      style="width:100%;margin-top:14px;padding:14px;background:linear-gradient(135deg,#C9A84C,#e8c97a);
+             border:none;border-radius:14px;font-family:'Fredoka One',cursive;
+             font-size:18px;color:white;cursor:pointer">
+      ✅ ¡Este es el orden!
+    </button>`;
   renderPuzzleCards();
 }
 
@@ -5081,19 +5132,22 @@ function renderPuzzleCards() {
   if(!el) return;
   el.innerHTML=puzzleSceneOrder.map((sceneIdx,pos)=>{
     const sc=storyData.scenes[sceneIdx];
-    return `<div style="background:var(--bg2);border-radius:14px;padding:10px;display:flex;gap:10px;align-items:center;border:2px solid rgba(167,139,250,0.2)" id="pzCard${pos}">
-      <!-- Number selector -->
+    return `<div style="background:white;border-radius:16px;padding:12px;display:flex;gap:10px;align-items:center;border:2px solid rgba(201,168,76,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.06)" id="pzCard${pos}">
+      <!-- Flechas -->
       <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-        <button onclick="movePuzzleScene(${pos},-1)" style="width:30px;height:30px;border-radius:50%;background:rgba(167,139,250,0.2);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">▲</button>
-        <div style="font-family:'Fredoka One',cursive;font-size:28px;color:var(--accent2);line-height:1;min-width:28px;text-align:center">${pos+1}</div>
-        <button onclick="movePuzzleScene(${pos},1)" style="width:30px;height:30px;border-radius:50%;background:rgba(167,139,250,0.2);border:none;color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">▼</button>
+        <button onclick="movePuzzleScene(${pos},-1)"
+          style="width:34px;height:34px;border-radius:50%;background:${pos===0?'rgba(200,200,200,0.2)':'rgba(201,168,76,0.2)'};border:none;color:#5C4033;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800"
+          ${pos===0?'disabled':''}>▲</button>
+        <div style="font-family:'Fredoka One',cursive;font-size:26px;color:#C9A84C;line-height:1;min-width:28px;text-align:center">${pos+1}</div>
+        <button onclick="movePuzzleScene(${pos},1)"
+          style="width:34px;height:34px;border-radius:50%;background:${pos===puzzleSceneOrder.length-1?'rgba(200,200,200,0.2)':'rgba(201,168,76,0.2)'};border:none;color:#5C4033;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800"
+          ${pos===puzzleSceneOrder.length-1?'disabled':''}>▼</button>
       </div>
-      <!-- Image -->
-      <img src="${sc.img}" style="width:72px;height:72px;border-radius:10px;object-fit:cover;flex-shrink:0">
-      <!-- Text + emoji -->
+      <!-- Emoji grande -->
+      <div style="font-size:40px;flex-shrink:0;width:52px;text-align:center">${sc.emoji}</div>
+      <!-- Texto -->
       <div style="flex:1;min-width:0">
-        <div style="font-size:28px;margin-bottom:4px">${sc.emoji}</div>
-        <div style="font-size:13px;font-weight:700;line-height:1.3">${sc.text}</div>
+        <div style="font-size:15px;font-weight:800;line-height:1.4;color:#5C4033;font-family:'Fredoka One',cursive">${sc.text}</div>
       </div>
     </div>`;
   }).join('');
