@@ -1022,19 +1022,14 @@
               style="background-image:url('/sprites_kid_OWN.png');background-size:1041px 777px;background-position:-301px -61px;background-repeat:no-repeat;mix-blend-mode:multiply;width:72px;height:72px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
             <button onclick="toggleKidPlay()" id="kidPlayBtn"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:574px 429px;background-position:-163px -282px;background-repeat:no-repeat;mix-blend-mode:multiply;width:72px;height:72px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
+              style="background-image:url('/sprites_kid_OWN.png');background-size:745px 556px;background-position:-367px -31px;background-repeat:no-repeat;mix-blend-mode:multiply;width:72px;height:72px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
             <button onclick="playNextKidStory()" id="kidBtnNext"
               style="background-image:url('/sprites_kid_OWN.png');background-size:1054px 787px;background-position:-409px -61px;background-repeat:no-repeat;mix-blend-mode:multiply;width:72px;height:72px;border:none;cursor:pointer;padding:0;border-radius:50%;transition:transform .12s"
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
           </div>
 
-          <!-- Botón reproducir siguiente -->
-          <div style="margin-top:12px;display:flex;justify-content:center">
-            <button onclick="playNextKidStory()" id="kidBtnSiguiente"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:885px 661px;background-position:-164px -422px;background-repeat:no-repeat;width:180px;height:34px;border:none;cursor:pointer;padding:0;transition:transform .12s"
-              onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"></button>
-          </div>
+
         </div>
 
         <!-- Story text -->
@@ -1703,8 +1698,8 @@ function pedirClaveActivacion(tipo) {
     + '<div style="font-family:Fredoka One,cursive;font-size:20px;color:white;margin-bottom:6px;text-align:center">🔑 Activar plan</div>'
     + '<div style="font-size:13px;color:rgba(255,255,255,0.6);text-align:center;margin-bottom:20px">' + (labels[tipo]||tipo) + '</div>'
     + '<input type="password" id="claveInput" placeholder="Ingresá tu clave" maxlength="20" style="width:100%;font-size:18px;letter-spacing:6px;text-align:center;margin-bottom:16px;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:white">'
-    + '<button onclick="confirmarClave('' + tipo + '')" style="width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:white;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;cursor:pointer;margin-bottom:10px">Activar</button>'
-    + '<button onclick="document.getElementById('claveModal').remove()" style="width:100%;padding:10px;background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.5);border-radius:14px;font-size:13px;cursor:pointer">Cancelar</button>'
+    + '<button onclick="confirmarClave(\'' + tipo + '\')" style="width:100%;padding:14px;background:linear-gradient(135deg,#f59e0b,#d97706);border:none;color:white;border-radius:14px;font-family:Fredoka One,cursive;font-size:16px;cursor:pointer;margin-bottom:10px">Activar</button>'
+    + '<button onclick="document.getElementById(\'claveModal\').remove()" style="width:100%;padding:10px;background:rgba(255,255,255,0.06);border:none;color:rgba(255,255,255,0.5);border-radius:14px;font-size:13px;cursor:pointer">Cancelar</button>'
     + '</div>';
   document.body.appendChild(div);
   setTimeout(function(){ var inp=document.getElementById('claveInput'); if(inp) inp.focus(); }, 100);
