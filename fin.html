@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    width:800px; height:800px;
+    background: linear-gradient(135deg, #FFF8E7 0%, #F5EDE0 50%, #EDD9C0 100%);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-family:'Fredoka One', cursive;
+    overflow:hidden;
+  }
+  .estrellas {
+    position:absolute; inset:0; pointer-events:none;
+  }
+  .estrella {
+    position:absolute;
+    width:12px; height:12px;
+    background:#C9A84C;
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    opacity:0.3;
+  }
+  .logo-wrap {
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:20px;
+  }
+  .logo-img {
+    width:320px;
+    mix-blend-mode: multiply;
+  }
+  .fin-texto {
+    font-size:120px;
+    color:#C9A84C;
+    letter-spacing:8px;
+    text-shadow: 4px 4px 0px rgba(92,64,51,0.15);
+    line-height:1;
+    margin-bottom:12px;
+  }
+  .subtitulo {
+    font-size:22px;
+    color:#9B7B6B;
+    letter-spacing:3px;
+  }
+  .linea {
+    width:200px; height:3px;
+    background:linear-gradient(90deg, transparent, #C9A84C, transparent);
+    margin:16px auto;
+    border-radius:2px;
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="estrellas">
+  <div class="estrella" style="top:8%;left:5%"></div>
+  <div class="estrella" style="top:15%;left:88%;width:18px;height:18px;opacity:0.2"></div>
+  <div class="estrella" style="top:75%;left:6%;width:16px;height:16px;opacity:0.25"></div>
+  <div class="estrella" style="top:80%;left:90%;width:14px;height:14px;opacity:0.2"></div>
+  <div class="estrella" style="top:40%;left:3%;width:10px;height:10px;opacity:0.15"></div>
+  <div class="estrella" style="top:55%;left:93%;width:10px;height:10px;opacity:0.15"></div>
+  <div class="estrella" style="top:25%;left:12%;width:8px;height:8px;opacity:0.2"></div>
+  <div class="estrella" style="top:70%;left:82%;width:8px;height:8px;opacity:0.2"></div>
+</div>
+
+<div class="logo-wrap">
+  <img class="logo-img" src="logooso.png">
+</div>
+
+<div class="linea"></div>
+<div class="fin-texto">FIN</div>
+<div class="linea"></div>
+<div class="subtitulo">CUENTOS QUE CONECTAN</div>
+
+</body>
+</html>
