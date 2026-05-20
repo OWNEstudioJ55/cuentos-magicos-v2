@@ -1630,94 +1630,64 @@ function previewVoiceWithChar() {
 }
 
 // ===================== MÚSICA DE FONDO =====================
-let _bgMusicCtx = null, _bgMusicNodes = [], _bgMusicOn = false, _bgMusicIdx = 0;
-
-const BG_MELODIES = [
-  // Melodía 1 — Cuna suave
-  { name:'Cuna', notes:[
-    {f:261.6,d:0.8},{f:329.6,d:0.8},{f:392,d:0.8},{f:329.6,d:0.8},
-    {f:261.6,d:0.8},{f:246.9,d:0.8},{f:261.6,d:1.6},
-    {f:293.7,d:0.8},{f:349.2,d:0.8},{f:392,d:0.8},{f:349.2,d:0.8},
-    {f:293.7,d:1.6},
-  ]},
-  // Melodía 2 — Vals mágico
-  { name:'Vals', notes:[
-    {f:392,d:0.5},{f:329.6,d:0.5},{f:261.6,d:0.5},
-    {f:349.2,d:0.5},{f:293.7,d:0.5},{f:246.9,d:0.5},
-    {f:329.6,d:0.5},{f:261.6,d:0.5},{f:220,d:0.5},
-    {f:261.6,d:1.5},
-  ]},
-  // Melodía 3 — Aventura
-  { name:'Aventura', notes:[
-    {f:523.3,d:0.3},{f:587.3,d:0.3},{f:659.3,d:0.3},{f:698.5,d:0.6},
-    {f:659.3,d:0.3},{f:587.3,d:0.3},{f:523.3,d:0.6},
-    {f:440,d:0.3},{f:493.9,d:0.3},{f:523.3,d:0.6},
-  ]},
-  // Melodía 4 — Sueños
-  { name:'Sueños', notes:[
-    {f:220,d:1.2},{f:246.9,d:0.6},{f:261.6,d:1.2},{f:293.7,d:0.6},
-    {f:329.6,d:1.2},{f:293.7,d:0.6},{f:261.6,d:1.2},
-    {f:246.9,d:0.6},{f:220,d:1.8},
-  ]},
-  // Melodía 5 — Juego feliz
-  { name:'Juego', notes:[
-    {f:523.3,d:0.25},{f:523.3,d:0.25},{f:587.3,d:0.5},{f:523.3,d:0.5},
-    {f:698.5,d:0.5},{f:659.3,d:1.0},
-    {f:523.3,d:0.25},{f:523.3,d:0.25},{f:587.3,d:0.5},{f:523.3,d:0.5},
-    {f:783.9,d:0.5},{f:698.5,d:1.0},
-  ]},
+// ===== MÚSICA DE FONDO MP3 =====
+const BG_MUSIC_TRACKS = [
+  {id:'1',label:'🎵 Alegre',  file:'/public/musica/musica1.mp3'},
+  {id:'2',label:'🌙 Cuna',    file:'/public/musica/musica2.mp3'},
+  {id:'3',label:'✨ Mágica',  file:'/public/musica/musica3.mp3'},
+  {id:'4',label:'🌟 Aventura',file:'/public/musica/musica4.mp3'},
 ];
+let _bgMusicOn=false, _bgMusicTrackId='1', _bgMusicAudio=null, _bgMusicPreviewAudio=null;
+let _kidBgMusicAudio=null;
 
-function startBgMusic() {
-  if(_bgMusicOn) return;
-  _bgMusicOn = true;
-  _playBgMelody();
-  const btn = document.getElementById('btnBgMusic');
-  if(btn) btn.textContent = '🔊 Música';
+function startBgMusic(){
+  stopBgMusic(); _bgMusicOn=true;
+  const tk=BG_MUSIC_TRACKS.find(t=>t.id===_bgMusicTrackId)||BG_MUSIC_TRACKS[0];
+  _bgMusicAudio=new Audio(tk.file); _bgMusicAudio.volume=0.3; _bgMusicAudio.loop=true;
+  _bgMusicAudio.play().catch(e=>console.warn('bgMusic:',e));
+  const btn=document.getElementById('btnBgMusic');
+  if(btn){btn.textContent='🔊 Música';btn.style.background='rgba(201,168,76,0.15)';btn.style.color='#C9A84C';}
+}
+function stopBgMusic(){
+  _bgMusicOn=false;
+  if(_bgMusicAudio){try{_bgMusicAudio.pause();_bgMusicAudio=null;}catch(e){}}
+  // Parar también el preview si está sonando
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  const btn=document.getElementById('btnBgMusic');
+  if(btn){btn.textContent='🔇 Música';btn.style.background='white';btn.style.color='#9B7B6B';}
+}
+function toggleBgMusic(){ if(_bgMusicOn) stopBgMusic(); else startBgMusic(); }
+
+function previewBgMusic(id){
+  // Parar preview anterior siempre
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  const tk=BG_MUSIC_TRACKS.find(t=>t.id===id); if(!tk) return;
+  _bgMusicPreviewAudio=new Audio(tk.file);
+  _bgMusicPreviewAudio.volume=0.3;
+  _bgMusicPreviewAudio.play().catch(()=>{});
+  // Para automáticamente a los 10 segundos
+  setTimeout(()=>{
+    if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  },10000);
+}
+function selectBgMusicTrack(id){
+  // Parar preview anterior antes de cambiar
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  _bgMusicTrackId=id;
+  document.querySelectorAll('[id^="bgTrack-"]').forEach(b=>{
+    const a=b.id==='bgTrack-'+id;
+    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
+    b.style.background=a?'rgba(201,168,76,0.15)':'white';
+    b.style.color=a?'#C9A84C':'#9B7B6B';
+  });
+  if(_bgMusicOn) startBgMusic();
+  previewBgMusic(id);
 }
 
-function stopBgMusic() {
-  _bgMusicOn = false;
-  _bgMusicNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
-  _bgMusicNodes = [];
-  if(_bgMusicCtx) { try{ _bgMusicCtx.close(); }catch(e){} _bgMusicCtx=null; }
-  const btn = document.getElementById('btnBgMusic');
-  if(btn) btn.textContent = '🔇 Música';
+function stopKidBgMusic(){
+  if(_kidBgMusicAudio){try{_kidBgMusicAudio.pause();_kidBgMusicAudio=null;}catch(e){}}
 }
 
-function toggleBgMusic() {
-  if(_bgMusicOn) stopBgMusic();
-  else startBgMusic();
-}
-
-function _playBgMelody() {
-  if(!_bgMusicOn) return;
-  try {
-    if(_bgMusicCtx) { try{ _bgMusicCtx.close(); }catch(e){} }
-    _bgMusicCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const melody = BG_MELODIES[_bgMusicIdx % BG_MELODIES.length];
-    _bgMusicIdx++;
-    let t = _bgMusicCtx.currentTime + 0.1;
-    let totalDur = 0;
-    melody.notes.forEach(note => {
-      const osc = _bgMusicCtx.createOscillator();
-      const gain = _bgMusicCtx.createGain();
-      osc.connect(gain); gain.connect(_bgMusicCtx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(note.f, t);
-      gain.gain.setValueAtTime(0, t);
-      gain.gain.linearRampToValueAtTime(0.08, t + 0.05);
-      gain.gain.linearRampToValueAtTime(0.06, t + note.d * 0.7);
-      gain.gain.linearRampToValueAtTime(0, t + note.d);
-      osc.start(t); osc.stop(t + note.d);
-      _bgMusicNodes.push(osc);
-      t += note.d;
-      totalDur += note.d;
-    });
-    // Repetir al terminar
-    setTimeout(()=>{ if(_bgMusicOn) _playBgMelody(); }, totalDur * 1000 + 200);
-  } catch(e) { console.warn('bgMusic error:', e); }
-}
 let recordingInterval=null;
 async function toggleRecord() {
   if(appState.isRecording) { stopRecording(); return; }
@@ -1869,9 +1839,9 @@ function updateSlideDur(val) {
 
 // ══ DISTORSIÓN DE VOZ — 3 opciones ══
 const VOICE_DISTORTIONS = [
-  { id:'ada',   label:'🧚 Hada',  pitch:1.4,  rate:1.1 },
-  { id:'ogro',  label:'👹 Ogro',  pitch:0.6,  rate:0.85 },
-  { id:'dragon',label:'🐉 Dragón',pitch:0.75, rate:0.9  },
+  {id:'ada',   label:'🧚 Hada',   pitch: 6, rate:1.0},
+  {id:'ogro',  label:'👹 Ogro',   pitch:-6, rate:1.0},
+  {id:'dragon',label:'🐉 Dragón', pitch:-3, rate:1.0},
 ];
 let _selectedDistortion = null;
 let _distortPreviewAudio = null;
@@ -1932,81 +1902,64 @@ function selectDistortion(id, btn) {
   document.getElementById('btnApplyDistort').disabled = false;
 }
 
-let _distortCtx = null;
+let _distortCtx=null, _tonePlayer=null, _tonePitchShift=null;
 
 async function previewDistortion() {
-  if(!_selectedDistortion || !appState.recordedBlob) return;
-  const btn = document.getElementById('btnDistPreview');
-  if(_distortPreviewAudio && !_distortPreviewAudio.paused) {
-    _distortPreviewAudio.pause();
-    if(btn) btn.textContent = '👂 Escuchar con distorsión';
-    return;
+  if(!_selectedDistortion||!appState.recordedBlob) return;
+  const btn=document.getElementById('btnDistPreview');
+  // Parar si está reproduciendo
+  if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
+  if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
+  if(_distortPreviewAudio&&!_distortPreviewAudio.paused){
+    _distortPreviewAudio.pause(); _distortPreviewAudio=null;
+    if(btn) btn.textContent='👂 Escuchar con distorsión'; return;
   }
-  if(btn) btn.textContent = '⏳ Preparando...';
-  const d = _selectedDistortion;
-  const url = URL.createObjectURL(appState.recordedBlob);
-  const audio = new Audio(url);
-  audio.playbackRate = d.rate || 1;
-  audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar con distorsión'; };
-  _distortPreviewAudio = audio;
+  if(btn) btn.textContent='⏳ Cargando...';
   try {
-    await audio.play();
-    if(btn) btn.textContent = '⏸ Pausar';
-  } catch(e) {
-    showToast('❌ Error: ' + e.message);
-    if(btn) btn.textContent = '👂 Escuchar con distorsión';
-  }
-}
-
-async function applyDistortionAndSave() {
-  if(!_selectedDistortion) { saveStoryWithoutDistortion(); return; }
-  // Guardamos el audio original + el playbackRate de la distorsión
-  // El niño lo escuchará con la misma velocidad
-  appState.selectedDistortionRate = _selectedDistortion.rate || 1;
-  appState.selectedDistortionId = _selectedDistortion.id;
-  await saveStory();
-}
-
-function audioBufferToWav(buffer) {
-  const numCh = buffer.numberOfChannels;
-  const sampleRate = buffer.sampleRate;
-  const samples = buffer.length * numCh;
-  const dataLen = samples * 2;
-  const ab = new ArrayBuffer(44 + dataLen);
-  const view = new DataView(ab);
-  // WAV header
-  const w = (o,s)=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); };
-  w(0,'RIFF'); view.setUint32(4,36+dataLen,true);
-  w(8,'WAVE'); w(12,'fmt ');
-  view.setUint32(16,16,true); view.setUint16(20,1,true);
-  view.setUint16(22,numCh,true); view.setUint32(24,sampleRate,true);
-  view.setUint32(28,sampleRate*numCh*2,true); view.setUint16(32,numCh*2,true);
-  view.setUint16(34,16,true); w(36,'data');
-  view.setUint32(40,dataLen,true);
-  let offset=44;
-  for(let i=0;i<buffer.length;i++) {
-    for(let c=0;c<numCh;c++) {
-      const s=Math.max(-1,Math.min(1,buffer.getChannelData(c)[i]));
-      view.setInt16(offset,s<0?s*0x8000:s*0x7FFF,true);
-      offset+=2;
+    if(typeof Tone==='undefined'){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
+        s.onload=res; s.onerror=rej; document.head.appendChild(s);
+      });
     }
+    await Tone.start();
+    const url=URL.createObjectURL(appState.recordedBlob);
+    _tonePitchShift=new Tone.PitchShift(_selectedDistortion.pitch||0).toDestination();
+    _tonePlayer=new Tone.Player(url).connect(_tonePitchShift);
+    await new Promise(res=>setTimeout(res,800));
+    _tonePlayer.start();
+    if(btn) btn.textContent='⏸ Pausar';
+    const dur=(_tonePlayer.buffer?.duration||5)*1000;
+    setTimeout(()=>{if(btn)btn.textContent='👂 Escuchar con distorsión';},dur+300);
+  } catch(e) {
+    console.error('Tone preview:',e);
+    const url=URL.createObjectURL(appState.recordedBlob);
+    const audio=new Audio(url);
+    audio.onended=()=>{if(btn)btn.textContent='👂 Escuchar con distorsión';};
+    _distortPreviewAudio=audio;
+    await audio.play().catch(()=>{});
+    if(btn) btn.textContent='⏸ Pausar';
   }
-  return new Blob([ab],{type:'audio/wav'});
 }
 
 async function applyDistortionAndSave() {
-  if(_selectedDistortion) {
-    appState.selectedDistortionRate = _selectedDistortion.rate || 1;
-    appState.selectedDistortionId = _selectedDistortion.id;
+  if(_selectedDistortion){
+    appState.selectedDistortionRate=_selectedDistortion.rate||1;
+    appState.selectedDistortionId=_selectedDistortion.id;
+    appState.selectedDistortionPitch=_selectedDistortion.pitch||0;
     showToast('✅ Distorsión aplicada — guardando...');
   }
+  if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
+  if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
   await saveStory();
 }
 
 async function saveStoryWithoutDistortion() {
-  appState.selectedDistortionRate = 1;
-  appState.selectedDistortionId = null;
-  _selectedDistortion = null;
+  appState.selectedDistortionRate=1;
+  appState.selectedDistortionId=null;
+  appState.selectedDistortionPitch=0;
+  _selectedDistortion=null;
   await saveStory();
 }
 
@@ -2069,6 +2022,8 @@ async function saveStory() {
     supaSync: existingStory?.supaSync || false,
     distortionRate: appState.selectedDistortionRate || 1,
     distortionId: appState.selectedDistortionId || null,
+    distortionPitch: appState.selectedDistortionPitch || 0,
+    musicTrackId: _bgMusicOn ? _bgMusicTrackId : null,
   };
 
   try {
@@ -2091,6 +2046,9 @@ async function saveStory() {
         texto: document.getElementById('storyTextInput')?.value||'',
         portada: appState.portadaUrl||null,
         tiene_audio: !!(appState.recordedBlob || story.hasAudio),
+        distortion_pitch: appState.selectedDistortionPitch||0,
+        distortion_id: appState.selectedDistortionId||null,
+        music_track_id: _bgMusicOn ? _bgMusicTrackId : null,
       };
       // Upload audio to Supabase Storage
       if(appState.recordedBlob) {
@@ -4088,7 +4046,10 @@ async function loadKidHomeStories() {
             storyText: c.texto, portada: c.portada,
             hasAudio: c.tiene_audio, created: new Date(c.created_at).toLocaleDateString('es-AR'),
             type: 'parent', supaSync: true,
-            audioFile: c.tiene_audio ? `${familiaId}/${c.id}.webm` : null
+            audioFile: c.tiene_audio ? `${familiaId}/${c.id}.webm` : null,
+            distortionPitch: c.distortion_pitch||0,
+            distortionId: c.distortion_id||null,
+            musicTrackId: c.music_track_id||null,
           };
           await dbPut('stories', local).catch(()=>{});
         }
@@ -4152,10 +4113,11 @@ async function loadKidHomeStories() {
   }).join('');
 }
 
-function loadKidAudioFromBlob(blob, distortionRate) {
-  if(appState.kidAudioUrl){ try{ URL.revokeObjectURL(appState.kidAudioUrl); }catch(e){} appState.kidAudioUrl=null; }
+function loadKidAudioFromBlob(blob, distortionRate, distortionPitch) {
+  if(appState.kidAudioUrl){try{URL.revokeObjectURL(appState.kidAudioUrl);}catch(e){} appState.kidAudioUrl=null;}
   const url=URL.createObjectURL(blob);
   appState.kidAudioUrl=url;
+  if(distortionPitch&&distortionPitch!==0){ _applyTonePitchToKid(url,distortionPitch); return; }
   const audio=new Audio();
   audio.preload='auto'; audio.src=url; audio.load();
   if(distortionRate && distortionRate!==1) audio.playbackRate=distortionRate;
@@ -4251,7 +4213,7 @@ async function openKidStory(id) {
 
   if(audioData&&audioData.blob&&audioData.blob.size>0) {
     // Audio encontrado localmente
-    loadKidAudioFromBlob(audioData.blob, story.distortionRate||1);
+    loadKidAudioFromBlob(audioData.blob, story.distortionRate||1, story.distortionPitch||0);
   } else if(story.hasAudio && story.audioFile && supa) {
     // No está local — buscar en Supabase Storage
     const td=document.getElementById('kidTimeDisplay'); if(td) td.textContent='⏳ Cargando...';
@@ -4259,6 +4221,7 @@ async function openKidStory(id) {
     try {
       const url = await supaGetAudioUrl(story.audioFile);
       if(url) {
+        if(story.distortionPitch&&story.distortionPitch!==0){ _applyTonePitchToKid(url,story.distortionPitch); }
         const audio=new Audio();
         audio.preload='auto'; audio.src=url; audio.load();
         if(story.distortionRate && story.distortionRate!==1) audio.playbackRate=story.distortionRate;
@@ -4303,14 +4266,9 @@ async function openKidStory(id) {
 
   // Preparar música — arranca cuando el niño toca play
   stopKidBgMusic();
-  if(story.musicTrackId && typeof BG_MUSIC_TRACKS!=='undefined') {
+  if(story.musicTrackId) {
     const tk=BG_MUSIC_TRACKS.find(t=>t.id===String(story.musicTrackId));
-    if(tk) {
-      _kidBgMusicAudio=new Audio(tk.file);
-      _kidBgMusicAudio.volume=0.3;
-      _kidBgMusicAudio.loop=true;
-      // No .play() acá — arranca cuando el niño toca play
-    }
+    if(tk){ _kidBgMusicAudio=new Audio(tk.file); _kidBgMusicAudio.volume=0.3; _kidBgMusicAudio.loop=true; }
   }
 
   // Show story text if available
@@ -4581,7 +4539,7 @@ function toggleKidPlay() {
     appState.kidIsPlaying=false;
     if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
     // Pausar música de fondo
-    if(_kidBgMusicAudio) _kidBgMusicAudio.pause();
+    if(_kidBgMusicAudio&&!_kidBgMusicAudio.paused) _kidBgMusicAudio.pause();
     const btn=document.getElementById('kidPlayBtn');
     if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   } else {
@@ -4590,8 +4548,8 @@ function toggleKidPlay() {
         appState.kidIsPlaying=true;
         const btn=document.getElementById('kidPlayBtn');
         if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
-        // Reanudar o arrancar música de fondo
-        if(_kidBgMusicAudio && _kidBgMusicAudio.paused) _kidBgMusicAudio.play().catch(()=>{});
+        // Arrancar o reanudar música de fondo
+        if(_kidBgMusicAudio) _kidBgMusicAudio.play().catch(()=>{});
         const dur=appState.kidAudio.duration||0;
         const finVisible=document.querySelector('#kidSlideshow .slideshow-fin')?.classList.contains('active');
         if(finVisible) stopSlideshow();
@@ -4619,21 +4577,35 @@ function stopKidPlay() {
   if(appState.kidAudio) { appState.kidAudio.pause(); appState.kidIsPlaying=false; }
   if(window.speechSynthesis) window.speechSynthesis.cancel();
 }
-
-// Música de fondo del niño
-let _kidBgMusicAudio = null;
-function startKidBgMusic(trackId) {
-  stopKidBgMusic();
-  if(typeof BG_MUSIC_TRACKS === 'undefined') return;
-  const tk = BG_MUSIC_TRACKS.find(t=>t.id===String(trackId));
-  if(!tk) return;
-  _kidBgMusicAudio = new Audio(tk.file);
-  _kidBgMusicAudio.volume = 0.3;
-  _kidBgMusicAudio.loop = true;
-  _kidBgMusicAudio.play().catch(e=>console.warn('kidBgMusic:',e));
+function stopKidBgMusic(){
+  if(_kidBgMusicAudio){try{_kidBgMusicAudio.pause();_kidBgMusicAudio=null;}catch(e){}}
 }
-function stopKidBgMusic() {
-  if(_kidBgMusicAudio){ try{ _kidBgMusicAudio.pause(); _kidBgMusicAudio=null; }catch(e){} }
+
+async function _applyTonePitchToKid(url,pitchVal){
+  try {
+    if(typeof Tone==='undefined'){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
+        s.onload=res; s.onerror=rej; document.head.appendChild(s);
+      });
+    }
+    const ps=new Tone.PitchShift(pitchVal).toDestination();
+    const pl=new Tone.Player(url).connect(ps);
+    await new Promise(res=>setTimeout(res,800));
+    appState.kidAudio={
+      _pl:pl,_ps:ps,duration:pl.buffer?.duration||0,currentTime:0,paused:true,
+      play:async function(){await Tone.start();this._pl.start();this.paused=false;},
+      pause:function(){try{this._pl.stop();}catch(e){}this.paused=true;},
+    };
+    const t=document.getElementById('kidTimeDisplay');
+    if(t) t.textContent='0:00 / '+formatTime(pl.buffer?.duration||0);
+  } catch(e){
+    console.error('Tone kid:',e);
+    const audio=new Audio(); audio.preload='auto'; audio.src=url; audio.load();
+    audio.onended=()=>{appState.kidIsPlaying=false;if(appState.kidSlideInterval){clearInterval(appState.kidSlideInterval);appState.kidSlideInterval=null;}try{showFin();}catch(e){}updateKidProgress('storiesListened');};
+    appState.kidAudio=audio;
+  }
 }
 
 function updateKidProgress2() {
