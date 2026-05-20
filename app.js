@@ -1641,6 +1641,8 @@ let _bgMusicOn=false, _bgMusicTrackId='1', _bgMusicAudio=null, _bgMusicPreviewAu
 let _kidBgMusicAudio=null;
 
 function startBgMusic(){
+  // Parar preview antes de arrancar música real
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
   stopBgMusic(); _bgMusicOn=true;
   const tk=BG_MUSIC_TRACKS.find(t=>t.id===_bgMusicTrackId)||BG_MUSIC_TRACKS[0];
   _bgMusicAudio=new Audio(tk.file); _bgMusicAudio.volume=0.3; _bgMusicAudio.loop=true;
@@ -1651,7 +1653,6 @@ function startBgMusic(){
 function stopBgMusic(){
   _bgMusicOn=false;
   if(_bgMusicAudio){try{_bgMusicAudio.pause();_bgMusicAudio=null;}catch(e){}}
-  // Parar también el preview si está sonando
   if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
   const btn=document.getElementById('btnBgMusic');
   if(btn){btn.textContent='🔇 Música';btn.style.background='white';btn.style.color='#9B7B6B';}
@@ -1659,19 +1660,16 @@ function stopBgMusic(){
 function toggleBgMusic(){ if(_bgMusicOn) stopBgMusic(); else startBgMusic(); }
 
 function previewBgMusic(id){
-  // Parar preview anterior siempre
   if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
   const tk=BG_MUSIC_TRACKS.find(t=>t.id===id); if(!tk) return;
   _bgMusicPreviewAudio=new Audio(tk.file);
   _bgMusicPreviewAudio.volume=0.3;
   _bgMusicPreviewAudio.play().catch(()=>{});
-  // Para automáticamente a los 10 segundos
   setTimeout(()=>{
     if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
   },10000);
 }
 function selectBgMusicTrack(id){
-  // Parar preview anterior antes de cambiar
   if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
   _bgMusicTrackId=id;
   document.querySelectorAll('[id^="bgTrack-"]').forEach(b=>{
@@ -1680,8 +1678,13 @@ function selectBgMusicTrack(id){
     b.style.background=a?'rgba(201,168,76,0.15)':'white';
     b.style.color=a?'#C9A84C':'#9B7B6B';
   });
-  if(_bgMusicOn) startBgMusic();
-  previewBgMusic(id);
+  if(_bgMusicOn){
+    // Si música real está activa, cambiar a la nueva sin preview
+    startBgMusic();
+  } else {
+    // Solo preview si NO hay música real sonando
+    previewBgMusic(id);
+  }
 }
 
 function stopKidBgMusic(){
@@ -4268,7 +4271,7 @@ async function openKidStory(id) {
   stopKidBgMusic();
   if(story.musicTrackId) {
     const tk=BG_MUSIC_TRACKS.find(t=>t.id===String(story.musicTrackId));
-    if(tk){ _kidBgMusicAudio=new Audio(tk.file); _kidBgMusicAudio.volume=0.3; _kidBgMusicAudio.loop=true; }
+    if(tk){ _kidBgMusicAudio=new Audio(tk.file); _kidBgMusicAudio.volume=0.15; _kidBgMusicAudio.loop=true; }
   }
 
   // Show story text if available
