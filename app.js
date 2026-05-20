@@ -581,10 +581,32 @@ const CHARACTERS = [
 
 const SEQ_CHARS = ['🐉','🧚','🦁','🐬','🦊','🤖','🦄','🧙'];
 const SEQ_ACTIONS = [
-  {icon:'🏃',label:'Corre'},{icon:'✈️',label:'Vuela'},{icon:'🤔',label:'Piensa'},
-  {icon:'🤝',label:'Ayuda'},{icon:'⚔️',label:'Lucha'},{icon:'🎵',label:'Canta'},
-  {icon:'🍕',label:'Come'},{icon:'😴',label:'Duerme'},
+  {icon:'🏃',label:'Corre',   file:'corre'},
+  {icon:'✈️',label:'Vuela',   file:'vuela'},
+  {icon:'🤔',label:'Piensa',  file:'piensa'},
+  {icon:'🤝',label:'Ayuda',   file:'ayuda'},
+  {icon:'⚔️',label:'Lucha',   file:'lucha'},
+  {icon:'🎵',label:'Canta',   file:'canta'},
+  {icon:'🍕',label:'Come',    file:'come'},
+  {icon:'😴',label:'Duerme',  file:'duerme'},
 ];
+
+const SEQ_CHAR_IDS = ['dragon','hada','leon','delfin','zorro','robot','unicornio','mago'];
+const SEQ_CHAR_LABELS = {
+  dragon:'🐉 Dragón', hada:'🧚 Hada', leon:'🦁 León',
+  delfin:'🐬 Delfín', zorro:'🦊 Zorro', robot:'🤖 Robot',
+  unicornio:'🦄 Unicornio', mago:'🧙 Mago'
+};
+
+function getSceneImageUrl(charId, actionFile) {
+  const char = charId || appState.selectedChar || 'dragon';
+  return `/public/personajes/${char}/${actionFile}.png`;
+}
+
+function getCelebImageUrl(charId, celebId) {
+  const char = charId || appState.selectedChar || 'dragon';
+  return `/public/personajes/${char}/festejo-${celebId}.png`;
+}
 
 // ===================== CLASSIC STORIES =====================
 const CLASSIC_STORIES = [
@@ -3637,21 +3659,57 @@ function buildParentSequenceScenes() {
     const actSel=scene.action!==undefined?SEQ_ACTIONS[scene.action]:null;
     const isLast=i===4;
     const celSel=SEQ_CELEBRATIONS.find(c=>c.id===parentSelectedCelebration)||SEQ_CELEBRATIONS[3];
+    const charId=scene.char||appState.selectedChar||'dragon';
     const done=actSel||isLast;
-    return `<div class="seq-scene${done?' complete':''}" id="pScene${i}">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div class="seq-scene-title" style="margin:0">Escena ${i+1}${isLast?' 🎉':''}</div>
-        ${done?'<span style="color:var(--mint);font-size:16px">✅</span>':''}
+    // Imagen preview
+    let imgUrl='';
+    if(isLast) imgUrl=getCelebImageUrl(charId, parentSelectedCelebration);
+    else if(actSel) imgUrl=getSceneImageUrl(charId, actSel.file);
+    return `<div style="background:white;border-radius:16px;padding:12px;margin-bottom:10px;border:2px solid ${done?'rgba(201,168,76,0.4)':'rgba(201,168,76,0.15)'}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <!-- Preview imagen -->
+        <div style="width:64px;height:64px;border-radius:12px;overflow:hidden;flex-shrink:0;background:#F5EDE0;display:flex;align-items:center;justify-content:center;border:2px solid rgba(201,168,76,0.2)">
+          ${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextSibling.style.display='flex'">`:''}
+          <span style="font-size:28px;${imgUrl?'display:none':''}">📸</span>
+        </div>
+        <!-- Info escena -->
+        <div style="flex:1">
+          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:4px">Escena ${i+1}${isLast?' 🎉':''} ${done?'✅':''}</div>
+          <div style="font-size:12px;color:#9B7B6B">${isLast?`${celSel.icon} ${celSel.label}`:actSel?`${actSel.icon} ${actSel.label}`:'Sin acción elegida'} · ${SEQ_CHAR_LABELS[charId]||charId}</div>
+        </div>
       </div>
+
+      <!-- Selector personaje -->
+      <div style="font-size:10px;font-weight:800;color:#9B7B6B;margin-bottom:6px">PERSONAJE</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+        ${SEQ_CHAR_IDS.map(c=>`<button onclick="selectParentSeqChar(${i},'${c}');buildParentSequenceScenes()"
+          style="padding:5px 10px;border-radius:10px;border:2px solid ${charId===c?'#C9A84C':'rgba(201,168,76,0.2)'};
+                 background:${charId===c?'rgba(201,168,76,0.15)':'white'};cursor:pointer;font-size:12px;
+                 font-weight:700;color:${charId===c?'#C9A84C':'#9B7B6B'};font-family:'Fredoka One',cursive">
+          ${SEQ_CHAR_LABELS[c]}
+        </button>`).join('')}
+      </div>
+
       ${isLast?`
-        <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:6px">TIPO DE FESTEJO</div>
+        <!-- Selector festejo -->
+        <div style="font-size:10px;font-weight:800;color:#9B7B6B;margin-bottom:6px">TIPO DE FESTEJO</div>
         <div style="display:flex;flex-wrap:wrap;gap:6px">
-          ${SEQ_CELEBRATIONS.map(c=>`<button onclick="selectParentCelebration('${c.id}');buildParentSequenceScenes()" style="padding:8px 12px;border-radius:12px;border:2px solid ${parentSelectedCelebration===c.id?'var(--warm)':'rgba(255,255,255,.08)'};background:${parentSelectedCelebration===c.id?'rgba(255,209,102,.2)':'var(--bg2)'};cursor:pointer;font-size:13px;font-weight:700;color:${parentSelectedCelebration===c.id?'var(--warm)':'var(--text2)'};font-family:Nunito,sans-serif">${c.icon} ${c.label}</button>`).join('')}
+          ${SEQ_CELEBRATIONS.map(c=>`<button onclick="selectParentCelebration('${c.id}');buildParentSequenceScenes()"
+            style="padding:8px 12px;border-radius:12px;border:2px solid ${parentSelectedCelebration===c.id?'#C9A84C':'rgba(201,168,76,0.2)'};
+                   background:${parentSelectedCelebration===c.id?'rgba(201,168,76,0.15)':'white'};cursor:pointer;
+                   font-size:13px;font-weight:700;color:${parentSelectedCelebration===c.id?'#C9A84C':'#9B7B6B'};
+                   font-family:'Fredoka One',cursive">${c.icon} ${c.label}</button>`).join('')}
         </div>
       `:`
-        <div style="font-size:10px;font-weight:800;color:var(--text3);margin-bottom:6px">ACCIÓN DE LA ESCENA</div>
+        <!-- Selector accion -->
+        <div style="font-size:10px;font-weight:800;color:#9B7B6B;margin-bottom:6px">ACCIÓN</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px">
-          ${SEQ_ACTIONS.map((a,j)=>`<button onclick="selectParentSeqAction(${i},${j})" style="padding:6px 10px;border-radius:10px;border:2px solid ${scene.action===j?'var(--coral)':'rgba(255,255,255,.06)'};background:${scene.action===j?'rgba(255,107,107,.15)':'var(--bg2)'};cursor:pointer;font-size:12px;font-weight:700;color:${scene.action===j?'var(--coral)':'var(--text2)'};font-family:Nunito,sans-serif">${a.icon} ${a.label}</button>`).join('')}
+          ${SEQ_ACTIONS.map((a,j)=>`<button onclick="selectParentSeqAction(${i},${j})"
+            style="padding:6px 10px;border-radius:10px;border:2px solid ${scene.action===j?'#C9A84C':'rgba(201,168,76,0.2)'};
+                   background:${scene.action===j?'rgba(201,168,76,0.15)':'white'};cursor:pointer;font-size:12px;
+                   font-weight:700;color:${scene.action===j?'#C9A84C':'#9B7B6B'};font-family:'Fredoka One',cursive">
+            ${a.icon} ${a.label}
+          </button>`).join('')}
         </div>
       `}
     </div>`;
@@ -3691,25 +3749,32 @@ function selectParentCelebration(cel) {
 
 async function generateParentSequenceImages() {
   const btn=document.getElementById('btnGenScenes');
-  if(btn) { btn.disabled=true; btn.textContent='⏳ Generando...'; }
-  showLoading('Generando 5 escenas...');
-  const prompts=parentSequenceData.map((s,i)=>{
-    const c=s.char||'🐉', a=SEQ_ACTIONS[s.action||0];
-    return `${c} ${a?a.label:''} scene ${i+1} children storybook`;
+  if(btn) { btn.disabled=true; btn.textContent='⏳ Cargando...'; }
+  showLoading('Preparando las 5 escenas...');
+
+  // Usar imágenes locales pre-generadas
+  const imgs = parentSequenceData.map((s,i) => {
+    const isLast = i===4;
+    const charId = s.char || appState.selectedChar || 'dragon';
+    if(isLast) return getCelebImageUrl(charId, parentSelectedCelebration);
+    const action = SEQ_ACTIONS[s.action!==undefined ? s.action : 0];
+    return getSceneImageUrl(charId, action.file);
   });
-  const imgs=[];
-  for(const p of prompts) { imgs.push(await generateImageWithFallback(p)); await new Promise(r=>setTimeout(r,300)); }
-  appState.currentStoryImages=imgs;
-  // Show thumbs row
+
+  appState.currentStoryImages = imgs;
+
+  // Mostrar thumbs
   const thumbRow=document.getElementById('scenesThumbRow');
   const preview=document.getElementById('scenesPreviewGrid');
-  if(thumbRow) thumbRow.innerHTML=imgs.map((u,i)=>`<img src="${u}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover" title="Escena ${i+1}">`).join('');
+  if(thumbRow) thumbRow.innerHTML=imgs.map((u,i)=>`
+    <img src="${u}" style="width:100%;aspect-ratio:1;border-radius:8px;object-fit:cover;border:2px solid rgba(201,168,76,0.3)"
+         title="Escena ${i+1}" onerror="this.style.background='#F5EDE0';this.style.border='2px dashed #C9A84C'">`
+  ).join('');
   if(preview) preview.style.display='block';
-  // Enable step 3 button
+
   const nextBtn=document.getElementById('btnGoStep3');
-  if(nextBtn) { nextBtn.disabled=false; }
-  if(btn) { btn.disabled=false; btn.textContent='🔄 Regenerar imágenes'; }
-  // Build slideshow for step 3
+  if(nextBtn) nextBtn.disabled=false;
+  if(btn) { btn.disabled=false; btn.textContent='🔄 Cambiar selección'; }
   buildRecSlideshow(imgs);
   hideLoading();
   showToast('✅ ¡5 escenas listas! Avanzá al paso 3 para grabar');
