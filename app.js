@@ -250,7 +250,7 @@ function kidSpriteBg(key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;`;
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
 }
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
@@ -4602,22 +4602,27 @@ function seekKid(secs) {
   appState.kidAudio.currentTime=Math.max(0,appState.kidAudio.currentTime+secs);
 }
 
+function _markStoryAsOpened(id) {
+  const opened = JSON.parse(localStorage.getItem('ownKidOpenedStories')||'[]');
+  if(!opened.includes(id)) { opened.push(id); localStorage.setItem('ownKidOpenedStories', JSON.stringify(opened)); }
+}
+
 function playPrevKidStory() {
   const stories = appState._kidStories || [];
-  if(!stories.length) { showToast('No hay más cuentos'); return; }
-  const currentId = appState.currentStory?.id;
-  const idx = stories.findIndex(s => s.id === currentId);
-  const prevIdx = idx <= 0 ? stories.length - 1 : idx - 1;
-  openKidStory(stories[prevIdx].id);
+  if(stories.length <= 1) return;
+  const idx = stories.findIndex(s => s.id === appState.currentStory?.id);
+  if(idx <= 0) return; // primer cuento, no hacer nada
+  _markStoryAsOpened(stories[idx-1].id);
+  openKidStory(stories[idx-1].id);
 }
 
 function playNextKidStory() {
   const stories = appState._kidStories || [];
-  if(!stories.length) { showToast('No hay más cuentos'); return; }
-  const currentId = appState.currentStory?.id;
-  const idx = stories.findIndex(s => s.id === currentId);
-  const nextIdx = idx === -1 || idx === stories.length - 1 ? 0 : idx + 1;
-  openKidStory(stories[nextIdx].id);
+  if(stories.length <= 1) return;
+  const idx = stories.findIndex(s => s.id === appState.currentStory?.id);
+  if(idx === -1 || idx === stories.length - 1) return; // último cuento, no hacer nada
+  _markStoryAsOpened(stories[idx+1].id);
+  openKidStory(stories[idx+1].id);
 }
 
 function buildKidVoiceRow() {
