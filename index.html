@@ -526,17 +526,16 @@
       <!-- ========== STEP 3: GRABAR (imágenes arriba, botón abajo) ========== -->
       <div id="recStep-3" style="display:none">
         <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:4px;background:linear-gradient(135deg,var(--accent),#ff6fd8);-webkit-background-clip:text;-webkit-text-fill-color:transparent">3️⃣ Grabar el cuento</div>
-        <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Las imágenes pasan mientras grabás. Podés avanzarlas o dejar que pasen solas.</p>
 
-        <!-- Título editable en el paso de grabación -->
+        <!-- Título editable -->
         <div style="margin-bottom:12px">
-          <input type="text" id="storyTitleStep3" placeholder="✏️ Título del cuento (podés cambiarlo acá)" style="font-size:15px;text-align:center;font-weight:700" oninput="document.getElementById('storyTitle').value=this.value;updatePortadaTitleOverlay()">
+          <input type="text" id="storyTitleStep3" placeholder="✏️ Título del cuento" style="font-size:15px;text-align:center;font-weight:700" oninput="document.getElementById('storyTitle').value=this.value;updatePortadaTitleOverlay()">
         </div>
 
-        <!-- Slideshow de escenas mientras graba — arriba -->
-        <div style="background:var(--bg2);border-radius:18px;overflow:hidden;margin-bottom:14px;border:2px solid rgba(167,139,250,0.25)">
-          <div class="slideshow-container" id="recSlideshow" style="aspect-ratio:1;border-radius:0">
-            <div id="recSlidePlaceholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text2);gap:8px">
+        <!-- Slideshow -->
+        <div style="background:#F5EDE0;border-radius:18px;overflow:hidden;margin-bottom:12px;border:2px solid rgba(201,168,76,0.25)">
+          <div class="slideshow-container" id="recSlideshow" style="aspect-ratio:1;border-radius:0;position:relative">
+            <div id="recSlidePlaceholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#9B7B6B;gap:8px">
               <div style="font-size:48px">🎬</div>
               <div style="font-size:13px">Generá las escenas en el paso 2</div>
             </div>
@@ -545,36 +544,46 @@
           </div>
           <div style="padding:10px;display:flex;align-items:center;gap:10px">
             <div class="slideshow-dots" id="recSlideshowDots" style="flex:1"></div>
-            <div style="font-size:12px;color:var(--text2)" id="recSlideCounter">0 / 0</div>
+            <div style="font-size:12px;color:#9B7B6B" id="recSlideCounter">0 / 0</div>
           </div>
-          <!-- Auto-advance controls -->
-          <div style="padding:0 10px 10px;display:flex;align-items:center;gap:8px">
-            <label style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="autoAdvanceChk" onchange="toggleAutoAdvance()" style="accent-color:var(--accent)">
-              Auto-avance cada
-            </label>
-            <select id="autoAdvanceSecs" style="background:var(--bg2);border:1px solid rgba(167,139,250,0.3);border-radius:8px;color:var(--text);padding:3px 6px;font-size:12px;font-family:Nunito,sans-serif">
-              <option value="5">5s</option>
-              <option value="10" selected>10s</option>
-              <option value="15">15s</option>
-              <option value="20">20s</option>
-            </select>
+
+          <!-- Controles duración + música -->
+          <div style="padding:0 12px 12px;background:rgba(201,168,76,0.06);border-top:1px solid rgba(201,168,76,0.15)">
+            <!-- Duración por imagen -->
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 0 6px">
+              <span style="font-size:13px;font-weight:700;color:#5C4033;font-family:'Fredoka One',cursive;flex-shrink:0">⏱ Cada imagen dura</span>
+              <input type="range" id="slideDurSecs" min="3" max="15" value="5"
+                oninput="updateSlideDur(this.value)"
+                style="flex:1;accent-color:#C9A84C">
+              <span id="slideDurLabel" style="font-family:'Fredoka One',cursive;font-size:15px;color:#C9A84C;font-weight:700;min-width:28px;text-align:right">5s</span>
+            </div>
+            <div style="font-size:11px;color:#9B7B6B;margin-bottom:8px;font-style:italic">Mové el slider para cambiar cuánto dura cada imagen</div>
+
+            <!-- Música de fondo -->
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span style="font-size:13px;color:#5C4033;font-family:'Fredoka One',cursive">🎵 Música de fondo</span>
+              <button id="btnBgMusic" data-enabled="0"
+                onclick="this.dataset.enabled=this.dataset.enabled==='1'?'0':'1';toggleBgMusic()"
+                style="padding:6px 14px;border-radius:10px;border:2px solid rgba(201,168,76,0.3);
+                       background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;
+                       font-size:13px;cursor:pointer">🔇 Música</button>
+            </div>
           </div>
         </div>
 
-        <!-- Botón de grabación — abajo, grande -->
-        <div style="background:var(--card);border-radius:18px;padding:20px;border:1px solid rgba(167,139,250,0.15);margin-bottom:14px">
+        <!-- Botón grabación -->
+        <div style="background:white;border-radius:18px;padding:20px;border:2px solid rgba(201,168,76,0.2);margin-bottom:14px">
           <div class="timer-display" id="recTimer" style="font-size:48px;margin-bottom:4px">0:00</div>
-          <div class="rec-status" id="recStatus" style="font-size:14px;margin-bottom:16px">Listo para grabar</div>
+          <div class="rec-status" id="recStatus" style="font-size:14px;margin-bottom:16px;color:#5C4033">Listo para grabar — las imágenes pasan solas mientras grabás</div>
           <button id="recBtn" onclick="toggleRecord()" style="width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#ff8e53);border:none;color:white;cursor:pointer;margin:8px auto 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(255,107,107,.5);transition:transform .15s" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
             <span style="font-size:44px;line-height:1">🎙️</span>
             <span style="font-size:14px;font-weight:900;font-family:'Nunito',sans-serif;margin-top:4px">GRABAR</span>
           </button>
 
-          <!-- Playback — aparece al terminar de grabar -->
+          <!-- Playback -->
           <div id="recPlayback" style="display:none;margin-top:18px">
-            <div style="font-size:13px;font-weight:800;color:var(--accent3);margin-bottom:8px">✅ ¡Grabación lista! Escuchala:</div>
-            <div class="audio-player" style="background:var(--bg2);border-radius:14px;padding:14px">
+            <div style="font-size:13px;font-weight:800;color:#059669;margin-bottom:8px">✅ ¡Grabación lista! Escuchala:</div>
+            <div class="audio-player" style="background:#F5EDE0;border-radius:14px;padding:14px">
               <div class="audio-controls">
                 <button class="seek-btn" onclick="seekRecAudio(-5)">⏪</button>
                 <button class="play-btn" id="recPlayBtn" onclick="toggleRecPlay()">▶</button>
@@ -1043,12 +1052,6 @@
               onmousedown="this.style.transform='scale(0.88)'" onmouseup="this.style.transform='scale(1)'" ontouchstart="this.style.transform='scale(0.88)'" ontouchend="this.style.transform='scale(1)'"></button>
           </div>
 
-          <!-- Botón reproducir siguiente -->
-          <div style="margin-top:12px;display:flex;justify-content:center">
-            <button onclick="playNextKidStory()" id="kidBtnSiguiente"
-              style="background-image:url('/sprites_kid_OWN.png');background-size:885px 661px;background-position:-164px -422px;background-repeat:no-repeat;width:180px;height:34px;border:none;cursor:pointer;padding:0;transition:transform .12s"
-              onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"></button>
-          </div>
         </div>
 
         <!-- Story text -->
