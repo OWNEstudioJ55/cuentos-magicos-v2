@@ -1741,7 +1741,7 @@ async function toggleRecord() {
     appState.recordSeconds=0;
     // Arrancar música de fondo si está activada
     if(document.getElementById('btnBgMusic')?.dataset.enabled==='1') startBgMusic();
-    // Arrancar slideshow automáticamente
+    // Arrancar slideshow automáticamente con la duración del slider
     startAutoAdvance();
     const btn=document.getElementById('recBtn');
     if(btn){
@@ -1756,7 +1756,6 @@ async function toggleRecord() {
       appState.recordSeconds++;
       const rt=document.getElementById('recTimer'); if(rt) rt.textContent=formatTime(appState.recordSeconds);
     },1000);
-    if(document.getElementById('autoAdvanceChk')?.checked) startAutoAdvance();
   } catch(e) { console.error(e); showToast('❌ No se pudo acceder al micrófono: '+e.message); }
 }
 
@@ -4478,27 +4477,32 @@ function buildSlideshowDots(n) {
   el.innerHTML=Array.from({length:n},(_,i)=>`<button class="slide-dot ${i===0?'active':''}" onclick="goKidSlide(${i})"></button>`).join('');
 }
 
-function startSlideshow(totalDuration) {
-  // Parar intervalo anterior
+function startSlideshow(totalDurationMs) {
   if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
   const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
   const n=imgs.length;
   if(n<=0) return;
-  // Calcular duración por imagen — si tenemos duración del audio la dividimos, si no usamos 5 seg
-  const secPerSlide = totalDuration>0 ? Math.max(3, (totalDuration/n)*1000) : 5000;
+  // totalDurationMs ya está en milisegundos
+  // Si no hay duración válida, usamos 5 segundos por imagen
+  const msPerSlide = totalDurationMs>0 ? Math.max(3000, totalDurationMs/n) : 5000;
+  let slideCount=0;
   appState.kidSlideInterval=setInterval(()=>{
-    const currentImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
-    if(!currentImgs.length) return;
-    // Si llegamos a la última imagen, mostramos FIN
-    if(appState.kidSlideIndex>=currentImgs.length-1) {
-      currentImgs.forEach(img=>img.classList.remove('active'));
+    slideCount++;
+    if(slideCount>=n) {
+      // Llegamos al final — mostrar FIN y parar
+      const allImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
+      allImgs.forEach(img=>img.classList.remove('active'));
       const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
       if(finEl) finEl.style.display='flex';
       clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null;
       return;
     }
-    slideKid(1);
-  }, secPerSlide);
+    // Avanzar sin loop — índice directo
+    const allImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
+    allImgs.forEach((img,i)=>img.classList.toggle('active',i===slideCount));
+    appState.kidSlideIndex=slideCount;
+    document.querySelectorAll('#slideshowDots .slide-dot').forEach((d,i)=>d.classList.toggle('active',i===slideCount));
+  }, msPerSlide);
 }
 
 function stopSlideshow() {
