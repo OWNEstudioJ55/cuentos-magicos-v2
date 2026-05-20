@@ -1369,11 +1369,11 @@ function injectNavSprites() {
   // Hero botón "Escuchar ahora"
   const heroBtn=document.getElementById('kidHeroBtnSig');
   if(heroBtn) heroBtn.style.cssText=`width:220px;height:48px;`+kidSpriteBg('btn_siguiente',48);
-  const kidPlay=document.getElementById('kidPlayBtn'); if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;border:none;cursor:pointer;border-radius:50%;padding:0;${kidSpriteBg('btn_play_big',72)}`; }
+  const kidPlay=document.getElementById('kidPlayBtn'); if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   const kidPrev = document.getElementById('kidBtnPrev');
-  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:72px;height:72px;border:none;cursor:pointer;border-radius:50%;padding:0;${kidSpriteBg('btn_prev',72)}`; }
+  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_prev',56)}`; }
   const kidNext = document.getElementById('kidBtnNext');
-  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:72px;height:72px;border:none;cursor:pointer;border-radius:50%;padding:0;${kidSpriteBg('btn_next',72)}`; }
+  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_next',56)}`; }
   const kidSig = document.getElementById('kidBtnSiguiente');
   if(kidSig) { kidSig.innerHTML=''; kidSig.style.cssText=`width:200px;height:40px;${kidSpriteBg('btn_siguiente',40)}`; }
 }
@@ -4600,6 +4600,24 @@ function updateKidProgress2() {
 function seekKid(secs) {
   if(!appState.kidAudio) return;
   appState.kidAudio.currentTime=Math.max(0,appState.kidAudio.currentTime+secs);
+}
+
+function playPrevKidStory() {
+  const stories = appState._kidStories || [];
+  if(!stories.length) { showToast('No hay más cuentos'); return; }
+  const currentId = appState.currentStory?.id;
+  const idx = stories.findIndex(s => s.id === currentId);
+  const prevIdx = idx <= 0 ? stories.length - 1 : idx - 1;
+  openKidStory(stories[prevIdx].id);
+}
+
+function playNextKidStory() {
+  const stories = appState._kidStories || [];
+  if(!stories.length) { showToast('No hay más cuentos'); return; }
+  const currentId = appState.currentStory?.id;
+  const idx = stories.findIndex(s => s.id === currentId);
+  const nextIdx = idx === -1 || idx === stories.length - 1 ? 0 : idx + 1;
+  openKidStory(stories[nextIdx].id);
 }
 
 function buildKidVoiceRow() {
