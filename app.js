@@ -1755,6 +1755,12 @@ async function toggleRecord() {
     recordingInterval=setInterval(()=>{
       appState.recordSeconds++;
       const rt=document.getElementById('recTimer'); if(rt) rt.textContent=formatTime(appState.recordSeconds);
+      // Aviso a los 3 minutos
+      if(appState.recordSeconds===180) {
+        const rs=document.getElementById('recStatus');
+        if(rs) rs.innerHTML='<span style="color:#C9A84C;font-weight:800">⏱ 3 minutos de cuento... ¡moraleja!</span>';
+        showToast('⏱ 3 minutos de cuento... ¡moraleja!');
+      }
     },1000);
   } catch(e) { console.error(e); showToast('❌ No se pudo acceder al micrófono: '+e.message); }
 }
@@ -1905,87 +1911,34 @@ let _distortCtx = null;
 async function previewDistortion() {
   if(!_selectedDistortion || !appState.recordedBlob) return;
   const btn = document.getElementById('btnDistPreview');
-
-  // Si está reproduciendo, parar
   if(_distortPreviewAudio && !_distortPreviewAudio.paused) {
     _distortPreviewAudio.pause();
     if(btn) btn.textContent = '👂 Escuchar con distorsión';
     return;
   }
-
-  if(btn) btn.textContent = '⏳ Procesando...';
-
+  if(btn) btn.textContent = '⏳ Preparando...';
+  const d = _selectedDistortion;
+  const url = URL.createObjectURL(appState.recordedBlob);
+  const audio = new Audio(url);
+  audio.playbackRate = d.rate || 1;
+  audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar con distorsión'; };
+  _distortPreviewAudio = audio;
   try {
-    // Decodificar el audio grabado
-    const arrayBuffer = await appState.recordedBlob.arrayBuffer();
-    const tempCtx = new (window.AudioContext||window.webkitAudioContext)();
-    const decoded = await tempCtx.decodeAudioData(arrayBuffer);
-    tempCtx.close();
-
-    const d = _selectedDistortion;
-    const sampleRate = decoded.sampleRate;
-    const duration = decoded.duration;
-    // playbackRate afecta duración — ajustamos
-    const rate = d.rate || 1;
-    const offlineDuration = duration / rate;
-    const offlineCtx = new OfflineAudioContext(decoded.numberOfChannels, Math.ceil(offlineDuration * sampleRate), sampleRate);
-
-    const src = offlineCtx.createBufferSource();
-    src.buffer = decoded;
-    src.playbackRate.value = rate;
-
-    if(d.id === 'ada') {
-      // Hada — agudo
-      const filter = offlineCtx.createBiquadFilter();
-      filter.type = 'highshelf';
-      filter.frequency.value = 1800;
-      filter.gain.value = 14;
-      const gain = offlineCtx.createGain();
-      gain.gain.value = 1.3;
-      src.connect(filter); filter.connect(gain); gain.connect(offlineCtx.destination);
-
-    } else if(d.id === 'ogro') {
-      // Ogro — grave
-      const filter = offlineCtx.createBiquadFilter();
-      filter.type = 'lowshelf';
-      filter.frequency.value = 300;
-      filter.gain.value = 16;
-      const gain = offlineCtx.createGain();
-      gain.gain.value = 1.1;
-      src.connect(filter); filter.connect(gain); gain.connect(offlineCtx.destination);
-
-    } else if(d.id === 'dragon') {
-      // Dragón — ronco
-      const filter = offlineCtx.createBiquadFilter();
-      filter.type = 'bandpass';
-      filter.frequency.value = 700;
-      filter.Q.value = 0.8;
-      src.connect(filter); filter.connect(offlineCtx.destination);
-    }
-
-    src.start(0);
-    const renderedBuffer = await offlineCtx.startRendering();
-
-    // Convertir a blob y reproducir
-    const wavBlob = audioBufferToWav(renderedBuffer);
-    const url = URL.createObjectURL(wavBlob);
-    const audio = new Audio(url);
-    audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar con distorsión'; };
-    _distortPreviewAudio = audio;
     await audio.play();
     if(btn) btn.textContent = '⏸ Pausar';
-
   } catch(e) {
-    console.error('previewDistortion error:', e);
-    // Fallback: reproducir sin distorsión
-    const url = URL.createObjectURL(appState.recordedBlob);
-    const audio = new Audio(url);
-    audio.playbackRate = _selectedDistortion.rate || 1;
-    audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar con distorsión'; };
-    _distortPreviewAudio = audio;
-    await audio.play();
-    if(btn) btn.textContent = '⏸ Pausar';
+    showToast('❌ Error: ' + e.message);
+    if(btn) btn.textContent = '👂 Escuchar con distorsión';
   }
+}
+
+async function applyDistortionAndSave() {
+  if(!_selectedDistortion) { saveStoryWithoutDistortion(); return; }
+  // Guardamos el audio original + el playbackRate de la distorsión
+  // El niño lo escuchará con la misma velocidad
+  appState.selectedDistortionRate = _selectedDistortion.rate || 1;
+  appState.selectedDistortionId = _selectedDistortion.id;
+  await saveStory();
 }
 
 function audioBufferToWav(buffer) {
@@ -2085,6 +2038,8 @@ async function saveStory() {
     hasAudio: !!(appState.recordedBlob || existingStory?.hasAudio),
     audioFile: existingStory?.audioFile || null,
     supaSync: existingStory?.supaSync || false,
+    distortionRate: appState.selectedDistortionRate || 1,
+    distortionId: appState.selectedDistortionId || null,
   };
 
   try {
@@ -3981,7 +3936,7 @@ async function generateParentSequenceImages() {
   showLoading('Preparando las 5 escenas...');
 
   // Usar imágenes locales pre-generadas
-  const imgs = parentSequenceData.map((s,i) => {
+  const sceneImgs = parentSequenceData.map((s,i) => {
     const isLast = i===4;
     const charId = s.char || appState.selectedChar || 'dragon';
     if(isLast) return getCelebImageUrl(charId, parentSelectedCelebration);
@@ -3989,7 +3944,9 @@ async function generateParentSequenceImages() {
     return getSceneImageUrl(charId, action.file);
   });
 
-  appState.currentStoryImages = imgs;
+  // Portada como primera imagen si existe
+  const imgs = appState.portadaUrl ? [appState.portadaUrl, ...sceneImgs] : sceneImgs;
+  appState.currentStoryImages = sceneImgs; // guardar solo escenas (portada va separada)
 
   // Mostrar thumbs
   const thumbRow=document.getElementById('scenesThumbRow');
@@ -4166,12 +4123,13 @@ async function loadKidHomeStories() {
   }).join('');
 }
 
-function loadKidAudioFromBlob(blob) {
+function loadKidAudioFromBlob(blob, distortionRate) {
   if(appState.kidAudioUrl){ try{ URL.revokeObjectURL(appState.kidAudioUrl); }catch(e){} appState.kidAudioUrl=null; }
   const url=URL.createObjectURL(blob);
   appState.kidAudioUrl=url;
   const audio=new Audio();
   audio.preload='auto'; audio.src=url; audio.load();
+  if(distortionRate && distortionRate!==1) audio.playbackRate=distortionRate;
   audio.onloadedmetadata=()=>{
     const t=document.getElementById('kidTimeDisplay');
     if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
@@ -4186,7 +4144,8 @@ function loadKidAudioFromBlob(blob) {
     const b=document.getElementById('kidPlayBtn');
     if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
     appState.kidIsPlaying=false;
-    stopSlideshow();
+    if(appState.kidSlideInterval){ clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+    showFin();
     updateKidProgress('storiesListened');
   };
   audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4263,7 +4222,7 @@ async function openKidStory(id) {
 
   if(audioData&&audioData.blob&&audioData.blob.size>0) {
     // Audio encontrado localmente
-    loadKidAudioFromBlob(audioData.blob);
+    loadKidAudioFromBlob(audioData.blob, story.distortionRate||1);
   } else if(story.hasAudio && story.audioFile && supa) {
     // No está local — buscar en Supabase Storage
     const td=document.getElementById('kidTimeDisplay'); if(td) td.textContent='⏳ Cargando...';
@@ -4273,6 +4232,7 @@ async function openKidStory(id) {
       if(url) {
         const audio=new Audio();
         audio.preload='auto'; audio.src=url; audio.load();
+        if(story.distortionRate && story.distortionRate!==1) audio.playbackRate=story.distortionRate;
         audio.onloadedmetadata=()=>{
           const t=document.getElementById('kidTimeDisplay');
           if(t) t.textContent='0:00 / '+formatTime(audio.duration||0);
@@ -4287,7 +4247,8 @@ async function openKidStory(id) {
         audio.onended=()=>{
           const b=document.getElementById('kidPlayBtn'); if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
           appState.kidIsPlaying=false;
-          stopSlideshow();
+          if(appState.kidSlideInterval){ clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+          showFin();
           updateKidProgress('storiesListened');
         };
         audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4443,23 +4404,33 @@ function buildKidVoiceRow2() {
 function buildKidSlideshow(images) {
   const container=document.getElementById('kidSlideshow');
   const placeholder=document.getElementById('slidePlaceholder');
-  // Limpiar imágenes y placa fin anteriores
-  document.querySelectorAll('#kidSlideshow .slideshow-img, #kidSlideshow .slideshow-fin').forEach(el=>el.remove());
-  if(!images||!images.length) { if(placeholder) placeholder.style.display='flex'; return; }
+  document.querySelectorAll('#kidSlideshow .slideshow-img, #kidSlideshow .slideshow-fin, #kidSlideshow .slideshow-portada').forEach(el=>el.remove());
+
+  // Portada — se muestra antes de que empiece el audio
+  const portada = appState.currentStory?.portada || null;
+  if(portada) {
+    const p=document.createElement('img');
+    p.className='slideshow-portada';
+    p.src=portada;
+    p.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px;z-index:1';
+    container.appendChild(p);
+  }
+
+  if(!images||!images.length) { if(placeholder) placeholder.style.display=portada?'none':'flex'; return; }
   if(placeholder) placeholder.style.display='none';
 
-  // Agregar imágenes
+  // Imágenes de escenas — ocultas hasta que empiece el audio
   images.forEach((url,i)=>{
     const img=document.createElement('img');
-    img.className='slideshow-img'+(i===0?' active':'');
+    img.className='slideshow-img'; // sin 'active' — empieza oculto
     img.src=url;
     container.appendChild(img);
   });
 
-  // Agregar placa FIN
+  // Placa FIN
   const fin=document.createElement('div');
   fin.className='slideshow-fin';
-  fin.style.cssText='position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px;z-index:2';
+  fin.style.cssText='background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px;z-index:3';
   fin.innerHTML=`
     <img src="/logooso.png" style="width:55%;max-width:180px;mix-blend-mode:multiply;margin-bottom:8px">
     <div style="font-family:'Fredoka One',cursive;font-size:52px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
@@ -4467,8 +4438,7 @@ function buildKidSlideshow(images) {
   container.appendChild(fin);
 
   appState.kidSlideIndex=0;
-  buildSlideshowDots(images.length);
-  // No arranca el intervalo acá — se arranca cuando empieza el audio
+  // No arrancar slideshow — esperar al play
 }
 
 function buildSlideshowDots(n) {
@@ -4479,41 +4449,58 @@ function buildSlideshowDots(n) {
 
 function startSlideshow(totalDurationMs) {
   if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+
+  // Ocultar portada al arrancar
+  const portadaEl=document.querySelector('#kidSlideshow .slideshow-portada');
+  if(portadaEl) portadaEl.style.display='none';
+
   const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
   const n=imgs.length;
-  if(n<=0) return;
-  // totalDurationMs ya está en milisegundos
-  // Si no hay duración válida, usamos 5 segundos por imagen
-  const msPerSlide = totalDurationMs>0 ? Math.max(3000, totalDurationMs/n) : 5000;
+  if(n<=0) {
+    // Sin imágenes — mostrar FIN al terminar audio
+    return;
+  }
+
+  // Mostrar primera imagen
+  imgs.forEach((img,i)=>img.classList.toggle('active',i===0));
+  appState.kidSlideIndex=0;
+
+  // Duración por imagen — se estira lo que sea necesario, sin repetición
+  const msPerSlide = totalDurationMs>0 ? totalDurationMs/n : 5000;
   let slideCount=0;
+
   appState.kidSlideInterval=setInterval(()=>{
     slideCount++;
     if(slideCount>=n) {
-      // Llegamos al final — mostrar FIN y parar
-      const allImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
-      allImgs.forEach(img=>img.classList.remove('active'));
-      const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
-      if(finEl) finEl.style.display='flex';
+      // Terminamos las imágenes — apagar intervalo
+      // FIN se mostrará cuando termine el audio (en onended)
       clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null;
       return;
     }
-    // Avanzar sin loop — índice directo
-    const allImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
-    allImgs.forEach((img,i)=>img.classList.toggle('active',i===slideCount));
+    imgs.forEach((img,i)=>img.classList.toggle('active',i===slideCount));
     appState.kidSlideIndex=slideCount;
-    document.querySelectorAll('#slideshowDots .slide-dot').forEach((d,i)=>d.classList.toggle('active',i===slideCount));
   }, msPerSlide);
+}
+
+function showFin() {
+  // Ocultar todo y mostrar FIN
+  document.querySelectorAll('#kidSlideshow .slideshow-img').forEach(img=>img.classList.remove('active'));
+  document.querySelectorAll('#kidSlideshow .slideshow-portada').forEach(p=>p.style.display='none');
+  const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
+  if(finEl) finEl.classList.add('active');
 }
 
 function stopSlideshow() {
   if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
-  // Ocultar placa FIN y volver a primera imagen
+  // Ocultar FIN
   const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
-  if(finEl) finEl.style.display='none';
-  const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
-  imgs.forEach((img,i)=>img.classList.toggle('active',i===0));
+  if(finEl) finEl.classList.remove('active');
+  // Ocultar imágenes
+  document.querySelectorAll('#kidSlideshow .slideshow-img').forEach(img=>img.classList.remove('active'));
+  // Mostrar portada si existe
+  const portadaEl=document.querySelector('#kidSlideshow .slideshow-portada');
+  if(portadaEl) portadaEl.style.display='block';
   appState.kidSlideIndex=0;
-  buildSlideshowDots(imgs.length);
 }
 
 function slideKid(dir) {
@@ -4551,7 +4538,7 @@ function toggleKidPlay() {
   if(appState.kidIsPlaying) {
     appState.kidAudio.pause();
     appState.kidIsPlaying=false;
-    // Pausar slideshow
+    // Solo pausar el intervalo — no resetear
     if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
     const btn=document.getElementById('kidPlayBtn');
     if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
@@ -4561,10 +4548,12 @@ function toggleKidPlay() {
         appState.kidIsPlaying=true;
         const btn=document.getElementById('kidPlayBtn');
         if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
-        // Arrancar slideshow sincronizado con duración del audio
         const dur=appState.kidAudio.duration||0;
-        stopSlideshow();
-        startSlideshow(dur*1000);
+        // Si FIN está visible, resetear desde el principio
+        const finVisible=document.querySelector('#kidSlideshow .slideshow-fin')?.classList.contains('active');
+        if(finVisible) stopSlideshow();
+        // Solo arrancar si no hay slideshow corriendo (no reiniciar si se pausó a mitad)
+        if(!appState.kidSlideInterval) startSlideshow(dur*1000);
       })
       .catch(e=>{
         appState.kidIsPlaying=false;
