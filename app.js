@@ -1903,7 +1903,7 @@ function selectDistortion(id, btn) {
 
 let _distortCtx = null;
 
-function previewDistortion() {
+async function previewDistortion() {
   if(!_selectedDistortion || !appState.recordedBlob) return;
   const btn = document.getElementById('btnDistPreview');
 
@@ -1914,83 +1914,106 @@ function previewDistortion() {
     return;
   }
 
-  // Cerrar contexto anterior
-  if(_distortCtx) { try{ _distortCtx.close(); }catch(e){} _distortCtx=null; }
-
-  const d = _selectedDistortion;
-  const url = URL.createObjectURL(appState.recordedBlob);
-  const audio = new Audio();
-  audio.src = url;
-  audio.crossOrigin = 'anonymous';
+  if(btn) btn.textContent = '⏳ Procesando...';
 
   try {
-    const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    _distortCtx = ctx;
-    const src = ctx.createMediaElementSource(audio);
+    // Decodificar el audio grabado
+    const arrayBuffer = await appState.recordedBlob.arrayBuffer();
+    const tempCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const decoded = await tempCtx.decodeAudioData(arrayBuffer);
+    tempCtx.close();
+
+    const d = _selectedDistortion;
+    const sampleRate = decoded.sampleRate;
+    const duration = decoded.duration;
+    // playbackRate afecta duración — ajustamos
+    const rate = d.rate || 1;
+    const offlineDuration = duration / rate;
+    const offlineCtx = new OfflineAudioContext(decoded.numberOfChannels, Math.ceil(offlineDuration * sampleRate), sampleRate);
+
+    const src = offlineCtx.createBufferSource();
+    src.buffer = decoded;
+    src.playbackRate.value = rate;
 
     if(d.id === 'ada') {
-      // Hada — voz aguda: playbackRate alto + filtro paso-alto
-      audio.playbackRate = 1.4;
-      const filter = ctx.createBiquadFilter();
+      // Hada — agudo
+      const filter = offlineCtx.createBiquadFilter();
       filter.type = 'highshelf';
-      filter.frequency.value = 2000;
-      filter.gain.value = 12;
-      const gain = ctx.createGain();
-      gain.gain.value = 1.2;
-      src.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
+      filter.frequency.value = 1800;
+      filter.gain.value = 14;
+      const gain = offlineCtx.createGain();
+      gain.gain.value = 1.3;
+      src.connect(filter); filter.connect(gain); gain.connect(offlineCtx.destination);
 
     } else if(d.id === 'ogro') {
-      // Ogro — voz grave: playbackRate bajo + filtro paso-bajo + distorsión
-      audio.playbackRate = 0.7;
-      const filter = ctx.createBiquadFilter();
+      // Ogro — grave
+      const filter = offlineCtx.createBiquadFilter();
       filter.type = 'lowshelf';
-      filter.frequency.value = 400;
-      filter.gain.value = 15;
-      const wave = ctx.createWaveShaper();
-      const curve = new Float32Array(256);
-      for(let i=0;i<256;i++){
-        const x=i*2/256-1;
-        curve[i]=x*(1+0.3*Math.abs(x));
-      }
-      wave.curve = curve;
-      src.connect(filter);
-      filter.connect(wave);
-      wave.connect(ctx.destination);
+      filter.frequency.value = 300;
+      filter.gain.value = 16;
+      const gain = offlineCtx.createGain();
+      gain.gain.value = 1.1;
+      src.connect(filter); filter.connect(gain); gain.connect(offlineCtx.destination);
 
     } else if(d.id === 'dragon') {
-      // Dragón — voz ronca: playbackRate medio + eco + filtro
-      audio.playbackRate = 0.85;
-      const filter = ctx.createBiquadFilter();
+      // Dragón — ronco
+      const filter = offlineCtx.createBiquadFilter();
       filter.type = 'bandpass';
-      filter.frequency.value = 800;
-      filter.Q.value = 0.5;
-      const delay = ctx.createDelay();
-      delay.delayTime.value = 0.08;
-      const feedGain = ctx.createGain();
-      feedGain.gain.value = 0.3;
-      src.connect(filter);
-      filter.connect(ctx.destination);
-      filter.connect(delay);
-      delay.connect(feedGain);
-      feedGain.connect(ctx.destination);
+      filter.frequency.value = 700;
+      filter.Q.value = 0.8;
+      src.connect(filter); filter.connect(offlineCtx.destination);
     }
 
-    _distortCtx = ctx;
-  } catch(e) {
-    console.warn('Web Audio distortion error:', e);
-    audio.playbackRate = d.rate || 1;
-    audio.src = url;
-  }
+    src.start(0);
+    const renderedBuffer = await offlineCtx.startRendering();
 
-  audio.onended = () => {
-    if(btn) btn.textContent = '👂 Escuchar con distorsión';
-  };
-  _distortPreviewAudio = audio;
-  audio.play()
-    .then(()=>{ if(btn) btn.textContent = '⏸ Pausar'; })
-    .catch(e=>{ showToast('❌ Error al reproducir: '+e.message); });
+    // Convertir a blob y reproducir
+    const wavBlob = audioBufferToWav(renderedBuffer);
+    const url = URL.createObjectURL(wavBlob);
+    const audio = new Audio(url);
+    audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar con distorsión'; };
+    _distortPreviewAudio = audio;
+    await audio.play();
+    if(btn) btn.textContent = '⏸ Pausar';
+
+  } catch(e) {
+    console.error('previewDistortion error:', e);
+    // Fallback: reproducir sin distorsión
+    const url = URL.createObjectURL(appState.recordedBlob);
+    const audio = new Audio(url);
+    audio.playbackRate = _selectedDistortion.rate || 1;
+    audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar con distorsión'; };
+    _distortPreviewAudio = audio;
+    await audio.play();
+    if(btn) btn.textContent = '⏸ Pausar';
+  }
+}
+
+function audioBufferToWav(buffer) {
+  const numCh = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const samples = buffer.length * numCh;
+  const dataLen = samples * 2;
+  const ab = new ArrayBuffer(44 + dataLen);
+  const view = new DataView(ab);
+  // WAV header
+  const w = (o,s)=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); };
+  w(0,'RIFF'); view.setUint32(4,36+dataLen,true);
+  w(8,'WAVE'); w(12,'fmt ');
+  view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,sampleRate,true);
+  view.setUint32(28,sampleRate*numCh*2,true); view.setUint16(32,numCh*2,true);
+  view.setUint16(34,16,true); w(36,'data');
+  view.setUint32(40,dataLen,true);
+  let offset=44;
+  for(let i=0;i<buffer.length;i++) {
+    for(let c=0;c<numCh;c++) {
+      const s=Math.max(-1,Math.min(1,buffer.getChannelData(c)[i]));
+      view.setInt16(offset,s<0?s*0x8000:s*0x7FFF,true);
+      offset+=2;
+    }
+  }
+  return new Blob([ab],{type:'audio/wav'});
 }
 
 async function applyDistortionAndSave() {
@@ -4164,6 +4187,7 @@ function loadKidAudioFromBlob(blob) {
     const b=document.getElementById('kidPlayBtn');
     if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
     appState.kidIsPlaying=false;
+    stopSlideshow();
     updateKidProgress('storiesListened');
   };
   audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4264,6 +4288,7 @@ async function openKidStory(id) {
         audio.onended=()=>{
           const b=document.getElementById('kidPlayBtn'); if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
           appState.kidIsPlaying=false;
+          stopSlideshow();
           updateKidProgress('storiesListened');
         };
         audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4419,29 +4444,72 @@ function buildKidVoiceRow2() {
 function buildKidSlideshow(images) {
   const container=document.getElementById('kidSlideshow');
   const placeholder=document.getElementById('slidePlaceholder');
-  document.querySelectorAll('#kidSlideshow .slideshow-img').forEach(el=>el.remove());
+  // Limpiar imágenes y placa fin anteriores
+  document.querySelectorAll('#kidSlideshow .slideshow-img, #kidSlideshow .slideshow-fin').forEach(el=>el.remove());
   if(!images||!images.length) { if(placeholder) placeholder.style.display='flex'; return; }
   if(placeholder) placeholder.style.display='none';
+
+  // Agregar imágenes
   images.forEach((url,i)=>{
     const img=document.createElement('img');
     img.className='slideshow-img'+(i===0?' active':'');
     img.src=url;
     container.appendChild(img);
   });
+
+  // Agregar placa FIN
+  const fin=document.createElement('div');
+  fin.className='slideshow-fin';
+  fin.style.cssText='position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px;z-index:2';
+  fin.innerHTML=`
+    <img src="/logooso.png" style="width:55%;max-width:180px;mix-blend-mode:multiply;margin-bottom:8px">
+    <div style="font-family:'Fredoka One',cursive;font-size:52px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#9B7B6B;letter-spacing:2px;margin-top:4px">CUENTOS QUE CONECTAN</div>`;
+  container.appendChild(fin);
+
   appState.kidSlideIndex=0;
   buildSlideshowDots(images.length);
-  startSlideshow(images.length);
+  // No arranca el intervalo acá — se arranca cuando empieza el audio
 }
 
 function buildSlideshowDots(n) {
   const el=document.getElementById('slideshowDots');
+  if(!el) return;
   el.innerHTML=Array.from({length:n},(_,i)=>`<button class="slide-dot ${i===0?'active':''}" onclick="goKidSlide(${i})"></button>`).join('');
 }
 
-function startSlideshow(n) {
-  if(appState.kidSlideInterval) clearInterval(appState.kidSlideInterval);
-  if(n<=1) return;
-  appState.kidSlideInterval=setInterval(()=>slideKid(1),4000);
+function startSlideshow(totalDuration) {
+  // Parar intervalo anterior
+  if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+  const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
+  const n=imgs.length;
+  if(n<=0) return;
+  // Calcular duración por imagen — si tenemos duración del audio la dividimos, si no usamos 5 seg
+  const secPerSlide = totalDuration>0 ? Math.max(3, (totalDuration/n)*1000) : 5000;
+  appState.kidSlideInterval=setInterval(()=>{
+    const currentImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
+    if(!currentImgs.length) return;
+    // Si llegamos a la última imagen, mostramos FIN
+    if(appState.kidSlideIndex>=currentImgs.length-1) {
+      currentImgs.forEach(img=>img.classList.remove('active'));
+      const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
+      if(finEl) finEl.style.display='flex';
+      clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null;
+      return;
+    }
+    slideKid(1);
+  }, secPerSlide);
+}
+
+function stopSlideshow() {
+  if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+  // Ocultar placa FIN y volver a primera imagen
+  const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
+  if(finEl) finEl.style.display='none';
+  const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
+  imgs.forEach((img,i)=>img.classList.toggle('active',i===0));
+  appState.kidSlideIndex=0;
+  buildSlideshowDots(imgs.length);
 }
 
 function slideKid(dir) {
@@ -4479,22 +4547,26 @@ function toggleKidPlay() {
   if(appState.kidIsPlaying) {
     appState.kidAudio.pause();
     appState.kidIsPlaying=false;
-    const btn=document.getElementById('kidPlayBtn'); if(btn) btn.textContent='▶';
+    // Pausar slideshow
+    if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+    const btn=document.getElementById('kidPlayBtn');
+    if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   } else {
     appState.kidAudio.play()
       .then(()=>{
         appState.kidIsPlaying=true;
-        const btn=document.getElementById('kidPlayBtn'); if(btn) btn.textContent='⏸';
+        const btn=document.getElementById('kidPlayBtn');
+        if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
+        // Arrancar slideshow sincronizado con duración del audio
+        const dur=appState.kidAudio.duration||0;
+        stopSlideshow();
+        startSlideshow(dur*1000);
       })
       .catch(e=>{
         appState.kidIsPlaying=false;
         console.error('kidPlay error',e);
-        // iOS/Safari: try resuming AudioContext first
-        if(e.name==='NotAllowedError'){
-          showToast('Tocá la pantalla primero para permitir audio');
-        } else {
-          showToast('❌ Error reproduciendo: '+e.message);
-        }
+        if(e.name==='NotAllowedError') showToast('Tocá la pantalla primero para permitir audio');
+        else showToast('❌ Error reproduciendo: '+e.message);
       });
   }
 }
