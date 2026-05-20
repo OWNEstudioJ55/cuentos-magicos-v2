@@ -1291,6 +1291,8 @@ function showSaveBeforeLeaveDialog(targetTab) {
 
 function _doSwitchParentTab(tab) {
   if(tab==='progress'||tab==='tokens') tab='library';
+  // Parar cualquier audio activo al cambiar de tab
+  stopAllParentAudio();
   // Ocultar todos los tabs
   ['home','record','library','planes'].forEach(t=>{
     const el=document.getElementById('pTab-'+t);
@@ -1307,6 +1309,14 @@ function _doSwitchParentTab(tab) {
   if(tab==='library') { loadParentLibrary(); loadParentKidMessages(); }
   if(tab==='home') { loadParentHomeStories(); buildProgressSummary(); loadParentKidMessages(); }
   if(tab==='record') showRecTab();
+}
+
+function stopAllParentAudio() {
+  if(appState.recAudio) { try{ appState.recAudio.pause(); }catch(e){} }
+  if(_distortPreviewAudio) { try{ _distortPreviewAudio.pause(); _distortPreviewAudio=null; }catch(e){} }
+  if(typeof _distortCtx!=='undefined'&&_distortCtx) { try{ _distortCtx.close(); }catch(e){} _distortCtx=null; }
+  stopBgMusic();
+  if(window._parentLibAudio) { try{ window._parentLibAudio.pause(); window._parentLibAudio=null; }catch(e){} }
 }
 
 function injectNavSprites() {
@@ -1593,7 +1603,95 @@ function previewVoiceWithChar() {
   window.speechSynthesis.speak(utter);
 }
 
-// ===================== RECORDING =====================
+// ===================== MÚSICA DE FONDO =====================
+let _bgMusicCtx = null, _bgMusicNodes = [], _bgMusicOn = false, _bgMusicIdx = 0;
+
+const BG_MELODIES = [
+  // Melodía 1 — Cuna suave
+  { name:'Cuna', notes:[
+    {f:261.6,d:0.8},{f:329.6,d:0.8},{f:392,d:0.8},{f:329.6,d:0.8},
+    {f:261.6,d:0.8},{f:246.9,d:0.8},{f:261.6,d:1.6},
+    {f:293.7,d:0.8},{f:349.2,d:0.8},{f:392,d:0.8},{f:349.2,d:0.8},
+    {f:293.7,d:1.6},
+  ]},
+  // Melodía 2 — Vals mágico
+  { name:'Vals', notes:[
+    {f:392,d:0.5},{f:329.6,d:0.5},{f:261.6,d:0.5},
+    {f:349.2,d:0.5},{f:293.7,d:0.5},{f:246.9,d:0.5},
+    {f:329.6,d:0.5},{f:261.6,d:0.5},{f:220,d:0.5},
+    {f:261.6,d:1.5},
+  ]},
+  // Melodía 3 — Aventura
+  { name:'Aventura', notes:[
+    {f:523.3,d:0.3},{f:587.3,d:0.3},{f:659.3,d:0.3},{f:698.5,d:0.6},
+    {f:659.3,d:0.3},{f:587.3,d:0.3},{f:523.3,d:0.6},
+    {f:440,d:0.3},{f:493.9,d:0.3},{f:523.3,d:0.6},
+  ]},
+  // Melodía 4 — Sueños
+  { name:'Sueños', notes:[
+    {f:220,d:1.2},{f:246.9,d:0.6},{f:261.6,d:1.2},{f:293.7,d:0.6},
+    {f:329.6,d:1.2},{f:293.7,d:0.6},{f:261.6,d:1.2},
+    {f:246.9,d:0.6},{f:220,d:1.8},
+  ]},
+  // Melodía 5 — Juego feliz
+  { name:'Juego', notes:[
+    {f:523.3,d:0.25},{f:523.3,d:0.25},{f:587.3,d:0.5},{f:523.3,d:0.5},
+    {f:698.5,d:0.5},{f:659.3,d:1.0},
+    {f:523.3,d:0.25},{f:523.3,d:0.25},{f:587.3,d:0.5},{f:523.3,d:0.5},
+    {f:783.9,d:0.5},{f:698.5,d:1.0},
+  ]},
+];
+
+function startBgMusic() {
+  if(_bgMusicOn) return;
+  _bgMusicOn = true;
+  _playBgMelody();
+  const btn = document.getElementById('btnBgMusic');
+  if(btn) btn.textContent = '🔊 Música';
+}
+
+function stopBgMusic() {
+  _bgMusicOn = false;
+  _bgMusicNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
+  _bgMusicNodes = [];
+  if(_bgMusicCtx) { try{ _bgMusicCtx.close(); }catch(e){} _bgMusicCtx=null; }
+  const btn = document.getElementById('btnBgMusic');
+  if(btn) btn.textContent = '🔇 Música';
+}
+
+function toggleBgMusic() {
+  if(_bgMusicOn) stopBgMusic();
+  else startBgMusic();
+}
+
+function _playBgMelody() {
+  if(!_bgMusicOn) return;
+  try {
+    if(_bgMusicCtx) { try{ _bgMusicCtx.close(); }catch(e){} }
+    _bgMusicCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const melody = BG_MELODIES[_bgMusicIdx % BG_MELODIES.length];
+    _bgMusicIdx++;
+    let t = _bgMusicCtx.currentTime + 0.1;
+    let totalDur = 0;
+    melody.notes.forEach(note => {
+      const osc = _bgMusicCtx.createOscillator();
+      const gain = _bgMusicCtx.createGain();
+      osc.connect(gain); gain.connect(_bgMusicCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(note.f, t);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.08, t + 0.05);
+      gain.gain.linearRampToValueAtTime(0.06, t + note.d * 0.7);
+      gain.gain.linearRampToValueAtTime(0, t + note.d);
+      osc.start(t); osc.stop(t + note.d);
+      _bgMusicNodes.push(osc);
+      t += note.d;
+      totalDur += note.d;
+    });
+    // Repetir al terminar
+    setTimeout(()=>{ if(_bgMusicOn) _playBgMelody(); }, totalDur * 1000 + 200);
+  } catch(e) { console.warn('bgMusic error:', e); }
+}
 let recordingInterval=null;
 async function toggleRecord() {
   if(appState.isRecording) { stopRecording(); return; }
@@ -1641,6 +1739,10 @@ async function toggleRecord() {
     appState.mediaRecorder.start(100);
     appState.isRecording=true;
     appState.recordSeconds=0;
+    // Arrancar música de fondo si está activada
+    if(document.getElementById('btnBgMusic')?.dataset.enabled==='1') startBgMusic();
+    // Arrancar slideshow automáticamente
+    startAutoAdvance();
     const btn=document.getElementById('recBtn');
     if(btn){
       btn.classList.add('recording');
@@ -1663,6 +1765,7 @@ function stopRecording() {
     appState.mediaRecorder.stop();
     appState.isRecording=false;
     clearInterval(recordingInterval);
+    stopBgMusic();
     const btn=document.getElementById('recBtn');
     if(btn){
       btn.classList.remove('recording');
@@ -1718,12 +1821,18 @@ function toggleAutoAdvance() {
 
 function startAutoAdvance() {
   stopAutoAdvance();
-  const secs=parseInt(document.getElementById('autoAdvanceSecs')?.value||'10')*1000;
-  autoAdvanceInterval=setInterval(()=>slideRecView(1),secs);
+  const secs = parseInt(document.getElementById('slideDurSecs')?.value||'5') * 1000;
+  autoAdvanceInterval = setInterval(()=>slideRecView(1), secs);
 }
 
 function stopAutoAdvance() {
   clearInterval(autoAdvanceInterval); autoAdvanceInterval=null;
+}
+
+function updateSlideDur(val) {
+  const lbl = document.getElementById('slideDurLabel');
+  if(lbl) lbl.textContent = val+'s';
+  if(autoAdvanceInterval) { stopAutoAdvance(); startAutoAdvance(); }
 }
 
 
@@ -1740,23 +1849,37 @@ function showVoiceDistortionPanel() {
   const wrap = document.getElementById('recApplyVoiceWrap');
   if(!wrap) return;
   wrap.innerHTML = `
-    <div style="background:var(--card);border-radius:16px;padding:14px;margin-top:12px;border:1px solid rgba(167,139,250,0.2)">
-      <div style="font-family:'Fredoka One',cursive;font-size:15px;color:var(--text);margin-bottom:10px">🎭 Distorsionar voz (opcional)</div>
+    <div style="background:white;border-radius:16px;padding:14px;margin-top:12px;border:2px solid rgba(201,168,76,0.2)">
+      <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:10px">🎭 Distorsionar voz (opcional)</div>
       <div style="display:flex;gap:8px;margin-bottom:12px">
         ${VOICE_DISTORTIONS.map(v=>`
-          <button onclick="selectDistortion('${v.id}',this)" 
-            style="flex:1;padding:10px 6px;border-radius:12px;border:2px solid rgba(255,255,255,.08);background:var(--bg2);cursor:pointer;font-size:13px;font-weight:700;color:var(--text2);font-family:Nunito,sans-serif;display:flex;flex-direction:column;align-items:center;gap:4px"
+          <button onclick="selectDistortion('${v.id}',this)"
+            style="flex:1;padding:10px 6px;border-radius:12px;border:2px solid rgba(201,168,76,0.2);
+                   background:#FFF8E7;cursor:pointer;font-size:13px;font-weight:700;
+                   color:#9B7B6B;font-family:'Fredoka One',cursive;
+                   display:flex;flex-direction:column;align-items:center;gap:4px"
             id="distBtn-${v.id}">
             <span style="font-size:24px">${v.label.split(' ')[0]}</span>
             <span>${v.label.split(' ')[1]}</span>
           </button>`).join('')}
       </div>
       <div id="distortPreviewWrap" style="display:none;margin-bottom:10px">
-        <button onclick="previewDistortion()" class="btn btn-ghost btn-sm btn-full" id="btnDistPreview">👂 Escuchar preview</button>
+        <button onclick="previewDistortion()"
+          style="width:100%;padding:10px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
+                 background:#FFF8E7;color:#5C4033;font-family:'Fredoka One',cursive;
+                 font-size:14px;cursor:pointer"
+          id="btnDistPreview">👂 Escuchar con distorsión</button>
       </div>
       <div style="display:flex;gap:8px">
-        <button onclick="applyDistortionAndSave()" class="btn btn-accent btn-sm" style="flex:1" id="btnApplyDistort" disabled>✅ Aplicar y enviar</button>
-        <button onclick="saveStoryWithoutDistortion()" class="btn btn-ghost btn-sm" style="flex:1">Sin distorsión →</button>
+        <button onclick="applyDistortionAndSave()"
+          style="flex:1;padding:12px;border-radius:12px;border:none;
+                 background:linear-gradient(135deg,#C9A84C,#e8c97a);
+                 color:white;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer"
+          id="btnApplyDistort" disabled>✅ Aplicar y enviar</button>
+        <button onclick="saveStoryWithoutDistortion()"
+          style="flex:1;padding:12px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
+                 background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer">
+          Sin distorsión →</button>
       </div>
     </div>`;
   wrap.style.display = 'block';
@@ -1765,40 +1888,109 @@ function showVoiceDistortionPanel() {
 function selectDistortion(id, btn) {
   _selectedDistortion = VOICE_DISTORTIONS.find(v=>v.id===id);
   document.querySelectorAll('[id^="distBtn-"]').forEach(b=>{
-    b.style.border = '2px solid rgba(255,255,255,.08)';
-    b.style.color = 'var(--text2)';
-    b.style.background = 'var(--bg2)';
+    b.style.border = '2px solid rgba(201,168,76,0.2)';
+    b.style.color = '#9B7B6B';
+    b.style.background = '#FFF8E7';
   });
   if(btn) {
-    btn.style.border = '2px solid var(--lavender)';
-    btn.style.color = 'var(--lavender)';
-    btn.style.background = 'rgba(167,139,250,0.15)';
+    btn.style.border = '2px solid #C9A84C';
+    btn.style.color = '#C9A84C';
+    btn.style.background = 'rgba(201,168,76,0.15)';
   }
   document.getElementById('distortPreviewWrap').style.display = 'block';
   document.getElementById('btnApplyDistort').disabled = false;
 }
 
+let _distortCtx = null;
+
 function previewDistortion() {
   if(!_selectedDistortion || !appState.recordedBlob) return;
   const btn = document.getElementById('btnDistPreview');
+
+  // Si está reproduciendo, parar
   if(_distortPreviewAudio && !_distortPreviewAudio.paused) {
     _distortPreviewAudio.pause();
-    if(btn) btn.textContent = '👂 Escuchar preview';
+    if(btn) btn.textContent = '👂 Escuchar con distorsión';
     return;
   }
+
+  // Cerrar contexto anterior
+  if(_distortCtx) { try{ _distortCtx.close(); }catch(e){} _distortCtx=null; }
+
+  const d = _selectedDistortion;
   const url = URL.createObjectURL(appState.recordedBlob);
   const audio = new Audio();
   audio.src = url;
-  audio.playbackRate = _selectedDistortion.rate;
-  // Pitch via Web Audio API
+  audio.crossOrigin = 'anonymous';
+
   try {
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    _distortCtx = ctx;
     const src = ctx.createMediaElementSource(audio);
-    src.connect(ctx.destination);
-  } catch(e) {}
-  audio.onended = () => { if(btn) btn.textContent = '👂 Escuchar preview'; };
+
+    if(d.id === 'ada') {
+      // Hada — voz aguda: playbackRate alto + filtro paso-alto
+      audio.playbackRate = 1.4;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'highshelf';
+      filter.frequency.value = 2000;
+      filter.gain.value = 12;
+      const gain = ctx.createGain();
+      gain.gain.value = 1.2;
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+    } else if(d.id === 'ogro') {
+      // Ogro — voz grave: playbackRate bajo + filtro paso-bajo + distorsión
+      audio.playbackRate = 0.7;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowshelf';
+      filter.frequency.value = 400;
+      filter.gain.value = 15;
+      const wave = ctx.createWaveShaper();
+      const curve = new Float32Array(256);
+      for(let i=0;i<256;i++){
+        const x=i*2/256-1;
+        curve[i]=x*(1+0.3*Math.abs(x));
+      }
+      wave.curve = curve;
+      src.connect(filter);
+      filter.connect(wave);
+      wave.connect(ctx.destination);
+
+    } else if(d.id === 'dragon') {
+      // Dragón — voz ronca: playbackRate medio + eco + filtro
+      audio.playbackRate = 0.85;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 800;
+      filter.Q.value = 0.5;
+      const delay = ctx.createDelay();
+      delay.delayTime.value = 0.08;
+      const feedGain = ctx.createGain();
+      feedGain.gain.value = 0.3;
+      src.connect(filter);
+      filter.connect(ctx.destination);
+      filter.connect(delay);
+      delay.connect(feedGain);
+      feedGain.connect(ctx.destination);
+    }
+
+    _distortCtx = ctx;
+  } catch(e) {
+    console.warn('Web Audio distortion error:', e);
+    audio.playbackRate = d.rate || 1;
+    audio.src = url;
+  }
+
+  audio.onended = () => {
+    if(btn) btn.textContent = '👂 Escuchar con distorsión';
+  };
   _distortPreviewAudio = audio;
-  audio.play().then(()=>{ if(btn) btn.textContent = '⏸ Pausar'; });
+  audio.play()
+    .then(()=>{ if(btn) btn.textContent = '⏸ Pausar'; })
+    .catch(e=>{ showToast('❌ Error al reproducir: '+e.message); });
 }
 
 async function applyDistortionAndSave() {
@@ -2917,34 +3109,48 @@ function handlePortadaUpload(e) {
 // ===================== SLIDESHOW WHILE RECORDING =====================
 let recSlideIdx=0, recSlideImgs=[];
 function buildRecSlideshow(imgs) {
-  recSlideImgs = imgs || appState.currentStoryImages || [];
+  recSlideImgs = [...(imgs || appState.currentStoryImages || [])];
+  // Agregar slide FIN al final
+  if(recSlideImgs.length && !recSlideImgs.includes('FIN')) recSlideImgs.push('FIN');
   recSlideIdx = 0;
   const ss = document.getElementById('recSlideshow');
   const dots = document.getElementById('recSlideshowDots');
   const counter = document.getElementById('recSlideCounter');
   const ph = document.getElementById('recSlidePlaceholder');
   if(!ss || !recSlideImgs.length) return;
-  // Hide placeholder
   if(ph) ph.style.display='none';
-  // Remove old images
-  ss.querySelectorAll('.slideshow-img').forEach(el=>el.remove());
+  ss.querySelectorAll('.slideshow-img,.slideshow-fin').forEach(el=>el.remove());
   recSlideImgs.forEach((url,i)=>{
-    const img = document.createElement('img');
-    img.className='slideshow-img'+(i===0?' active':'');
-    img.src=url; img.alt=`Escena ${i+1}`;
-    ss.insertBefore(img, ss.querySelector('.slide-nav-btn'));
+    if(url==='FIN') {
+      const fin = document.createElement('div');
+      fin.className='slideshow-fin'+(i===0?' active':'');
+      fin.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px';
+      fin.innerHTML=`
+        <img src="/logooso.png" style="width:60%;max-width:200px;mix-blend-mode:multiply;margin-bottom:8px">
+        <div style="font-family:Fredoka One,cursive;font-size:56px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
+        <div style="font-family:Fredoka One,cursive;font-size:13px;color:#9B7B6B;letter-spacing:2px;margin-top:4px">CUENTOS QUE CONECTAN</div>`;
+      ss.insertBefore(fin, ss.querySelector('.slide-nav-btn'));
+    } else {
+      const img = document.createElement('img');
+      img.className='slideshow-img'+(i===0?' active':'');
+      img.src=url; img.alt=`Escena ${i+1}`;
+      img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px';
+      ss.insertBefore(img, ss.querySelector('.slide-nav-btn'));
+    }
   });
   if(dots) dots.innerHTML = recSlideImgs.map((_,i)=>`<button class="slide-dot ${i===0?'active':''}" onclick="goRecSlide(${i})"></button>`).join('');
   if(counter) counter.textContent=`1 / ${recSlideImgs.length}`;
 }
+
 function slideRecView(dir) {
   if(!recSlideImgs.length) return;
   recSlideIdx=(recSlideIdx+dir+recSlideImgs.length)%recSlideImgs.length;
   goRecSlide(recSlideIdx);
 }
+
 function goRecSlide(idx) {
   recSlideIdx=idx;
-  document.querySelectorAll('#recSlideshow .slideshow-img').forEach((img,i)=>img.classList.toggle('active',i===idx));
+  document.querySelectorAll('#recSlideshow .slideshow-img,#recSlideshow .slideshow-fin').forEach((el,i)=>el.classList.toggle('active',i===idx));
   document.querySelectorAll('#recSlideshowDots .slide-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
   const counter=document.getElementById('recSlideCounter');
   if(counter) counter.textContent=`${idx+1} / ${recSlideImgs.length}`;
@@ -3801,6 +4007,12 @@ function showKidApp() {
 }
 
 function switchKidTab(tab) {
+  // Parar audio al salir del player
+  if(tab!=='player') {
+    try{ stopKidPlay(); }catch(e){}
+    if(appState.kidAudio){ try{ appState.kidAudio.pause(); appState.kidAudio.src=''; }catch(e){} appState.kidAudio=null; }
+    appState.kidIsPlaying=false;
+  }
   ['home','player','play','write','draw','stars'].forEach(t=>{
     const el=document.getElementById('kTab-'+t);
     if(el) el.style.display=t===tab?'block':'none';
