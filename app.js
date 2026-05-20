@@ -1369,11 +1369,12 @@ function injectNavSprites() {
   // Hero botón "Escuchar ahora"
   const heroBtn=document.getElementById('kidHeroBtnSig');
   if(heroBtn) heroBtn.style.cssText=`width:220px;height:48px;`+kidSpriteBg('btn_siguiente',48);
-  const kidPlay=document.getElementById('kidPlayBtn'); if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
+  const kidPlay=document.getElementById('kidPlayBtn'); 
+  if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;background:url('/sprites_kid_OWN.png') -367px -31px/745px 556px no-repeat;mix-blend-mode:multiply;border:none;cursor:pointer;border-radius:50%;transition:transform .12s`; }
   const kidPrev = document.getElementById('kidBtnPrev');
-  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_prev',56)}`; }
+  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;background:url('/sprites_kid_OWN.png') -234px -47px/810px 605px no-repeat;mix-blend-mode:multiply;border:none;cursor:pointer;border-radius:50%;transition:transform .12s`; }
   const kidNext = document.getElementById('kidBtnNext');
-  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:56px;height:56px;${kidSpriteBg('btn_next',56)}`; }
+  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:56px;height:56px;background:url('/sprites_kid_OWN.png') -318px -48px/820px 612px no-repeat;mix-blend-mode:multiply;border:none;cursor:pointer;border-radius:50%;transition:transform .12s`; }
   const kidSig = document.getElementById('kidBtnSiguiente');
   if(kidSig) { kidSig.innerHTML=''; kidSig.style.cssText=`width:200px;height:40px;${kidSpriteBg('btn_siguiente',40)}`; }
 }
@@ -3146,7 +3147,7 @@ function buildRecSlideshow(imgs) {
     if(url==='FIN') {
       const fin = document.createElement('div');
       fin.className='slideshow-fin'+(i===0?' active':'');
-      fin.style.cssText='background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px';
+      fin.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px';
       fin.innerHTML=`
         <img src="/logooso.png" style="width:60%;max-width:200px;mix-blend-mode:multiply;margin-bottom:8px">
         <div style="font-family:Fredoka One,cursive;font-size:56px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
@@ -4459,7 +4460,7 @@ function buildKidSlideshow(images) {
   // Agregar placa FIN
   const fin=document.createElement('div');
   fin.className='slideshow-fin';
-  fin.style.cssText='background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px;z-index:3';
+  fin.style.cssText='position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px;z-index:2';
   fin.innerHTML=`
     <img src="/logooso.png" style="width:55%;max-width:180px;mix-blend-mode:multiply;margin-bottom:8px">
     <div style="font-family:'Fredoka One',cursive;font-size:52px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
@@ -4493,7 +4494,7 @@ function startSlideshow(totalDurationMs) {
       const allImgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
       allImgs.forEach(img=>img.classList.remove('active'));
       const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
-      if(finEl) finEl.classList.add('active');
+      if(finEl) finEl.style.display='flex';
       clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null;
       return;
     }
@@ -4509,7 +4510,7 @@ function stopSlideshow() {
   if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
   // Ocultar placa FIN y volver a primera imagen
   const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
-  if(finEl) finEl.classList.remove('active');
+  if(finEl) finEl.style.display='none';
   const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
   imgs.forEach((img,i)=>img.classList.toggle('active',i===0));
   appState.kidSlideIndex=0;
@@ -4600,24 +4601,6 @@ function updateKidProgress2() {
 function seekKid(secs) {
   if(!appState.kidAudio) return;
   appState.kidAudio.currentTime=Math.max(0,appState.kidAudio.currentTime+secs);
-}
-
-function playPrevKidStory() {
-  const stories = appState._kidStories || [];
-  if(!stories.length) return;
-  const currentId = appState.currentStory && appState.currentStory.id;
-  const idx = stories.findIndex(s => s.id === currentId);
-  const prevIdx = idx <= 0 ? stories.length - 1 : idx - 1;
-  openKidStory(stories[prevIdx].id);
-}
-
-function playNextKidStory() {
-  const stories = appState._kidStories || [];
-  if(!stories.length) return;
-  const currentId = appState.currentStory && appState.currentStory.id;
-  const idx = stories.findIndex(s => s.id === currentId);
-  const nextIdx = idx === -1 || idx === stories.length - 1 ? 0 : idx + 1;
-  openKidStory(stories[nextIdx].id);
 }
 
 function buildKidVoiceRow() {
