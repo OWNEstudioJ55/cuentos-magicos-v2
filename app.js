@@ -3132,7 +3132,6 @@ function handlePortadaUpload(e) {
 let recSlideIdx=0, recSlideImgs=[];
 function buildRecSlideshow(imgs) {
   recSlideImgs = [...(imgs || appState.currentStoryImages || [])];
-  // Agregar slide FIN al final
   if(recSlideImgs.length && !recSlideImgs.includes('FIN')) recSlideImgs.push('FIN');
   recSlideIdx = 0;
   const ss = document.getElementById('recSlideshow');
@@ -3141,25 +3140,31 @@ function buildRecSlideshow(imgs) {
   const ph = document.getElementById('recSlidePlaceholder');
   if(!ss || !recSlideImgs.length) return;
   if(ph) ph.style.display='none';
+  // Limpiar solo imágenes y fin, no los botones nav
   ss.querySelectorAll('.slideshow-img,.slideshow-fin').forEach(el=>el.remove());
+  // Guardar referencia a los botones nav para reinsertarlos al final
+  const navBtns = [...ss.querySelectorAll('.slide-nav-btn')];
+  navBtns.forEach(b=>b.remove());
   recSlideImgs.forEach((url,i)=>{
     if(url==='FIN') {
       const fin = document.createElement('div');
       fin.className='slideshow-fin'+(i===0?' active':'');
-      fin.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px';
+      fin.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#FFF8E7,#F5EDE0);border-radius:16px;z-index:2';
       fin.innerHTML=`
         <img src="/logooso.png" style="width:60%;max-width:200px;mix-blend-mode:multiply;margin-bottom:8px">
-        <div style="font-family:Fredoka One,cursive;font-size:56px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
-        <div style="font-family:Fredoka One,cursive;font-size:13px;color:#9B7B6B;letter-spacing:2px;margin-top:4px">CUENTOS QUE CONECTAN</div>`;
-      ss.insertBefore(fin, ss.querySelector('.slide-nav-btn'));
+        <div style="font-family:'Fredoka One',cursive;font-size:56px;color:#C9A84C;letter-spacing:4px;line-height:1">FIN</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#9B7B6B;letter-spacing:2px;margin-top:4px">CUENTOS QUE CONECTAN</div>`;
+      ss.appendChild(fin);
     } else {
       const img = document.createElement('img');
       img.className='slideshow-img'+(i===0?' active':'');
       img.src=url; img.alt=`Escena ${i+1}`;
       img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:16px';
-      ss.insertBefore(img, ss.querySelector('.slide-nav-btn'));
+      ss.appendChild(img);
     }
   });
+  // Re-agregar botones nav al final para que queden encima
+  navBtns.forEach(b=>ss.appendChild(b));
   if(dots) dots.innerHTML = recSlideImgs.map((_,i)=>`<button class="slide-dot ${i===0?'active':''}" onclick="goRecSlide(${i})"></button>`).join('');
   if(counter) counter.textContent=`1 / ${recSlideImgs.length}`;
 }
@@ -4186,7 +4191,7 @@ function loadKidAudioFromBlob(blob) {
     const b=document.getElementById('kidPlayBtn');
     if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
     appState.kidIsPlaying=false;
-    stopSlideshow();
+    pauseSlideshow(); // dejar FIN visible, no resetear
     updateKidProgress('storiesListened');
   };
   audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4287,7 +4292,7 @@ async function openKidStory(id) {
         audio.onended=()=>{
           const b=document.getElementById('kidPlayBtn'); if(b) b.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`;
           appState.kidIsPlaying=false;
-          stopSlideshow();
+          pauseSlideshow(); // dejar FIN visible, no resetear
           updateKidProgress('storiesListened');
         };
         audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4505,9 +4510,14 @@ function startSlideshow(totalDurationMs) {
   }, msPerSlide);
 }
 
-function stopSlideshow() {
+function pauseSlideshow() {
+  // Solo parar el intervalo — no resetear ni ocultar FIN
   if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
-  // Ocultar placa FIN y volver a primera imagen
+}
+
+function stopSlideshow() {
+  // Parar Y resetear — solo al abrir un cuento nuevo
+  if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
   const finEl=document.querySelector('#kidSlideshow .slideshow-fin');
   if(finEl) finEl.style.display='none';
   const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
@@ -4551,8 +4561,7 @@ function toggleKidPlay() {
   if(appState.kidIsPlaying) {
     appState.kidAudio.pause();
     appState.kidIsPlaying=false;
-    // Pausar slideshow
-    if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+    pauseSlideshow(); // solo pausa, no resetea
     const btn=document.getElementById('kidPlayBtn');
     if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   } else {
@@ -4561,9 +4570,11 @@ function toggleKidPlay() {
         appState.kidIsPlaying=true;
         const btn=document.getElementById('kidPlayBtn');
         if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
-        // Arrancar slideshow sincronizado con duración del audio
         const dur=appState.kidAudio.duration||0;
-        stopSlideshow();
+        // Solo resetear si ya llegó al FIN (índice en última imagen)
+        const imgs=document.querySelectorAll('#kidSlideshow .slideshow-img');
+        const finVisible=document.querySelector('#kidSlideshow .slideshow-fin')?.style.display==='flex';
+        if(finVisible) stopSlideshow(); // resetear desde el principio
         startSlideshow(dur*1000);
       })
       .catch(e=>{
