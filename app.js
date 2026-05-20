@@ -559,14 +559,6 @@ let appState = {
 };
 
 // ===================== CONSTANTS =====================
-const BG_MUSIC_TRACKS = [
-  { id:'1', label:'🎵 Alegre',   file:'/public/musica/musica1.mp3' },
-  { id:'2', label:'🌙 Cuna',     file:'/public/musica/musica2.mp3' },
-  { id:'3', label:'✨ Mágica',   file:'/public/musica/musica3.mp3' },
-  { id:'4', label:'🌟 Aventura', file:'/public/musica/musica4.mp3' },
-];
-let _bgMusicTrackId='1', _bgMusicOn=false, _bgMusicAudio=null, _bgMusicPreviewAudio=null;
-
 const VOICES = [
   {id:'normal',   label:'🎤 Normal',    pitch:1,    rate:1,    free:true },
   {id:'dragon',   label:'🐉 Dragón',    pitch:0.45, rate:0.85, free:true },
@@ -1638,7 +1630,7 @@ function previewVoiceWithChar() {
 }
 
 // ===================== MÚSICA DE FONDO =====================
-// variables de música declaradas arriba
+let _bgMusicCtx = null, _bgMusicNodes = [], _bgMusicOn = false, _bgMusicIdx = 0;
 
 const BG_MELODIES = [
   // Melodía 1 — Cuna suave
@@ -1677,39 +1669,55 @@ const BG_MELODIES = [
 ];
 
 function startBgMusic() {
-  stopBgMusic(); _bgMusicOn=true;
-  const tk=BG_MUSIC_TRACKS.find(t=>t.id===_bgMusicTrackId)||BG_MUSIC_TRACKS[0];
-  _bgMusicAudio=new Audio(tk.file); _bgMusicAudio.volume=0.5; _bgMusicAudio.loop=true;
-  _bgMusicAudio.play().catch(e=>console.warn('bgMusic:',e));
-  const btn=document.getElementById('btnBgMusic');
-  if(btn){btn.textContent='🔊 Música';btn.style.background='rgba(201,168,76,0.15)';btn.style.color='#C9A84C';}
-}
-function stopBgMusic() {
-  _bgMusicOn=false;
-  if(_bgMusicAudio){try{_bgMusicAudio.pause();_bgMusicAudio=null;}catch(e){}}
-  const btn=document.getElementById('btnBgMusic');
-  if(btn){btn.textContent='🔇 Música';btn.style.background='white';btn.style.color='#9B7B6B';}
-}
-function toggleBgMusic(){ if(_bgMusicOn) stopBgMusic(); else startBgMusic(); }
-function previewBgMusic(id) {
-  if(_bgMusicPreviewAudio){_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}
-  const tk=BG_MUSIC_TRACKS.find(t=>t.id===id); if(!tk) return;
-  _bgMusicPreviewAudio=new Audio(tk.file); _bgMusicPreviewAudio.volume=0.5;
-  _bgMusicPreviewAudio.play().catch(()=>{});
-  setTimeout(()=>{if(_bgMusicPreviewAudio){_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}},10000);
-}
-function selectBgMusicTrack(id) {
-  _bgMusicTrackId=id;
-  document.querySelectorAll('[id^="bgTrack-"]').forEach(b=>{
-    const a=b.id==='bgTrack-'+id;
-    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
-    b.style.background=a?'rgba(201,168,76,0.15)':'white';
-    b.style.color=a?'#C9A84C':'#9B7B6B';
-  });
-  if(_bgMusicOn) startBgMusic();
-  previewBgMusic(id);
+  if(_bgMusicOn) return;
+  _bgMusicOn = true;
+  _playBgMelody();
+  const btn = document.getElementById('btnBgMusic');
+  if(btn) btn.textContent = '🔊 Música';
 }
 
+function stopBgMusic() {
+  _bgMusicOn = false;
+  _bgMusicNodes.forEach(n=>{ try{ n.stop(); }catch(e){} });
+  _bgMusicNodes = [];
+  if(_bgMusicCtx) { try{ _bgMusicCtx.close(); }catch(e){} _bgMusicCtx=null; }
+  const btn = document.getElementById('btnBgMusic');
+  if(btn) btn.textContent = '🔇 Música';
+}
+
+function toggleBgMusic() {
+  if(_bgMusicOn) stopBgMusic();
+  else startBgMusic();
+}
+
+function _playBgMelody() {
+  if(!_bgMusicOn) return;
+  try {
+    if(_bgMusicCtx) { try{ _bgMusicCtx.close(); }catch(e){} }
+    _bgMusicCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const melody = BG_MELODIES[_bgMusicIdx % BG_MELODIES.length];
+    _bgMusicIdx++;
+    let t = _bgMusicCtx.currentTime + 0.1;
+    let totalDur = 0;
+    melody.notes.forEach(note => {
+      const osc = _bgMusicCtx.createOscillator();
+      const gain = _bgMusicCtx.createGain();
+      osc.connect(gain); gain.connect(_bgMusicCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(note.f, t);
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(0.08, t + 0.05);
+      gain.gain.linearRampToValueAtTime(0.06, t + note.d * 0.7);
+      gain.gain.linearRampToValueAtTime(0, t + note.d);
+      osc.start(t); osc.stop(t + note.d);
+      _bgMusicNodes.push(osc);
+      t += note.d;
+      totalDur += note.d;
+    });
+    // Repetir al terminar
+    setTimeout(()=>{ if(_bgMusicOn) _playBgMelody(); }, totalDur * 1000 + 200);
+  } catch(e) { console.warn('bgMusic error:', e); }
+}
 let recordingInterval=null;
 async function toggleRecord() {
   if(appState.isRecording) { stopRecording(); return; }
@@ -1861,9 +1869,9 @@ function updateSlideDur(val) {
 
 // ══ DISTORSIÓN DE VOZ — 3 opciones ══
 const VOICE_DISTORTIONS = [
-  { id:'ada',    label:'🧚 Hada',   pitch: 6,  rate:1.0 },
-  { id:'ogro',   label:'👹 Ogro',   pitch:-6,  rate:1.0 },
-  { id:'dragon', label:'🐉 Dragón', pitch:-3,  rate:1.0 },
+  { id:'ada',   label:'🧚 Hada',  pitch:1.4,  rate:1.1 },
+  { id:'ogro',  label:'👹 Ogro',  pitch:0.6,  rate:0.85 },
+  { id:'dragon',label:'🐉 Dragón',pitch:0.75, rate:0.9  },
 ];
 let _selectedDistortion = null;
 let _distortPreviewAudio = null;
@@ -1990,7 +1998,6 @@ async function applyDistortionAndSave() {
   if(_selectedDistortion) {
     appState.selectedDistortionRate = _selectedDistortion.rate || 1;
     appState.selectedDistortionId = _selectedDistortion.id;
-    appState.selectedDistortionPitch = _selectedDistortion.pitch || 0;
     showToast('✅ Distorsión aplicada — guardando...');
   }
   await saveStory();
@@ -1999,7 +2006,6 @@ async function applyDistortionAndSave() {
 async function saveStoryWithoutDistortion() {
   appState.selectedDistortionRate = 1;
   appState.selectedDistortionId = null;
-  appState.selectedDistortionPitch = 0;
   _selectedDistortion = null;
   await saveStory();
 }
@@ -2063,8 +2069,6 @@ async function saveStory() {
     supaSync: existingStory?.supaSync || false,
     distortionRate: appState.selectedDistortionRate || 1,
     distortionId: appState.selectedDistortionId || null,
-    distortionPitch: appState.selectedDistortionPitch || 0,
-    musicTrackId: _bgMusicOn ? _bgMusicTrackId : null,
   };
 
   try {
@@ -2087,9 +2091,6 @@ async function saveStory() {
         texto: document.getElementById('storyTextInput')?.value||'',
         portada: appState.portadaUrl||null,
         tiene_audio: !!(appState.recordedBlob || story.hasAudio),
-        distortion_pitch: appState.selectedDistortionPitch || 0,
-        distortion_id: appState.selectedDistortionId || null,
-        music_track_id: _bgMusicOn ? _bgMusicTrackId : null,
       };
       // Upload audio to Supabase Storage
       if(appState.recordedBlob) {
@@ -4087,10 +4088,7 @@ async function loadKidHomeStories() {
             storyText: c.texto, portada: c.portada,
             hasAudio: c.tiene_audio, created: new Date(c.created_at).toLocaleDateString('es-AR'),
             type: 'parent', supaSync: true,
-            audioFile: c.tiene_audio ? `${familiaId}/${c.id}.webm` : null,
-            distortionPitch: c.distortion_pitch || 0,
-            distortionId: c.distortion_id || null,
-            musicTrackId: c.music_track_id || null,
+            audioFile: c.tiene_audio ? `${familiaId}/${c.id}.webm` : null
           };
           await dbPut('stories', local).catch(()=>{});
         }
@@ -4154,57 +4152,10 @@ async function loadKidHomeStories() {
   }).join('');
 }
 
-// Música del niño
-function startKidBgMusic(trackId) {
-  stopKidBgMusic();
-  if(!window.BG_MUSIC_TRACKS) return;
-  const tk=BG_MUSIC_TRACKS.find(t=>t.id===String(trackId));
-  if(!tk) return;
-  window._kidBgMusicAudio=new Audio(tk.file);
-  window._kidBgMusicAudio.volume=0.4;
-  window._kidBgMusicAudio.loop=true;
-  window._kidBgMusicAudio.play().catch(e=>console.warn('kidBgMusic:',e));
-}
-function stopKidBgMusic() {
-  if(window._kidBgMusicAudio){try{window._kidBgMusicAudio.pause();window._kidBgMusicAudio=null;}catch(e){}}
-}
-
-// Distorsión con Tone.js para el niño
-async function _applyTonePitchToKid(url, pitchVal) {
-  try {
-    if(typeof Tone==='undefined') {
-      await new Promise((res,rej)=>{
-        const s=document.createElement('script');
-        s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-        s.onload=res; s.onerror=rej;
-        document.head.appendChild(s);
-      });
-    }
-    const ps=new Tone.PitchShift(pitchVal).toDestination();
-    const pl=new Tone.Player(url).connect(ps);
-    await new Promise(res=>setTimeout(res,800));
-    appState.kidAudio={
-      _pl:pl,_ps:ps,
-      duration:pl.buffer?.duration||0,
-      currentTime:0,paused:true,
-      play:async function(){await Tone.start();this._pl.start();this.paused=false;},
-      pause:function(){try{this._pl.stop();}catch(e){}this.paused=true;},
-    };
-    const t=document.getElementById('kidTimeDisplay');
-    if(t) t.textContent='0:00 / '+formatTime(pl.buffer?.duration||0);
-  } catch(e) {
-    console.error('Tone kid:', e);
-    const audio=new Audio(); audio.preload='auto'; audio.src=url; audio.load();
-    audio.onended=()=>{appState.kidIsPlaying=false;if(appState.kidSlideInterval){clearInterval(appState.kidSlideInterval);appState.kidSlideInterval=null;}showFin();updateKidProgress('storiesListened');};
-    appState.kidAudio=audio;
-  }
-}
-
-function loadKidAudioFromBlob(blob, distortionRate, distortionPitch) {
+function loadKidAudioFromBlob(blob, distortionRate) {
   if(appState.kidAudioUrl){ try{ URL.revokeObjectURL(appState.kidAudioUrl); }catch(e){} appState.kidAudioUrl=null; }
   const url=URL.createObjectURL(blob);
   appState.kidAudioUrl=url;
-  if(distortionPitch && distortionPitch!==0){ _applyTonePitchToKid(url,distortionPitch); return; }
   const audio=new Audio();
   audio.preload='auto'; audio.src=url; audio.load();
   if(distortionRate && distortionRate!==1) audio.playbackRate=distortionRate;
@@ -4300,7 +4251,7 @@ async function openKidStory(id) {
 
   if(audioData&&audioData.blob&&audioData.blob.size>0) {
     // Audio encontrado localmente
-    loadKidAudioFromBlob(audioData.blob, story.distortionRate||1, story.distortionPitch||0);
+    loadKidAudioFromBlob(audioData.blob, story.distortionRate||1);
   } else if(story.hasAudio && story.audioFile && supa) {
     // No está local — buscar en Supabase Storage
     const td=document.getElementById('kidTimeDisplay'); if(td) td.textContent='⏳ Cargando...';
@@ -4308,7 +4259,6 @@ async function openKidStory(id) {
     try {
       const url = await supaGetAudioUrl(story.audioFile);
       if(url) {
-        if(story.distortionPitch && story.distortionPitch!==0){ _applyTonePitchToKid(url,story.distortionPitch); }
         const audio=new Audio();
         audio.preload='auto'; audio.src=url; audio.load();
         if(story.distortionRate && story.distortionRate!==1) audio.playbackRate=story.distortionRate;
@@ -4351,9 +4301,17 @@ async function openKidStory(id) {
   buildKidCharRow();
   buildKidImagesGrid();
 
-  // Música de fondo
+  // Preparar música — arranca cuando el niño toca play
   stopKidBgMusic();
-  if(story.musicTrackId) startKidBgMusic(story.musicTrackId);
+  if(story.musicTrackId && typeof BG_MUSIC_TRACKS!=='undefined') {
+    const tk=BG_MUSIC_TRACKS.find(t=>t.id===String(story.musicTrackId));
+    if(tk) {
+      _kidBgMusicAudio=new Audio(tk.file);
+      _kidBgMusicAudio.volume=0.3;
+      _kidBgMusicAudio.loop=true;
+      // No .play() acá — arranca cuando el niño toca play
+    }
+  }
 
   // Show story text if available
   const tc=document.getElementById('kidStoryTextCard');
@@ -4621,8 +4579,9 @@ function toggleKidPlay() {
   if(appState.kidIsPlaying) {
     appState.kidAudio.pause();
     appState.kidIsPlaying=false;
-    // Solo pausar el intervalo — no resetear
     if(appState.kidSlideInterval) { clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
+    // Pausar música de fondo
+    if(_kidBgMusicAudio) _kidBgMusicAudio.pause();
     const btn=document.getElementById('kidPlayBtn');
     if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_play_big',72)}`; }
   } else {
@@ -4631,11 +4590,11 @@ function toggleKidPlay() {
         appState.kidIsPlaying=true;
         const btn=document.getElementById('kidPlayBtn');
         if(btn){ btn.textContent=''; btn.style.cssText=`width:72px;height:72px;${kidSpriteBg('btn_pause_big',72)}`; }
+        // Reanudar o arrancar música de fondo
+        if(_kidBgMusicAudio && _kidBgMusicAudio.paused) _kidBgMusicAudio.play().catch(()=>{});
         const dur=appState.kidAudio.duration||0;
-        // Si FIN está visible, resetear desde el principio
         const finVisible=document.querySelector('#kidSlideshow .slideshow-fin')?.classList.contains('active');
         if(finVisible) stopSlideshow();
-        // Solo arrancar si no hay slideshow corriendo (no reiniciar si se pausó a mitad)
         if(!appState.kidSlideInterval) startSlideshow(dur*1000);
       })
       .catch(e=>{
@@ -4659,6 +4618,22 @@ function speakText(text) {
 function stopKidPlay() {
   if(appState.kidAudio) { appState.kidAudio.pause(); appState.kidIsPlaying=false; }
   if(window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
+// Música de fondo del niño
+let _kidBgMusicAudio = null;
+function startKidBgMusic(trackId) {
+  stopKidBgMusic();
+  if(typeof BG_MUSIC_TRACKS === 'undefined') return;
+  const tk = BG_MUSIC_TRACKS.find(t=>t.id===String(trackId));
+  if(!tk) return;
+  _kidBgMusicAudio = new Audio(tk.file);
+  _kidBgMusicAudio.volume = 0.3;
+  _kidBgMusicAudio.loop = true;
+  _kidBgMusicAudio.play().catch(e=>console.warn('kidBgMusic:',e));
+}
+function stopKidBgMusic() {
+  if(_kidBgMusicAudio){ try{ _kidBgMusicAudio.pause(); _kidBgMusicAudio=null; }catch(e){} }
 }
 
 function updateKidProgress2() {
