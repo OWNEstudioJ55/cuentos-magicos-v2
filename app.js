@@ -1449,6 +1449,32 @@ let currentRecStep = 1, autoAdvanceInterval = null;
 function showRecTab() {
   const seen = localStorage.getItem('ownRecGuideSeen');
   if(!seen) document.getElementById('recGuide').style.display='block';
+  // Solo limpiar si NO estamos editando un cuento existente
+  if(!appState._editingStoryId) {
+    appState.currentStoryImages = [];
+    appState.portadaUrl = null;
+    appState.recordedBlob = null;
+    appState.recAudio = null;
+    appState.selectedDistortionRate = 1;
+    appState.selectedDistortionId = null;
+    appState.recordSeconds = 0;
+    _selectedDistortion = null;
+    // Limpiar campos del formulario
+    const titleEl = document.getElementById('storyTitle');
+    if(titleEl) titleEl.value = '';
+    const textEl = document.getElementById('storyTextInput');
+    if(textEl) textEl.value = '';
+    // Ocultar panel de distorsión
+    const wrap = document.getElementById('recApplyVoiceWrap');
+    if(wrap) wrap.style.display = 'none';
+    // Ocultar playback
+    const pb = document.getElementById('recPlayback');
+    if(pb) pb.style.display = 'none';
+    const timer = document.getElementById('recTimer');
+    if(timer) timer.textContent = '0:00';
+    const status = document.getElementById('recStatus');
+    if(status) status.textContent = 'Listo para grabar — las imágenes pasan solas mientras grabás';
+  }
   goRecStep(1);
   // Verificar si hay borrador guardado
   restoreDraft();
@@ -1969,14 +1995,17 @@ function audioBufferToWav(buffer) {
 }
 
 async function applyDistortionAndSave() {
-  if(!_selectedDistortion) return;
-  // Aplicar rate como distorsión básica y guardar
-  appState.selectedVoice = _selectedDistortion.id;
-  showToast('✅ Distorsión aplicada — guardando...');
+  if(_selectedDistortion) {
+    appState.selectedDistortionRate = _selectedDistortion.rate || 1;
+    appState.selectedDistortionId = _selectedDistortion.id;
+    showToast('✅ Distorsión aplicada — guardando...');
+  }
   await saveStory();
 }
 
 async function saveStoryWithoutDistortion() {
+  appState.selectedDistortionRate = 1;
+  appState.selectedDistortionId = null;
   _selectedDistortion = null;
   await saveStory();
 }
