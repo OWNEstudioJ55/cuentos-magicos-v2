@@ -250,7 +250,7 @@ function kidSpriteBg(key, sizePx) {
   const bgH = Math.round(KS_H * scale);
   const bx  = -Math.round(sp.x * scale);
   const by  = -Math.round(sp.y * scale);
-  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;`;
+  return `background:url('${KID_SPRITE_URL}') ${bx}px ${by}px/${bgW}px ${bgH}px no-repeat;mix-blend-mode:multiply;`;
 }
 // ─────────────────────────────────────────────────────────
 const CHAR_SPRITES = {
@@ -1369,12 +1369,11 @@ function injectNavSprites() {
   // Hero botón "Escuchar ahora"
   const heroBtn=document.getElementById('kidHeroBtnSig');
   if(heroBtn) heroBtn.style.cssText=`width:220px;height:48px;`+kidSpriteBg('btn_siguiente',48);
-  const kidPlay=document.getElementById('kidPlayBtn'); 
-  if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;background:url('/sprites_kid_OWN.png') -367px -31px/745px 556px no-repeat;mix-blend-mode:multiply;border:none;cursor:pointer;border-radius:50%;transition:transform .12s`; }
+  const kidPlay=document.getElementById('kidPlayBtn'); if(kidPlay) { kidPlay.innerHTML=''; kidPlay.style.cssText=`width:72px;height:72px;border:none;cursor:pointer;border-radius:50%;padding:0;${kidSpriteBg('btn_play_big',72)}`; }
   const kidPrev = document.getElementById('kidBtnPrev');
-  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:56px;height:56px;background:url('/sprites_kid_OWN.png') -234px -47px/810px 605px no-repeat;mix-blend-mode:multiply;border:none;cursor:pointer;border-radius:50%;transition:transform .12s`; }
+  if(kidPrev) { kidPrev.innerHTML=''; kidPrev.style.cssText=`width:72px;height:72px;border:none;cursor:pointer;border-radius:50%;padding:0;${kidSpriteBg('btn_prev',72)}`; }
   const kidNext = document.getElementById('kidBtnNext');
-  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:56px;height:56px;background:url('/sprites_kid_OWN.png') -318px -48px/820px 612px no-repeat;mix-blend-mode:multiply;border:none;cursor:pointer;border-radius:50%;transition:transform .12s`; }
+  if(kidNext) { kidNext.innerHTML=''; kidNext.style.cssText=`width:72px;height:72px;border:none;cursor:pointer;border-radius:50%;padding:0;${kidSpriteBg('btn_next',72)}`; }
   const kidSig = document.getElementById('kidBtnSiguiente');
   if(kidSig) { kidSig.innerHTML=''; kidSig.style.cssText=`width:200px;height:40px;${kidSpriteBg('btn_siguiente',40)}`; }
 }
