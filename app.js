@@ -1912,16 +1912,6 @@ function showVoiceDistortionPanel() {
       </div>
     </div>`;
   wrap.style.display = 'block';
-  goRecStep(4);
-  // Pre-inicializar Tone.js para que el primer preview funcione sin demora
-  setTimeout(()=>{
-    if(typeof Tone==='undefined'){
-      const s=document.createElement('script');
-      s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-      s.onload=()=>{ try{Tone.start();}catch(e){} };
-      document.head.appendChild(s);
-    } else { try{Tone.start();}catch(e){} }
-  }, 300);
 }
 
 function selectDistortion(id, btn) {
@@ -4463,24 +4453,250 @@ function switchKidVersion(v) {
 
 // Kid step navigation
 let currentKidRecStep=1;
+// ===== NUEVO FLUJO NIÑO =====
+let _kidRecChar = 'dragon';
+let _kidRecScenes = [null,null,null,null,null]; // 5 escenas
+let _kidRecFinalMusicTrackId = null;
+let _kidRecSelectedDistortion = null;
+let _kidPreviewAsKidAudio = null, _kidPreviewAsKidMusic = null;
+
+function buildKidRecCharGrid() {
+  const grid = document.getElementById('kidRecCharGrid');
+  if(!grid) return;
+  grid.innerHTML = SEQ_CHAR_IDS.map(id=>{
+    const label = SEQ_CHAR_LABELS[id]||id;
+    const emoji = label.split(' ')[0];
+    const name = label.split(' ').slice(1).join(' ');
+    const img = getSceneImageUrl(id,'corre');
+    return `<button onclick="kidRecSelectChar('${id}')" id="kidRecCharBtn-${id}"
+      style="padding:6px;border-radius:14px;border:3px solid ${id===_kidRecChar?'#C9A84C':'rgba(201,168,76,0.2)'};
+             background:${id===_kidRecChar?'rgba(201,168,76,0.15)':'white'};cursor:pointer;text-align:center">
+      <img src="${img}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:10px;mix-blend-mode:multiply">
+      <div style="font-family:'Fredoka One',cursive;font-size:12px;color:#5C4033;margin-top:4px">${emoji} ${name}</div>
+    </button>`;
+  }).join('');
+}
+
+function kidRecSelectChar(id) {
+  _kidRecChar = id;
+  document.querySelectorAll('[id^="kidRecCharBtn-"]').forEach(b=>{
+    const active = b.id==='kidRecCharBtn-'+id;
+    b.style.border = active?'3px solid #C9A84C':'3px solid rgba(201,168,76,0.2)';
+    b.style.background = active?'rgba(201,168,76,0.15)':'white';
+  });
+  // Actualizar builder de escenas si ya está visible
+  if(document.getElementById('kidRecScenesBuilder')?.children.length>0) buildKidRecScenesBuilder();
+}
+
+function buildKidRecScenesBuilder() {
+  const container = document.getElementById('kidRecScenesBuilder');
+  if(!container) return;
+  container.innerHTML = _kidRecScenes.map((_,i)=>{
+    const scene = _kidRecScenes[i];
+    const imgUrl = scene ? getSceneImageUrl(_kidRecChar, scene.file) : null;
+    return `<div style="background:white;border-radius:14px;padding:10px;border:2px solid rgba(201,168,76,0.2)">
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:8px">
+        <div style="width:56px;height:56px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#F5EDE0;display:flex;align-items:center;justify-content:center">
+          ${imgUrl?`<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply">`:`<span style="font-size:24px">📷</span>`}
+        </div>
+        <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033">Escena ${i+1}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
+        ${SEQ_ACTIONS.map(a=>`
+          <button onclick="kidRecSelectScene(${i},'${a.file}','${a.label}',this)"
+            style="padding:8px 4px;border-radius:10px;border:2px solid ${scene?.file===a.file?'#C9A84C':'rgba(201,168,76,0.2)'};
+                   background:${scene?.file===a.file?'rgba(201,168,76,0.15)':'#FFF8E7'};cursor:pointer;
+                   font-size:18px;text-align:center;color:${scene?.file===a.file?'#C9A84C':'#9B7B6B'}">
+            ${a.icon}<br><span style="font-size:9px;font-family:'Fredoka One',cursive">${a.label}</span>
+          </button>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function kidRecSelectScene(idx, file, label, btn) {
+  _kidRecScenes[idx] = {file, label};
+  buildKidRecScenesBuilder();
+}
+
 function goKidRecStep(n) {
-  currentKidRecStep=n;
+  currentKidRecStep = n;
   [1,2,3,4].forEach(i=>{
     const s=document.getElementById('kidRecStep-'+i); if(s) s.style.display=i===n?'block':'none';
     const t=document.getElementById('krstab-'+i);
-    if(t){ t.classList.toggle('active',i===n); t.classList.toggle('done',i<n); }
+    if(t){t.classList.toggle('active',i===n);t.classList.toggle('done',i<n);}
   });
+  if(n===1) buildKidRecCharGrid();
+  if(n===2) buildKidRecScenesBuilder();
+  if(n===3) {
+    // Cargar imágenes elegidas en el slideshow
+    const imgs = _kidRecScenes.filter(s=>s).map(s=>getSceneImageUrl(_kidRecChar,s.file));
+    buildKidRecSlideshow2(imgs);
+  }
   if(n===4) showKidDistortionPanel();
   const c=document.getElementById('kidContent'); if(c) c.scrollTo(0,0);
 }
 
-function updateKidSendSummary() {
-  const title=appState.currentStory?.title||'Mi cuento';
-  const charEl=document.getElementById('kidSendSummaryChar'); if(charEl) charEl.textContent=appState.kidChar||'🐉';
-  const titleEl=document.getElementById('kidSendSummaryTitle'); if(titleEl) titleEl.textContent=title;
-  const infoEl=document.getElementById('kidSendSummaryInfo');
-  if(infoEl) infoEl.textContent=appState.kidOwnAudioBlob?`✅ Audio grabado · ${appState.kidImages?.length||0} imágenes`:'⚠️ Aún sin audio — volvé al paso 3';
+function avanzarKidAlPaso4() {
+  if(appState.isKidRecording) {
+    stopKidRecord();
+    return; // onstop llama showKidDistortionPanel
+  }
+  if(appState.kidOwnAudioBlob) {
+    showKidDistortionPanel();
+  } else {
+    showToast('🎙️ Grabá tu cuento primero');
+  }
 }
+
+function showKidDistortionPanel() {
+  const wrap = document.getElementById('kidRecApplyVoiceWrap');
+  if(!wrap) return;
+  if(!appState.kidOwnAudioBlob){ showToast('🎙️ Grabá tu cuento primero'); goKidRecStep(3); return; }
+  _kidRecFinalMusicTrackId = null;
+  _kidRecSelectedDistortion = null;
+
+  // Mostrar paso 4
+  [1,2,3,4].forEach(i=>{
+    const s=document.getElementById('kidRecStep-'+i); if(s) s.style.display=i===4?'block':'none';
+    const t=document.getElementById('krstab-'+i);
+    if(t){t.classList.toggle('active',i===4);t.classList.toggle('done',i<4);}
+  });
+
+  wrap.innerHTML = `
+    <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
+
+      <!-- DISTORSIÓN -->
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033;margin-bottom:12px;text-align:center">🎭 ¿Con qué voz?</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">
+        <button onclick="kidRecSelectDistortion(null,this)" id="kdistBtn-none"
+          style="padding:12px 4px;border-radius:12px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);cursor:pointer;font-size:22px;text-align:center">
+          🎤<br><span style="font-family:'Fredoka One',cursive;font-size:11px;color:#C9A84C">Normal</span>
+        </button>
+        ${VOICE_DISTORTIONS.map(v=>`
+          <button onclick="kidRecSelectDistortion('${v.id}',this)" id="kdistBtn-${v.id}"
+            style="padding:12px 4px;border-radius:12px;border:2px solid rgba(201,168,76,0.2);background:#FFF8E7;cursor:pointer;font-size:22px;text-align:center">
+            ${v.label.split(' ')[0]}<br><span style="font-family:'Fredoka One',cursive;font-size:11px;color:#9B7B6B">${v.label.split(' ')[1]}</span>
+          </button>`).join('')}
+      </div>
+
+      <!-- MÚSICA -->
+      <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033;margin-bottom:12px;text-align:center">🎵 ¿Con música?</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:16px">
+        <button onclick="kidRecSelectMusic('0')" id="kbgTrack-0"
+          style="padding:10px 2px;border-radius:10px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);cursor:pointer;font-size:16px;text-align:center;font-family:'Fredoka One',cursive;color:#C9A84C">🔇<br><span style="font-size:9px">Sin mús.</span></button>
+        <button onclick="kidRecSelectMusic('1')" id="kbgTrack-1"
+          style="padding:10px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:16px;text-align:center;font-family:'Fredoka One',cursive;color:#9B7B6B">🎵<br><span style="font-size:9px">Alegre</span></button>
+        <button onclick="kidRecSelectMusic('2')" id="kbgTrack-2"
+          style="padding:10px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:16px;text-align:center;font-family:'Fredoka One',cursive;color:#9B7B6B">🌙<br><span style="font-size:9px">Cuna</span></button>
+        <button onclick="kidRecSelectMusic('3')" id="kbgTrack-3"
+          style="padding:10px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:16px;text-align:center;font-family:'Fredoka One',cursive;color:#9B7B6B">✨<br><span style="font-size:9px">Mágica</span></button>
+        <button onclick="kidRecSelectMusic('4')" id="kbgTrack-4"
+          style="padding:10px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:16px;text-align:center;font-family:'Fredoka One',cursive;color:#9B7B6B">🌟<br><span style="font-size:9px">Aventura</span></button>
+      </div>
+
+      <!-- ESCUCHAR -->
+      <button onclick="kidPreviewAsParent()" id="btnKidPreviewAsParent"
+        style="width:100%;padding:13px;border-radius:12px;border:2px solid rgba(201,168,76,0.4);
+               background:#FFF8E7;color:#5C4033;font-family:'Fredoka One',cursive;
+               font-size:15px;cursor:pointer;margin-bottom:12px">
+        👂 Escuchar cómo queda
+      </button>
+
+      <!-- ENVIAR -->
+      <button onclick="sendKidVoiceToParent()"
+        style="width:100%;padding:16px;border-radius:14px;border:none;
+               background:linear-gradient(135deg,#C9A84C,#e8c97a);
+               color:white;font-family:'Fredoka One',cursive;font-size:18px;cursor:pointer">
+        🚀 ¡Mandar a papá/mamá!
+      </button>
+    </div>`;
+  wrap.style.display = 'block';
+
+  // Pre-cargar Tone.js
+  setTimeout(()=>{
+    if(typeof Tone==='undefined'){
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
+      s.onload=()=>{try{Tone.start();}catch(e){}};
+      document.head.appendChild(s);
+    } else {try{Tone.start();}catch(e){}}
+  },200);
+}
+
+function kidRecSelectDistortion(id, btn) {
+  _kidRecSelectedDistortion = id ? VOICE_DISTORTIONS.find(v=>v.id===id) : null;
+  document.querySelectorAll('[id^="kdistBtn-"]').forEach(b=>{
+    b.style.border='2px solid rgba(201,168,76,0.2)'; b.style.background='#FFF8E7'; b.style.color='#9B7B6B';
+  });
+  if(btn){btn.style.border='2px solid #C9A84C';btn.style.background='rgba(201,168,76,0.15)';btn.style.color='#C9A84C';}
+}
+
+function kidRecSelectMusic(id) {
+  _kidRecFinalMusicTrackId = id==='0' ? null : id;
+  document.querySelectorAll('[id^="kbgTrack-"]').forEach(b=>{
+    const a=b.id==='kbgTrack-'+id;
+    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
+    b.style.background=a?'rgba(201,168,76,0.15)':'white';
+    b.style.color=a?'#C9A84C':'#9B7B6B';
+  });
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  if(_kidRecFinalMusicTrackId&&typeof BG_MUSIC_TRACKS!=='undefined'){
+    const tk=BG_MUSIC_TRACKS.find(t=>t.id===_kidRecFinalMusicTrackId);
+    if(tk){
+      _bgMusicPreviewAudio=new Audio(tk.file); _bgMusicPreviewAudio.volume=0.4;
+      _bgMusicPreviewAudio.play().catch(()=>{});
+      setTimeout(()=>{if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}},10000);
+    }
+  }
+}
+
+async function kidPreviewAsParent() {
+  const btn=document.getElementById('btnKidPreviewAsParent');
+  if(_kidPreviewAsKidAudio||_kidPreviewAsKidMusic){
+    if(_kidPreviewAsKidAudio){try{_kidPreviewAsKidAudio.pause();}catch(e){}} _kidPreviewAsKidAudio=null;
+    if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();}catch(e){}} _kidPreviewAsKidMusic=null;
+    if(btn) btn.textContent='👂 Escuchar cómo queda'; return;
+  }
+  if(!appState.kidOwnAudioBlob){showToast('Grabá primero');return;}
+  if(btn) btn.textContent='⏳ Preparando...';
+  try {
+    const url=URL.createObjectURL(appState.kidOwnAudioBlob);
+    if(_kidRecSelectedDistortion?.pitch){
+      if(typeof Tone==='undefined'){
+        await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+      }
+      await Tone.start();
+      const ps=new Tone.PitchShift(_kidRecSelectedDistortion.pitch).toDestination();
+      const pl=new Tone.Player(url).connect(ps);
+      await new Promise(res=>setTimeout(res,600));
+      pl.start();
+      const dur=(pl.buffer?.duration||10)*1000;
+      _kidPreviewAsKidAudio={pause:()=>{try{pl.stop();ps.dispose();}catch(e){}}};
+      setTimeout(()=>{
+        _kidPreviewAsKidAudio=null;
+        if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();}catch(e){}} _kidPreviewAsKidMusic=null;
+        if(btn) btn.textContent='👂 Escuchar cómo queda';
+      },dur+300);
+    } else {
+      const audio=new Audio(url);
+      audio.onended=()=>{
+        _kidPreviewAsKidAudio=null;
+        if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();_kidPreviewAsKidMusic=null;}catch(e){}}
+        if(btn) btn.textContent='👂 Escuchar cómo queda';
+      };
+      await audio.play();
+      _kidPreviewAsKidAudio=audio;
+    }
+    if(_kidRecFinalMusicTrackId&&typeof BG_MUSIC_TRACKS!=='undefined'){
+      const tk=BG_MUSIC_TRACKS.find(t=>t.id===_kidRecFinalMusicTrackId);
+      if(tk){_kidPreviewAsKidMusic=new Audio(tk.file);_kidPreviewAsKidMusic.volume=0.5;_kidPreviewAsKidMusic.loop=true;_kidPreviewAsKidMusic.play().catch(()=>{});}
+    }
+    if(btn) btn.textContent='⏸ Pausar';
+  } catch(e){console.error('kidPreview:',e);if(btn) btn.textContent='👂 Escuchar cómo queda';}
+}
+
+function updateKidSendSummary() {} // compatibilidad
 
 // Kid recording slideshow (step 3)
 let kidRecSlide2Idx=0, kidRecSlide2Imgs=[];
@@ -4831,6 +5047,8 @@ async function toggleKidRecord() {
       audio.onerror=(e)=>console.error('Kid rec audio error',e);
       appState.kidRecAudio=audio;
       const pb=document.getElementById('kidRecPlayback'); if(pb) pb.style.display='block';
+      // Ir automáticamente al paso 4 después de un momento
+      setTimeout(()=>showKidDistortionPanel(), 800);
     };
     appState.kidMediaRecorder.start(100);
     appState.isKidRecording=true;
@@ -4918,159 +5136,6 @@ async function applyVoiceToKidRecording() {
     .catch(e=>{ console.warn('autoplay blocked:',e.message); });
 }
 
-// ===== NUEVO FLUJO NIÑO: PORTADA + ESCENAS + DISTORSIÓN + MÚSICA + ENVIAR =====
-
-let _kidRecPortadaBlob=null, _kidRecScenesBlobs=[], _kidRecFinalMusicTrackId=null, _kidRecSelectedDistortion=null;
-let _kidPreviewAsKidAudio=null, _kidPreviewAsKidMusic=null;
-
-function kidRecLoadPortada(input) {
-  const file=input.files[0]; if(!file) return;
-  _kidRecPortadaBlob=file;
-  const url=URL.createObjectURL(file);
-  const preview=document.getElementById('kidRecPortadaPreview');
-  if(preview) preview.innerHTML=`<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">`;
-}
-
-function kidRecLoadScenes(input) {
-  const files=[...input.files].slice(0,5);
-  if(!files.length) return;
-  files.forEach(f=>{ if(_kidRecScenesBlobs.length<5) _kidRecScenesBlobs.push(f); });
-  _renderKidScenesGrid();
-}
-
-function _renderKidScenesGrid() {
-  const grid=document.getElementById('kidRecScenesGrid'); if(!grid) return;
-  grid.innerHTML=_kidRecScenesBlobs.map((f,i)=>`
-    <div style="position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden">
-      <img src="${URL.createObjectURL(f)}" style="width:100%;height:100%;object-fit:cover">
-      <button onclick="_kidRecRemoveScene(${i})" style="position:absolute;top:2px;right:2px;background:rgba(239,68,68,0.9);border:none;border-radius:50%;width:22px;height:22px;color:white;cursor:pointer;font-size:13px">×</button>
-    </div>`).join('');
-}
-
-function _kidRecRemoveScene(idx) {
-  _kidRecScenesBlobs.splice(idx,1);
-  _renderKidScenesGrid();
-}
-
-function showKidDistortionPanel() {
-  const wrap=document.getElementById('kidRecApplyVoiceWrap'); if(!wrap) return;
-  if(!appState.kidOwnAudioBlob){ showToast('🎙️ Grabá tu voz primero'); goKidRecStep(3); return; }
-  _kidRecFinalMusicTrackId=null; _kidRecSelectedDistortion=null;
-  wrap.innerHTML=`
-    <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
-
-      <!-- DISTORSIÓN -->
-      <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">🎭 Distorsión de voz</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px">
-        <button onclick="kidRecSelectDistortion(null,this)" id="kdistBtn-none"
-          style="padding:10px 4px;border-radius:12px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);cursor:pointer;font-size:11px;color:#C9A84C;font-family:'Fredoka One',cursive;text-align:center">
-          🎤<br>Sin dist.
-        </button>
-        ${VOICE_DISTORTIONS.map(v=>`
-          <button onclick="kidRecSelectDistortion('${v.id}',this)" id="kdistBtn-${v.id}"
-            style="padding:10px 4px;border-radius:12px;border:2px solid rgba(201,168,76,0.2);background:#FFF8E7;cursor:pointer;font-size:11px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">
-            ${v.label.split(' ')[0]}<br>${v.label.split(' ')[1]}
-          </button>`).join('')}
-      </div>
-
-      <!-- MÚSICA -->
-      <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">🎵 Música de fondo</div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:14px">
-        <button onclick="kidRecSelectMusic('0')" id="kbgTrack-0"
-          style="padding:8px 2px;border-radius:10px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);cursor:pointer;font-size:10px;color:#C9A84C;font-family:'Fredoka One',cursive;text-align:center">🔇<br>Sin mús.</button>
-        <button onclick="kidRecSelectMusic('1')" id="kbgTrack-1"
-          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">🎵<br>Alegre</button>
-        <button onclick="kidRecSelectMusic('2')" id="kbgTrack-2"
-          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">🌙<br>Cuna</button>
-        <button onclick="kidRecSelectMusic('3')" id="kbgTrack-3"
-          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">✨<br>Mágica</button>
-        <button onclick="kidRecSelectMusic('4')" id="kbgTrack-4"
-          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">🌟<br>Aventura</button>
-      </div>
-
-      <!-- ESCUCHAR COMO PAPÁ/MAMÁ -->
-      <button onclick="kidPreviewAsParent()" id="btnKidPreviewAsParent"
-        style="width:100%;padding:11px;border-radius:12px;border:2px solid rgba(201,168,76,0.4);
-               background:#FFF8E7;color:#5C4033;font-family:'Fredoka One',cursive;
-               font-size:14px;cursor:pointer;margin-bottom:12px">
-        👂 Escuchar como papá/mamá lo va a escuchar
-      </button>
-
-      <!-- ENVIAR -->
-      <button onclick="sendKidVoiceToParent()"
-        style="width:100%;padding:14px;border-radius:12px;border:none;
-               background:linear-gradient(135deg,#C9A84C,#e8c97a);
-               color:white;font-family:'Fredoka One',cursive;font-size:16px;cursor:pointer">
-        🚀 ¡Mandar a papá/mamá!
-      </button>
-    </div>`;
-  wrap.style.display='block';
-}
-
-function kidRecSelectDistortion(id, btn) {
-  _kidRecSelectedDistortion=id?VOICE_DISTORTIONS.find(v=>v.id===id):null;
-  document.querySelectorAll('[id^="kdistBtn-"]').forEach(b=>{
-    b.style.border='2px solid rgba(201,168,76,0.2)'; b.style.color='#9B7B6B'; b.style.background='#FFF8E7';
-  });
-  if(btn){btn.style.border='2px solid #C9A84C';btn.style.color='#C9A84C';btn.style.background='rgba(201,168,76,0.15)';}
-}
-
-function kidRecSelectMusic(id) {
-  _kidRecFinalMusicTrackId=id==='0'?null:id;
-  document.querySelectorAll('[id^="kbgTrack-"]').forEach(b=>{
-    const a=b.id==='kbgTrack-'+id;
-    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
-    b.style.background=a?'rgba(201,168,76,0.15)':'white';
-    b.style.color=a?'#C9A84C':'#9B7B6B';
-  });
-  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
-  if(_kidRecFinalMusicTrackId&&typeof BG_MUSIC_TRACKS!=='undefined'){
-    const tk=BG_MUSIC_TRACKS.find(t=>t.id===_kidRecFinalMusicTrackId);
-    if(tk){
-      _bgMusicPreviewAudio=new Audio(tk.file); _bgMusicPreviewAudio.volume=0.4;
-      _bgMusicPreviewAudio.play().catch(()=>{});
-      setTimeout(()=>{if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}},10000);
-    }
-  }
-}
-
-async function kidPreviewAsParent() {
-  const btn=document.getElementById('btnKidPreviewAsParent');
-  if(_kidPreviewAsKidAudio||_kidPreviewAsKidMusic){
-    if(_kidPreviewAsKidAudio){try{_kidPreviewAsKidAudio.pause();}catch(e){}} _kidPreviewAsKidAudio=null;
-    if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();}catch(e){}} _kidPreviewAsKidMusic=null;
-    if(btn) btn.textContent='👂 Escuchar como papá/mamá lo va a escuchar'; return;
-  }
-  if(!appState.kidOwnAudioBlob){showToast('Grabá tu voz primero');return;}
-  if(btn) btn.textContent='⏳ Preparando...';
-  try {
-    const url=URL.createObjectURL(appState.kidOwnAudioBlob);
-    if(_kidRecSelectedDistortion&&_kidRecSelectedDistortion.pitch){
-      if(typeof Tone==='undefined'){
-        await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
-      }
-      await Tone.start();
-      const ps=new Tone.PitchShift(_kidRecSelectedDistortion.pitch).toDestination();
-      const pl=new Tone.Player(url).connect(ps);
-      await new Promise(res=>setTimeout(res,600));
-      pl.start();
-      const dur=(pl.buffer?.duration||10)*1000;
-      _kidPreviewAsKidAudio={pause:function(){try{pl.stop();ps.dispose();}catch(e){}}};
-      setTimeout(()=>{_kidPreviewAsKidAudio=null;if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();}catch(e){}_kidPreviewAsKidMusic=null;}if(btn)btn.textContent='👂 Escuchar como papá/mamá lo va a escuchar';},dur+300);
-    } else {
-      const audio=new Audio(url);
-      audio.onended=()=>{_kidPreviewAsKidAudio=null;if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();_kidPreviewAsKidMusic=null;}catch(e){}}if(btn)btn.textContent='👂 Escuchar como papá/mamá lo va a escuchar';};
-      await audio.play();
-      _kidPreviewAsKidAudio=audio;
-    }
-    if(_kidRecFinalMusicTrackId&&typeof BG_MUSIC_TRACKS!=='undefined'){
-      const tk=BG_MUSIC_TRACKS.find(t=>t.id===_kidRecFinalMusicTrackId);
-      if(tk){_kidPreviewAsKidMusic=new Audio(tk.file);_kidPreviewAsKidMusic.volume=0.5;_kidPreviewAsKidMusic.loop=true;_kidPreviewAsKidMusic.play().catch(()=>{});}
-    }
-    if(btn) btn.textContent='⏸ Pausar';
-  } catch(e){console.error('kidPreview:',e);if(btn)btn.textContent='👂 Escuchar como papá/mamá lo va a escuchar';}
-}
-
 async function saveKidVoice() {
   if(!appState.kidOwnAudioBlob){ showToast('❌ Grabá el audio primero'); return; }
   if(!appState.currentStory){ showToast('❌ No hay cuento seleccionado'); return; }
@@ -5090,29 +5155,29 @@ async function saveKidVoice() {
 }
 
 async function sendKidVoiceToParent() {
-  if(!appState.kidOwnAudioBlob){ showToast('❌ Grabá tu voz primero'); return; }
+  if(!appState.kidOwnAudioBlob){ showToast('🎙️ Grabá tu cuento primero'); return; }
   if(appState.kidOwnAudioBlob.size===0){ showToast('❌ El audio está vacío'); return; }
 
   // Parar previews
   if(_kidPreviewAsKidAudio){try{_kidPreviewAsKidAudio.pause();}catch(e){}} _kidPreviewAsKidAudio=null;
   if(_kidPreviewAsKidMusic){try{_kidPreviewAsKidMusic.pause();}catch(e){}} _kidPreviewAsKidMusic=null;
-  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();}catch(e){}} _bgMusicPreviewAudio=null;
+  if(typeof _bgMusicPreviewAudio!=='undefined'&&_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();}catch(e){}} _bgMusicPreviewAudio=null;
 
   showToast('⏳ Preparando y enviando...');
 
   try {
     const id='kidvoice_'+Date.now();
-    const imgs=appState.kidImages||[];
-    const title='🎙️ Mi versión de: '+(appState.currentStory?.title||'un cuento');
+    // Imágenes del nuevo flujo
+    const imgs = _kidRecScenes.filter(s=>s).map(s=>getSceneImageUrl(_kidRecChar,s.file));
+    const title='🎙️ Mi versión: '+(appState.currentStory?.title||'un cuento');
 
-    // Guardar audio original en DB
     await dbPutAudio(id, appState.kidOwnAudioBlob);
 
-    // Guardar en mensajes locales
     const msgs=JSON.parse(localStorage.getItem('ownKidMessages')||'[]');
     msgs.unshift({
       id, title, text:'', images:imgs, audioKey:id,
       date:new Date().toLocaleDateString('es-AR'), isVoice:true,
+      kidChar:_kidRecChar,
       distortionPitch: _kidRecSelectedDistortion?.pitch||0,
       distortionId: _kidRecSelectedDistortion?.id||null,
       musicTrackId: _kidRecFinalMusicTrackId||null,
@@ -5123,8 +5188,7 @@ async function sendKidVoiceToParent() {
     // Supabase
     const familiaId=getFamiliaId();
     if(supa&&familiaId){
-      const filename=`${familiaId}/${id}.webm`;
-      supaUploadAudio(appState.kidOwnAudioBlob,filename)
+      supaUploadAudio(appState.kidOwnAudioBlob,`${familiaId}/${id}.webm`)
         .then(f=>{ if(f) return supaSaveMensaje({
           id, familia_id:familiaId, titulo:title, imagenes:imgs,
           tiene_audio:true, tipo:'voz',
@@ -5132,31 +5196,30 @@ async function sendKidVoiceToParent() {
           distortion_id:_kidRecSelectedDistortion?.id||null,
           music_track_id:_kidRecFinalMusicTrackId||null,
         }); })
-        .then(()=>console.log('✅ Mensaje niño en Supabase'))
-        .catch(e=>console.warn('Mensaje Supabase (no crítico):',e));
+        .catch(e=>console.warn('Supabase msg:',e));
     }
 
-    // Descarga ZIP para el padre
-    await descargarCuentoNinoZip(id, title, appState.kidOwnAudioBlob, imgs);
+    // Generar ZIP para descargar el padre
+    await _generarZipKid(id, title, appState.kidOwnAudioBlob, imgs);
 
-    showToast('🚀 ¡Enviado! El ZIP se descargó para papá/mamá +5⭐');
+    showToast('🚀 ¡Enviado! El ZIP se descargó +5⭐');
     const stars=5; appState.stars+=stars; localStorage.setItem('ownStars',appState.stars); updateStarDisplay();
+
+    // Reset
     appState.kidOwnAudioBlob=null; appState.kidRecAudio=null; appState.kidRecIsPlaying=false;
-    _kidRecScenesBlobs=[]; _kidRecPortadaBlob=null; _kidRecSelectedDistortion=null; _kidRecFinalMusicTrackId=null;
+    _kidRecScenes=[null,null,null,null,null]; _kidRecSelectedDistortion=null; _kidRecFinalMusicTrackId=null;
     const pb=document.getElementById('kidRecPlayback'); if(pb) pb.style.display='none';
     const kt=document.getElementById('kidRecTimer'); if(kt) kt.textContent='0:00';
-    const ks=document.getElementById('kidRecStatus'); if(ks) ks.textContent='¡Tocá para grabar!';
+    const ks=document.getElementById('kidRecStatus'); if(ks) ks.textContent='Tocá el botón para empezar';
     goKidRecStep(1);
   } catch(err) {
-    const msg=err?.message||err?.name||String(err);
-    console.error('sendKidVoiceToParent error:',msg,err);
-    showToast('❌ '+msg);
+    console.error('sendKidVoiceToParent error:',err);
+    showToast('❌ '+err?.message);
   }
 }
 
-async function descargarCuentoNinoZip(id, title, audioBlob, imgUrls) {
+async function _generarZipKid(id, title, audioBlob, imgUrls) {
   try {
-    // Cargar JSZip desde CDN
     if(typeof JSZip==='undefined'){
       await new Promise((res,rej)=>{
         const s=document.createElement('script');
@@ -5165,58 +5228,39 @@ async function descargarCuentoNinoZip(id, title, audioBlob, imgUrls) {
       });
     }
     const zip=new JSZip();
-    const kidName=appState.kidName||'nino';
-    const safeTitle=title.replace(/[^a-zA-Z0-9áéíóúñü ]/g,'').trim().slice(0,30)||'cuento';
-    const folder=zip.folder(`${kidName}_${safeTitle}`);
+    const kidName=(appState.kidName||'nino').replace(/\s/g,'_');
+    const folder=zip.folder(`${kidName}_cuento`);
 
-    // Audio original (sin distorsión)
+    // Voz original
     folder.file('voz_original.webm', audioBlob);
 
-    // Audio con distorsión si eligió
-    if(_kidRecSelectedDistortion&&_kidRecSelectedDistortion.pitch&&typeof Tone!=='undefined'){
+    // Voz con distorsión si eligió
+    if(_kidRecSelectedDistortion?.pitch && typeof Tone!=='undefined'){
       try {
-        await Tone.start();
         const url=URL.createObjectURL(audioBlob);
         const ps=new Tone.PitchShift(_kidRecSelectedDistortion.pitch);
-        const recorder=new Tone.Recorder();
-        ps.connect(recorder);
-        const player=new Tone.Player(url).connect(ps);
-        await new Promise(res=>setTimeout(res,500));
-        await recorder.start();
-        player.start();
-        const dur=(player.buffer?.duration||10)*1000;
+        const rec=new Tone.Recorder();
+        ps.connect(rec); const pl=new Tone.Player(url).connect(ps);
+        await new Promise(res=>setTimeout(res,400));
+        await rec.start(); pl.start();
+        const dur=(pl.buffer?.duration||10)*1000;
         await new Promise(res=>setTimeout(res,dur+500));
-        const distBlob=await recorder.stop();
-        folder.file(`voz_con_${_kidRecSelectedDistortion.id}.webm`, distBlob);
-        ps.dispose(); player.dispose(); recorder.dispose();
-      } catch(e){ console.warn('Tone render error:',e); }
+        const distBlob=await rec.stop();
+        folder.file(`voz_${_kidRecSelectedDistortion.id}.webm`, distBlob);
+        ps.dispose(); pl.dispose(); rec.dispose();
+      } catch(e){console.warn('Tone zip:',e);}
     }
 
-    // Imágenes de escenas
+    // Imágenes
     const imgFolder=folder.folder('imagenes');
     for(let i=0;i<imgUrls.length;i++){
-      try {
+      try{
         const resp=await fetch(imgUrls[i]);
         const blob=await resp.blob();
-        const ext=blob.type.includes('png')?'png':'jpg';
-        imgFolder.file(`escena_${i+1}.${ext}`, blob);
-      } catch(e){ console.warn('img fetch error:',e); }
+        imgFolder.file(`escena_${i+1}.png`, blob);
+      }catch(e){}
     }
 
-    // Imágenes subidas por el niño
-    for(let i=0;i<_kidRecScenesBlobs.length;i++){
-      const f=_kidRecScenesBlobs[i];
-      const ext=f.type.includes('png')?'png':'jpg';
-      imgFolder.file(`mi_escena_${i+1}.${ext}`, f);
-    }
-
-    // Portada si hay
-    if(_kidRecPortadaBlob){
-      const ext=_kidRecPortadaBlob.type.includes('png')?'png':'jpg';
-      folder.file(`portada.${ext}`, _kidRecPortadaBlob);
-    }
-
-    // Generar y descargar
     const zipBlob=await zip.generateAsync({type:'blob'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(zipBlob);
@@ -5224,8 +5268,8 @@ async function descargarCuentoNinoZip(id, title, audioBlob, imgUrls) {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
   } catch(e){
-    console.error('descargarCuentoNinoZip error:',e);
-    showToast('⚠️ Cuento enviado pero no se pudo crear el ZIP');
+    console.error('ZIP error:',e);
+    showToast('⚠️ Enviado, pero no se pudo crear el ZIP');
   }
 }
 

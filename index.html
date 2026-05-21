@@ -1079,118 +1079,81 @@
       <!-- ====== VERSIÓN DEL NIÑO — PASOS ====== -->
       <div id="kidOwnRecordSteps" style="display:none">
         <!-- Step progress -->
-        <div style="display:flex;gap:0;margin-bottom:18px;border-radius:14px;overflow:hidden;border:1px solid rgba(167,139,250,0.2)">
-          <div class="rec-step-tab active" id="krstab-1" onclick="goKidRecStep(1)"><div style="font-size:18px">🎭</div><div style="font-size:9px;font-weight:800;margin-top:2px">Personaje</div></div>
-          <div class="rec-step-tab" id="krstab-2" onclick="goKidRecStep(2)"><div style="font-size:18px">🖼️</div><div style="font-size:9px;font-weight:800;margin-top:2px">Imágenes</div></div>
-          <div class="rec-step-tab" id="krstab-3" onclick="goKidRecStep(3)"><div style="font-size:18px">🎙️</div><div style="font-size:9px;font-weight:800;margin-top:2px">Grabar</div></div>
-          <div class="rec-step-tab" id="krstab-4" onclick="goKidRecStep(4)"><div style="font-size:18px">🚀</div><div style="font-size:9px;font-weight:800;margin-top:2px">Enviar</div></div>
+        <div style="display:flex;gap:0;margin-bottom:18px;border-radius:14px;overflow:hidden;border:1px solid rgba(201,168,76,0.2)">
+          <div class="rec-step-tab active" id="krstab-1" onclick="goKidRecStep(1)"><div style="font-size:20px">🐉</div><div style="font-size:9px;font-weight:800;margin-top:2px">Personaje</div></div>
+          <div class="rec-step-tab" id="krstab-2" onclick="goKidRecStep(2)"><div style="font-size:20px">🖼️</div><div style="font-size:9px;font-weight:800;margin-top:2px">Escenas</div></div>
+          <div class="rec-step-tab" id="krstab-3" onclick="goKidRecStep(3)"><div style="font-size:20px">🎙️</div><div style="font-size:9px;font-weight:800;margin-top:2px">Grabar</div></div>
+          <div class="rec-step-tab" id="krstab-4" onclick="goKidRecStep(4)"><div style="font-size:20px">🚀</div><div style="font-size:9px;font-weight:800;margin-top:2px">Enviar</div></div>
         </div>
 
-        <!-- KID STEP 1: Elegir personaje y voz -->
+        <!-- KID STEP 1: Elegir personaje -->
         <div id="kidRecStep-1">
-          <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:6px;color:var(--accent2)">1️⃣ Elegí tu personaje</div>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">¿Quién va a contar el cuento?</p>
-          <div style="background:var(--card);border-radius:18px;padding:16px;margin-bottom:14px">
-            <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:var(--accent2)">🎭 Elegí la voz:</div>
-            <div class="voice-row" id="kidVoiceRow2" style="margin-bottom:14px"></div>
-            <div style="font-size:14px;font-weight:800;margin-bottom:10px;color:var(--accent)">🐉 Elegí el personaje:</div>
-            <div class="char-row" id="kidCharRow" style="font-size:28px;gap:10px"></div>
+          <div style="font-family:'Fredoka One',cursive;font-size:24px;margin-bottom:16px;color:#C9A84C;text-align:center">¿Quién cuenta el cuento?</div>
+          <div id="kidRecCharGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px"></div>
+          <!-- Personaje elegido preview -->
+          <div id="kidRecCharPreview" style="display:none;text-align:center;margin-bottom:16px">
+            <img id="kidRecCharImg" style="width:120px;height:120px;object-fit:cover;border-radius:20px;border:3px solid #C9A84C">
+            <div id="kidRecCharLabel" style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-top:8px"></div>
           </div>
-          <button class="btn btn-accent btn-full" style="font-size:16px;padding:16px" onclick="goKidRecStep(2)">Siguiente: Elegir imágenes →</button>
+          <button class="btn btn-accent btn-full" style="font-size:18px;padding:18px;border-radius:16px" onclick="goKidRecStep(2)">Siguiente →</button>
         </div>
 
-        <!-- KID STEP 2: Elegir imágenes del archivo -->
+        <!-- KID STEP 2: Elegir 5 escenas -->
         <div id="kidRecStep-2" style="display:none">
-          <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:6px;color:var(--accent)">2️⃣ Elegí las imágenes</div>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Tocá las imágenes que querés usar en tu cuento:</p>
-
-          <!-- Portada -->
-          <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:12px">
-            <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--text2)">🖼️ Portada</div>
-            <div style="display:flex;gap:10px;align-items:center">
-              <div id="kidRecPortadaPreview" style="width:64px;height:64px;border-radius:10px;background:#F5EDE0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">📷</div>
-              <button onclick="document.getElementById('kidRecPortadaInput').click()"
-                style="flex:1;padding:10px;border-radius:10px;border:2px dashed rgba(201,168,76,0.4);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer">
-                📁 Elegir portada del archivo
-              </button>
-              <input type="file" id="kidRecPortadaInput" accept="image/*" style="display:none" onchange="kidRecLoadPortada(this)">
-            </div>
-          </div>
-
-          <!-- Escenas del archivo -->
-          <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px">
-            <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--text2)">📸 Escenas (hasta 5)</div>
-            <div class="images-grid" id="kidRecScenesGrid" style="margin-bottom:10px"></div>
-            <button onclick="document.getElementById('kidRecScenesInput').click()"
-              style="width:100%;padding:10px;border-radius:10px;border:2px dashed rgba(201,168,76,0.4);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer">
-              📁 Agregar imágenes del archivo
-            </button>
-            <input type="file" id="kidRecScenesInput" accept="image/*" multiple style="display:none" onchange="kidRecLoadScenes(this)">
-            <div style="font-size:10px;color:#9B7B6B;margin-top:6px;font-style:italic">También podés usar las imágenes del cuento de papá/mamá de abajo ↓</div>
-            <div class="images-grid" id="kidImagesGrid" style="margin-top:8px"></div>
-          </div>
-
+          <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:6px;color:#C9A84C;text-align:center">¿Qué hace en el cuento?</div>
+          <div style="font-size:13px;color:#9B7B6B;text-align:center;margin-bottom:14px">Elegí 5 momentos — tocá cada uno y elegí qué hace</div>
+          <div id="kidRecScenesBuilder" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px"></div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost btn-sm" onclick="goKidRecStep(1)">← Volver</button>
-            <button class="btn btn-accent btn-sm" style="flex:1;font-size:15px;padding:14px" onclick="goKidRecStep(3)">Siguiente: Grabar →</button>
+            <button class="btn btn-accent btn-sm" style="flex:1;font-size:16px;padding:16px" onclick="goKidRecStep(3)">¡A grabar! 🎙️</button>
           </div>
         </div>
 
         <!-- KID STEP 3: Grabar -->
         <div id="kidRecStep-3" style="display:none">
-          <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:6px;color:var(--accent)">3️⃣ ¡Grabá tu cuento!</div>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:12px">Las imágenes te van a ayudar a recordar qué decir:</p>
+          <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:10px;color:#C9A84C;text-align:center">¡Contá tu cuento!</div>
 
-          <!-- Mini slideshow while recording -->
-          <div style="background:var(--bg2);border-radius:16px;overflow:hidden;margin-bottom:14px;border:2px solid rgba(167,139,250,0.2)">
+          <!-- Slideshow mientras graba -->
+          <div style="margin:0 0 12px;border-radius:20px;overflow:hidden;border:3px solid #C9A84C;background:#F5EDE0">
             <div class="slideshow-container" id="kidRecSlideshow" style="aspect-ratio:1;border-radius:0">
-              <div id="kidRecSlidePh" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;color:var(--text2)">🖼️</div>
-              <button class="slide-nav-btn" style="left:6px" onclick="slideKidRec(-1)">‹</button>
-              <button class="slide-nav-btn" style="right:6px" onclick="slideKidRec(1)">›</button>
+              <div id="kidRecSlidePh" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:48px;color:#9B7B6B">🖼️</div>
             </div>
             <div class="slideshow-dots" id="kidRecSlideDots" style="padding:8px"></div>
           </div>
 
-          <!-- Big record button at bottom -->
-          <div style="background:var(--card);border-radius:18px;padding:20px;text-align:center;margin-bottom:14px">
-            <div class="timer-display" id="kidRecTimer" style="font-size:48px;margin-bottom:6px">0:00</div>
-            <div class="rec-status" id="kidRecStatus" style="font-size:15px;margin-bottom:16px">Tocá para grabar tu cuento</div>
-            <button id="kidRecBtn" onclick="toggleKidRecord()" style="width:140px;height:140px;border-radius:50%;background:linear-gradient(135deg,var(--coral),#ff8e53);border:none;color:white;cursor:pointer;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(255,107,107,.5);transition:transform .15s;font-size:inherit">
-              <span style="font-size:48px;line-height:1">🎙️</span>
-              <span style="font-size:16px;font-weight:900;margin-top:6px;font-family:'Nunito',sans-serif">GRABAR</span>
+          <!-- Botón grabar grande -->
+          <div style="text-align:center;margin-bottom:14px">
+            <div style="font-family:'Fredoka One',cursive;font-size:42px;margin-bottom:4px" id="kidRecTimer">0:00</div>
+            <div style="font-size:13px;color:#9B7B6B;margin-bottom:14px" id="kidRecStatus">Tocá el botón para empezar</div>
+            <button id="kidRecBtn" onclick="toggleKidRecord()"
+              style="width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,#ff6b6b,#ff8e53);border:none;color:white;cursor:pointer;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 32px rgba(255,107,107,.5);transition:transform .15s">
+              <span style="font-size:44px;line-height:1">🎙️</span>
+              <span style="font-size:15px;font-weight:900;margin-top:4px;font-family:'Fredoka One',cursive">GRABAR</span>
             </button>
           </div>
 
-          <!-- Playback after recording -->
+          <!-- Playback después de grabar -->
           <div id="kidRecPlayback" style="display:none;background:rgba(52,211,153,0.08);border-radius:16px;padding:16px;margin-bottom:14px;border:2px solid rgba(52,211,153,0.3)">
-            <div style="font-family:'Baloo 2',cursive;font-size:16px;margin-bottom:12px;color:var(--accent3)">✅ ¡Genial! Escuchá tu cuento:</div>
-            <div class="audio-player" style="background:rgba(0,0,0,0.15);border-radius:12px;padding:14px;margin-bottom:12px">
-              <div class="audio-controls">
-                <button class="play-btn" id="kidRecPlayBtn" onclick="toggleKidRecPlay()" style="width:60px;height:60px;font-size:26px">▶</button>
-                <div class="audio-waveform" style="flex:1"><div class="audio-progress" id="kidRecProgress"></div></div>
-                <span class="audio-time" id="kidRecTimeDisplay" style="font-size:13px">0:00</span>
-              </div>
+            <div style="font-family:'Fredoka One',cursive;font-size:16px;margin-bottom:10px;color:#059669">✅ ¡Genial! Escuchá lo que grabaste:</div>
+            <div class="audio-controls" style="background:rgba(0,0,0,0.06);border-radius:12px;padding:12px;margin-bottom:10px">
+              <button class="play-btn" id="kidRecPlayBtn" onclick="toggleKidRecPlay()" style="width:56px;height:56px;font-size:24px">▶</button>
+              <div class="audio-waveform" style="flex:1"><div class="audio-progress" id="kidRecProgress"></div></div>
+              <span class="audio-time" id="kidRecTimeDisplay" style="font-size:12px">0:00</span>
             </div>
-            <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--accent2)">🎭 Cambiar la voz:</div>
-            <div class="voice-pills" id="kidRecVoicePills" style="margin-bottom:10px"></div>
-            <button class="btn btn-accent btn-full btn-sm" style="margin-bottom:8px" onclick="applyVoiceToKidRecording()">✨ Aplicar voz</button>
-            <button class="btn btn-danger btn-sm btn-full" onclick="deleteKidRecording()">🗑 Borrar y grabar de nuevo</button>
+            <button style="width:100%;padding:10px;border-radius:10px;border:2px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);color:#ef4444;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer" onclick="deleteKidRecording()">🗑 Borrar y grabar de nuevo</button>
           </div>
 
           <div style="display:flex;gap:8px">
             <button class="btn btn-ghost btn-sm" onclick="goKidRecStep(2)">← Volver</button>
-            <button class="btn btn-accent btn-sm" style="flex:1;font-size:15px;padding:14px" onclick="goKidRecStep(4)">Siguiente: Enviar →</button>
+            <button class="btn btn-accent btn-sm" style="flex:1;font-size:16px;padding:16px" onclick="avanzarKidAlPaso4()">Siguiente: Enviar 🚀</button>
           </div>
         </div>
 
         <!-- KID STEP 4: Distorsión + Música + Enviar -->
         <div id="kidRecStep-4" style="display:none">
-          <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:12px;color:var(--accent3)">4️⃣ ¡Terminá tu cuento!</div>
-
-          <!-- Panel generado por showKidDistortionPanel() -->
+          <div style="font-family:'Fredoka One',cursive;font-size:22px;margin-bottom:14px;color:#C9A84C;text-align:center">¡Último paso!</div>
           <div id="kidRecApplyVoiceWrap"></div>
-
-          <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="goKidRecStep(3)">← Volver a grabar</button>
+          <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" onclick="goKidRecStep(3)">← Volver a grabar</button>
         </div>
       </div>
     </div>
