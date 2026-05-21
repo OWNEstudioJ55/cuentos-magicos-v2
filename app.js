@@ -1487,10 +1487,6 @@ function dismissRecGuide() {
 
 function goRecStep(n) {
   if(appState.isRecording) stopRecording();
-  try{if(typeof _previewAsKidAudio!=='undefined'&&_previewAsKidAudio)_previewAsKidAudio.pause();}catch(e){} 
-  try{if(typeof _previewAsKidMusic!=='undefined'&&_previewAsKidMusic)_previewAsKidMusic.pause();}catch(e){}
-  try{if(typeof _bgMusicPreviewAudio!=='undefined'&&_bgMusicPreviewAudio)_bgMusicPreviewAudio.pause();}catch(e){}
-  _previewAsKidAudio=null; _previewAsKidMusic=null; _bgMusicPreviewAudio=null;
   currentRecStep=n;
   // Autosave borrador al avanzar pasos
   autoSaveDraft();
@@ -1855,6 +1851,22 @@ const VOICE_DISTORTIONS = [
 let _selectedDistortion = null;
 let _distortPreviewAudio = null;
 
+function avanzarAlPaso4() {
+  if(appState.isRecording) {
+    // Está grabando — parar y esperar el onstop que llama showVoiceDistortionPanel
+    stopRecording();
+    // onstop se encarga de llamar showVoiceDistortionPanel automáticamente
+    return;
+  }
+  if(appState.recordedBlob) {
+    // Ya hay grabación — mostrar panel directamente
+    showVoiceDistortionPanel();
+    return;
+  }
+  // No hay grabación
+  showToast('🎙️ Grabá un cuento primero');
+}
+
 function showVoiceDistortionPanel() {
   const wrap = document.getElementById('recApplyVoiceWrap');
   if(!wrap) return;
@@ -1916,7 +1928,6 @@ function showVoiceDistortionPanel() {
       </div>
     </div>`;
   wrap.style.display = 'block';
-  goRecStep(4);
 }
 
 function selectDistortion(id, btn) {
