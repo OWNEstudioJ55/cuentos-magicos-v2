@@ -1856,7 +1856,6 @@ function showVoiceDistortionPanel() {
   if(!wrap) return;
   _finalMusicTrackId = null;
   _selectedDistortion = null;
-  // Ir al paso 4 y mostrar el panel
   goRecStep(4);
   wrap.innerHTML = `
     <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
