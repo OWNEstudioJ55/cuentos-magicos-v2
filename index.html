@@ -468,7 +468,7 @@
           <div style="font-size:16px">🎙️</div>
           <div style="font-size:10px;font-weight:800;margin-top:2px">Grabar</div>
         </div>
-        <div class="rec-step-tab" id="rstab-4" onclick="avanzarAlPaso4()">
+        <div class="rec-step-tab" id="rstab-4" onclick="goRecStep(4)">
           <div style="font-size:16px">🚀</div>
           <div style="font-size:10px;font-weight:800;margin-top:2px">Enviar</div>
         </div>
@@ -589,7 +589,7 @@
 
         <div style="display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" onclick="goRecStep(2)">← Volver</button>
-          <button class="btn btn-accent btn-sm" style="flex:1" onclick="avanzarAlPaso4()">Siguiente: Revisar y enviar →</button>
+          <button class="btn btn-accent btn-sm" style="flex:1" onclick="if(appState.isRecording)stopRecording();goRecStep(4)">Siguiente: Voz y envío →</button>
         </div>
       </div>
 
@@ -1099,22 +1099,35 @@
           <button class="btn btn-accent btn-full" style="font-size:16px;padding:16px" onclick="goKidRecStep(2)">Siguiente: Elegir imágenes →</button>
         </div>
 
-        <!-- KID STEP 2: Elegir / generar imágenes -->
+        <!-- KID STEP 2: Elegir imágenes del archivo -->
         <div id="kidRecStep-2" style="display:none">
           <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:6px;color:var(--accent)">2️⃣ Elegí las imágenes</div>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Podés usar las del cuento de papá o generar las tuyas:</p>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Tocá las imágenes que querés usar en tu cuento:</p>
 
-          <!-- Images from parent story -->
+          <!-- Portada -->
           <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:12px">
-            <div style="font-size:13px;font-weight:800;margin-bottom:10px;color:var(--text2)">🖼️ Imágenes del cuento de papá:</div>
-            <div class="images-grid" id="kidImagesGrid"></div>
+            <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--text2)">🖼️ Portada</div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <div id="kidRecPortadaPreview" style="width:64px;height:64px;border-radius:10px;background:#F5EDE0;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">📷</div>
+              <button onclick="document.getElementById('kidRecPortadaInput').click()"
+                style="flex:1;padding:10px;border-radius:10px;border:2px dashed rgba(201,168,76,0.4);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer">
+                📁 Elegir portada del archivo
+              </button>
+              <input type="file" id="kidRecPortadaInput" accept="image/*" style="display:none" onchange="kidRecLoadPortada(this)">
+            </div>
           </div>
 
-          <!-- Generate own sequence -->
+          <!-- Escenas del archivo -->
           <div style="background:var(--card);border-radius:18px;padding:14px;margin-bottom:14px">
-            <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--accent2)">✨ O generá MIS propias escenas:</div>
-            <div id="sequenceScenes" style="margin-bottom:10px"></div>
-            <button class="btn btn-accent btn-full btn-sm" onclick="generateSequenceImages()" id="btnGenerateSeq">✨ Generar mis 5 escenas</button>
+            <div style="font-size:13px;font-weight:800;margin-bottom:8px;color:var(--text2)">📸 Escenas (hasta 5)</div>
+            <div class="images-grid" id="kidRecScenesGrid" style="margin-bottom:10px"></div>
+            <button onclick="document.getElementById('kidRecScenesInput').click()"
+              style="width:100%;padding:10px;border-radius:10px;border:2px dashed rgba(201,168,76,0.4);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer">
+              📁 Agregar imágenes del archivo
+            </button>
+            <input type="file" id="kidRecScenesInput" accept="image/*" multiple style="display:none" onchange="kidRecLoadScenes(this)">
+            <div style="font-size:10px;color:#9B7B6B;margin-top:6px;font-style:italic">También podés usar las imágenes del cuento de papá/mamá de abajo ↓</div>
+            <div class="images-grid" id="kidImagesGrid" style="margin-top:8px"></div>
           </div>
 
           <div style="display:flex;gap:8px">
@@ -1170,24 +1183,13 @@
           </div>
         </div>
 
-        <!-- KID STEP 4: Enviar -->
+        <!-- KID STEP 4: Distorsión + Música + Enviar -->
         <div id="kidRecStep-4" style="display:none">
-          <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:6px;color:var(--accent3)">4️⃣ ¡Mandá tu cuento!</div>
-          <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Papá/mamá va a poder escucharlo y ver tus imágenes.</p>
+          <div style="font-family:'Baloo 2',cursive;font-size:22px;margin-bottom:12px;color:var(--accent3)">4️⃣ ¡Terminá tu cuento!</div>
 
-          <!-- Summary -->
-          <div style="background:var(--card);border-radius:16px;padding:14px;margin-bottom:16px;display:flex;gap:12px;align-items:center">
-            <div style="font-size:48px" id="kidSendSummaryChar">🐉</div>
-            <div>
-              <div style="font-weight:800;font-size:15px" id="kidSendSummaryTitle">Mi cuento</div>
-              <div style="font-size:12px;color:var(--text2)" id="kidSendSummaryInfo">Sin audio aún</div>
-            </div>
-          </div>
+          <!-- Panel generado por showKidDistortionPanel() -->
+          <div id="kidRecApplyVoiceWrap"></div>
 
-          <button class="btn btn-gold btn-full" style="font-size:18px;padding:20px;margin-bottom:10px;border-radius:18px" onclick="sendKidVoiceToParent()">
-            🚀 ¡Mandar a papá/mamá!
-          </button>
-          <button class="btn btn-ghost btn-sm btn-full" onclick="saveKidVoice()">💾 Solo guardar (sin enviar)</button>
           <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="goKidRecStep(3)">← Volver a grabar</button>
         </div>
       </div>
