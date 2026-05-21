@@ -1856,7 +1856,6 @@ function showVoiceDistortionPanel() {
   if(!wrap) return;
   _finalMusicTrackId = null;
   _selectedDistortion = null;
-  goRecStep(4);
   wrap.innerHTML = `
     <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
 
@@ -1913,6 +1912,7 @@ function showVoiceDistortionPanel() {
       </div>
     </div>`;
   wrap.style.display = 'block';
+  goRecStep(4);
 }
 
 function selectDistortion(id, btn) {
