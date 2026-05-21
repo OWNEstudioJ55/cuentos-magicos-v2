@@ -1588,6 +1588,17 @@ function discardDraft() {
 
 
 function updateRecStep4Summary() {
+  // Resetear selecciones al entrar al paso 4
+  _finalMusicTrackId = null;
+  _selectedDistortion = null;
+  // Marcar "Sin música" como activo
+  document.querySelectorAll('[id^="bgTrack-"]').forEach(b=>{
+    const a=b.id==='bgTrack-0';
+    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
+    b.style.background=a?'rgba(201,168,76,0.15)':'white';
+    b.style.color=a?'#C9A84C':'#9B7B6B';
+  });
+
   const title=document.getElementById('storyTitle')?.value||'Sin título';
   // Update editable title input
   const titleInput=document.getElementById('recFinalTitleInput');
@@ -1595,7 +1606,6 @@ function updateRecStep4Summary() {
   // Also update legacy element if exists
   const legacyTitle=document.getElementById('recFinalTitle');
   if(legacyTitle) legacyTitle.textContent=title;
-  document.getElementById('recStep4KidName').textContent=appState.kidName||'tu hijo';
   const imgs=appState.currentStoryImages||[];
   const dur=appState.recordSeconds||0;
   const sceneEl=document.getElementById('recFinalSceneCount');
@@ -1638,6 +1648,8 @@ const BG_MUSIC_TRACKS = [
   {id:'4',label:'🌟 Aventura',file:'/public/musica/musica4.mp3'},
 ];
 let _bgMusicOn=false, _bgMusicTrackId='1', _bgMusicAudio=null, _bgMusicPreviewAudio=null;
+let _finalMusicTrackId=null; // música elegida para enviar (null = sin música)
+let _previewAsKidAudio=null, _previewAsKidMusic=null;
 let _kidBgMusicAudio=null;
 
 function startBgMusic(){
@@ -1738,8 +1750,7 @@ async function toggleRecord() {
     appState.mediaRecorder.start(100);
     appState.isRecording=true;
     appState.recordSeconds=0;
-    // Arrancar música de fondo si está activada
-    if(document.getElementById('btnBgMusic')?.dataset.enabled==='1') startBgMusic();
+    // NO arrancar música al grabar — graba en silencio
     // Arrancar slideshow automáticamente con la duración del slider
     startAutoAdvance();
     const btn=document.getElementById('recBtn');
@@ -1853,44 +1864,37 @@ function showVoiceDistortionPanel() {
   const wrap = document.getElementById('recApplyVoiceWrap');
   if(!wrap) return;
   wrap.innerHTML = `
-    <div style="background:white;border-radius:16px;padding:14px;margin-top:12px;border:2px solid rgba(201,168,76,0.2)">
-      <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:10px">🎭 Distorsionar voz (opcional)</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
+      <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">2️⃣ Distorsión de voz (opcional)</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onclick="selectDistortion(null,this)" id="distBtn-none"
+          style="flex:1;padding:10px 6px;border-radius:12px;border:2px solid #C9A84C;
+                 background:rgba(201,168,76,0.15);cursor:pointer;font-size:11px;
+                 color:#C9A84C;font-family:'Fredoka One',cursive;text-align:center">
+          🎤<br>Sin dist.
+        </button>
         ${VOICE_DISTORTIONS.map(v=>`
           <button onclick="selectDistortion('${v.id}',this)"
             style="flex:1;padding:10px 6px;border-radius:12px;border:2px solid rgba(201,168,76,0.2);
-                   background:#FFF8E7;cursor:pointer;font-size:13px;font-weight:700;
-                   color:#9B7B6B;font-family:'Fredoka One',cursive;
-                   display:flex;flex-direction:column;align-items:center;gap:4px"
+                   background:#FFF8E7;cursor:pointer;font-size:11px;
+                   color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center"
             id="distBtn-${v.id}">
-            <span style="font-size:24px">${v.label.split(' ')[0]}</span>
-            <span>${v.label.split(' ')[1]}</span>
+            ${v.label.split(' ')[0]}<br>${v.label.split(' ')[1]}
           </button>`).join('')}
       </div>
-      <div id="distortPreviewWrap" style="display:none;margin-bottom:10px">
+      <div id="distortPreviewWrap" style="display:none">
         <button onclick="previewDistortion()"
           style="width:100%;padding:10px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
                  background:#FFF8E7;color:#5C4033;font-family:'Fredoka One',cursive;
-                 font-size:14px;cursor:pointer"
+                 font-size:13px;cursor:pointer"
           id="btnDistPreview">👂 Escuchar con distorsión</button>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="applyDistortionAndSave()"
-          style="flex:1;padding:12px;border-radius:12px;border:none;
-                 background:linear-gradient(135deg,#C9A84C,#e8c97a);
-                 color:white;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer"
-          id="btnApplyDistort" disabled>✅ Aplicar y enviar</button>
-        <button onclick="saveStoryWithoutDistortion()"
-          style="flex:1;padding:12px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
-                 background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer">
-          Sin distorsión →</button>
       </div>
     </div>`;
   wrap.style.display = 'block';
 }
 
 function selectDistortion(id, btn) {
-  _selectedDistortion = VOICE_DISTORTIONS.find(v=>v.id===id);
+  _selectedDistortion = id ? VOICE_DISTORTIONS.find(v=>v.id===id) : null;
   document.querySelectorAll('[id^="distBtn-"]').forEach(b=>{
     b.style.border = '2px solid rgba(201,168,76,0.2)';
     b.style.color = '#9B7B6B';
@@ -1901,8 +1905,8 @@ function selectDistortion(id, btn) {
     btn.style.color = '#C9A84C';
     btn.style.background = 'rgba(201,168,76,0.15)';
   }
-  document.getElementById('distortPreviewWrap').style.display = 'block';
-  document.getElementById('btnApplyDistort').disabled = false;
+  const pw = document.getElementById('distortPreviewWrap');
+  if(pw) pw.style.display = _selectedDistortion ? 'block' : 'none';
 }
 
 let _distortCtx=null, _tonePlayer=null, _tonePitchShift=null;
@@ -1946,15 +1950,92 @@ async function previewDistortion() {
   }
 }
 
+// Selector de música final (paso 4)
+function selectFinalMusicTrack(id) {
+  _finalMusicTrackId = id==='0' ? null : id;
+  document.querySelectorAll('[id^="bgTrack-"]').forEach(b=>{
+    const a=b.id==='bgTrack-'+id;
+    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
+    b.style.background=a?'rgba(201,168,76,0.15)':'white';
+    b.style.color=a?'#C9A84C':'#9B7B6B';
+  });
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  if(_finalMusicTrackId && typeof BG_MUSIC_TRACKS!=='undefined') {
+    const tk=BG_MUSIC_TRACKS.find(t=>t.id===_finalMusicTrackId);
+    if(tk){
+      _bgMusicPreviewAudio=new Audio(tk.file); _bgMusicPreviewAudio.volume=0.3;
+      _bgMusicPreviewAudio.play().catch(()=>{});
+      setTimeout(()=>{if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}},10000);
+    }
+  }
+}
+
+// Preview como el niño: voz + distorsión + música
+async function previewAsKid() {
+  if(_previewAsKidAudio){try{_previewAsKidAudio.pause();_previewAsKidAudio=null;}catch(e){}}
+  if(_previewAsKidMusic){try{_previewAsKidMusic.pause();_previewAsKidMusic=null;}catch(e){}}
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  if(!appState.recordedBlob){ showToast('❌ No hay grabación'); return; }
+  const btn=document.getElementById('btnPreviewAsKid');
+  if(btn) btn.textContent='⏳ Preparando...';
+  try {
+    const url=URL.createObjectURL(appState.recordedBlob);
+    let durMs=0;
+    if(_selectedDistortion&&_selectedDistortion.pitch) {
+      if(typeof Tone==='undefined'){
+        await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+      }
+      await Tone.start();
+      const ps=new Tone.PitchShift(_selectedDistortion.pitch).toDestination();
+      const pl=new Tone.Player(url).connect(ps);
+      await new Promise(res=>setTimeout(res,600));
+      pl.start();
+      durMs=(pl.buffer?.duration||10)*1000;
+      _previewAsKidAudio={pause:function(){try{pl.stop();ps.dispose();}catch(e){}}};
+      setTimeout(()=>{
+        if(_previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} _previewAsKidAudio=null;
+        if(_previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}} _previewAsKidMusic=null;
+        if(btn) btn.textContent='👂 Escuchar todo junto';
+      },durMs+300);
+    } else {
+      const audio=new Audio(url);
+      audio.onended=()=>{
+        if(_previewAsKidMusic){try{_previewAsKidMusic.pause();_previewAsKidMusic=null;}catch(e){}}
+        if(btn) btn.textContent='👂 Escuchar todo junto';
+      };
+      await audio.play();
+      _previewAsKidAudio=audio;
+    }
+    if(_finalMusicTrackId&&typeof BG_MUSIC_TRACKS!=='undefined'){
+      const tk=BG_MUSIC_TRACKS.find(t=>t.id===_finalMusicTrackId);
+      if(tk){ _previewAsKidMusic=new Audio(tk.file); _previewAsKidMusic.volume=0.5; _previewAsKidMusic.loop=true; _previewAsKidMusic.play().catch(()=>{}); }
+    }
+    if(btn) btn.textContent='⏸ Pausar preview';
+  } catch(e) {
+    console.error('previewAsKid:',e);
+    showToast('❌ Error: '+e.message);
+    if(btn) btn.textContent='👂 Escuchar todo junto';
+  }
+}
+
 async function applyDistortionAndSave() {
+  // Parar cualquier preview
+  if(_previewAsKidAudio){try{_previewAsKidAudio.pause();_previewAsKidAudio=null;}catch(e){}}
+  if(_previewAsKidMusic){try{_previewAsKidMusic.pause();_previewAsKidMusic=null;}catch(e){}}
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
+  if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
   if(_selectedDistortion){
     appState.selectedDistortionRate=_selectedDistortion.rate||1;
     appState.selectedDistortionId=_selectedDistortion.id;
     appState.selectedDistortionPitch=_selectedDistortion.pitch||0;
-    showToast('✅ Distorsión aplicada — guardando...');
+  } else {
+    appState.selectedDistortionRate=1;
+    appState.selectedDistortionId=null;
+    appState.selectedDistortionPitch=0;
   }
-  if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
-  if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
+  _bgMusicOn=!!_finalMusicTrackId;
+  if(_finalMusicTrackId) _bgMusicTrackId=_finalMusicTrackId;
   await saveStory();
 }
 
