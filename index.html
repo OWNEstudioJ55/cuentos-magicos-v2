@@ -589,7 +589,7 @@
 
         <div style="display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" onclick="goRecStep(2)">← Volver</button>
-          <button class="btn btn-accent btn-sm" style="flex:1" onclick="if(appState.isRecording)stopRecording();showVoiceDistortionPanel()">Siguiente: Revisar y enviar →</button>
+          <button class="btn btn-accent btn-sm" style="flex:1" onclick="if(appState.isRecording)stopRecording();setTimeout(showVoiceDistortionPanel,100)">Siguiente: Revisar y enviar →</button>
         </div>
       </div>
 
