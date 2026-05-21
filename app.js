@@ -1263,6 +1263,13 @@ function showParentApp() {
 }
 
 function switchParentTab(tab) {
+  // Parar todos los previews de audio
+  if(typeof _previewAsKidAudio!=='undefined'&&_previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} 
+  if(typeof _previewAsKidAudio!=='undefined') _previewAsKidAudio=null;
+  if(typeof _previewAsKidMusic!=='undefined'&&_previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}}
+  if(typeof _previewAsKidMusic!=='undefined') _previewAsKidMusic=null;
+  if(typeof _bgMusicPreviewAudio!=='undefined'&&_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();}catch(e){}}
+  if(typeof _bgMusicPreviewAudio!=='undefined') _bgMusicPreviewAudio=null;
   // Map old tabs to new 3-tab structure
   if(tab==='progress'||tab==='tokens') tab='library';
   // Si está grabando o tiene grabación no guardada, preguntar
@@ -1487,6 +1494,10 @@ function dismissRecGuide() {
 
 function goRecStep(n) {
   if(appState.isRecording) stopRecording();
+  // Parar previews al cambiar de paso
+  if(_previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} _previewAsKidAudio=null;
+  if(_previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}} _previewAsKidMusic=null;
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();}catch(e){}} _bgMusicPreviewAudio=null;
   currentRecStep=n;
   // Autosave borrador al avanzar pasos
   autoSaveDraft();
@@ -1912,7 +1923,6 @@ function showVoiceDistortionPanel() {
       </div>
     </div>`;
   wrap.style.display = 'block';
-  goRecStep(4);
 }
 
 function selectDistortion(id, btn) {
