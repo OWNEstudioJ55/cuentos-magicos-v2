@@ -559,20 +559,6 @@
             </div>
             <div style="font-size:11px;color:#9B7B6B;margin-bottom:8px;font-style:italic">Mové el slider para cambiar cuánto dura cada imagen</div>
 
-            <!-- Música de fondo -->
-            <div style="margin-top:4px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-                <span style="font-size:13px;color:#5C4033;font-family:'Fredoka One',cursive">🎵 Música de fondo</span>
-                <button id="btnBgMusic" data-enabled="0" onclick="this.dataset.enabled=this.dataset.enabled==='1'?'0':'1';toggleBgMusic()" style="padding:6px 14px;border-radius:10px;border:2px solid rgba(201,168,76,0.3);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:13px;cursor:pointer">🔇 Música</button>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">
-                <button id="bgTrack-1" onclick="selectBgMusicTrack('1')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🎵<br>Alegre</button>
-                <button id="bgTrack-2" onclick="selectBgMusicTrack('2')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🌙<br>Cuna</button>
-                <button id="bgTrack-3" onclick="selectBgMusicTrack('3')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">✨<br>Mágica</button>
-                <button id="bgTrack-4" onclick="selectBgMusicTrack('4')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🌟<br>Aventura</button>
-              </div>
-              <div style="font-size:10px;color:#9B7B6B;margin-top:5px;font-style:italic">Tocá una para escuchar 10 seg · Volumen 50%</div>
-            </div>
           </div>
         </div>
 
@@ -603,83 +589,34 @@
 
         <div style="display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" onclick="goRecStep(2)">← Volver</button>
-          <button class="btn btn-accent btn-sm" style="flex:1" onclick="goRecStep(4)">Siguiente: Voz y envío →</button>
+          <button class="btn btn-accent btn-sm" style="flex:1" onclick="if(appState.isRecording)stopRecording();goRecStep(4)">Siguiente: Voz y envío →</button>
         </div>
       </div>
 
-      <!-- ========== STEP 4: ESCUCHAR + DECIDIR + ENVIAR ========== -->
+      <!-- ========== STEP 4: ENVIAR ========== -->
       <div id="recStep-4" style="display:none">
-        <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:4px;background:linear-gradient(135deg,var(--accent3),#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent">4️⃣ Escuchar y enviar</div>
+        <div style="font-family:'Fredoka One',cursive;font-size:20px;margin-bottom:12px;background:linear-gradient(135deg,var(--accent3),#059669);-webkit-background-clip:text;-webkit-text-fill-color:transparent">4️⃣ Escuchar y enviar</div>
 
         <!-- Portada + título -->
         <div style="background:white;border-radius:14px;padding:12px;margin-bottom:14px;border:2px solid rgba(201,168,76,0.2)">
           <div style="display:flex;gap:12px;align-items:center;margin-bottom:8px">
             <div style="width:64px;height:64px;border-radius:10px;overflow:hidden;background:#F5EDE0;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:32px" id="recFinalPortadaThumb">🐉</div>
             <div style="flex:1">
-              <div style="font-size:11px;font-weight:800;color:#9B7B6B;margin-bottom:4px">TÍTULO DEL CUENTO</div>
-              <input type="text" id="recFinalTitleInput" placeholder="Título del cuento..." style="font-size:15px;font-weight:800;padding:8px 12px;width:100%;color:#5C4033" oninput="document.getElementById('storyTitle').value=this.value">
+              <div style="font-size:11px;font-weight:800;color:#9B7B6B;margin-bottom:4px">TÍTULO</div>
+              <input type="text" id="recFinalTitleInput" placeholder="Título del cuento..." style="font-size:15px;font-weight:800;padding:8px 12px;width:100%;color:#5C4033;border-radius:8px;border:1px solid #E8D5B7" oninput="document.getElementById('storyTitle').value=this.value">
             </div>
           </div>
           <div style="font-size:12px;color:#9B7B6B" id="recFinalSceneCount">0 escenas · 0:00</div>
         </div>
 
-        <!-- 1. ESCUCHAR VOZ LIMPIA -->
-        <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
-          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">1️⃣ Tu voz grabada</div>
-          <div style="background:#F5EDE0;border-radius:12px;padding:12px">
-            <div class="audio-controls">
-              <button class="seek-btn" onclick="seekRecAudio(-5)">⏪</button>
-              <button class="play-btn" id="recPlayBtn" onclick="toggleRecPlay()">▶</button>
-              <button class="seek-btn" onclick="seekRecAudio(5)">⏩</button>
-              <div class="audio-waveform" style="flex:1"><div class="audio-progress" id="recProgress"></div></div>
-              <span class="audio-time" id="recTimeDisplay">0:00</span>
-            </div>
-          </div>
-          <button class="btn btn-danger btn-sm" style="margin-top:10px" onclick="deleteRecording()">🗑 Grabar de nuevo</button>
-        </div>
-
-        <!-- 2. DISTORSIÓN (opcional) -->
+        <!-- Distorsión + Música — en el mismo panel -->
         <div id="recApplyVoiceWrap" style="display:none"></div>
 
-        <!-- 3. MÚSICA (opcional) -->
-        <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
-          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">3️⃣ Música de fondo (opcional)</div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px">
-            <button id="bgTrack-0" onclick="selectFinalMusicTrack('0')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🔇<br>Sin música</button>
-            <button id="bgTrack-1" onclick="selectFinalMusicTrack('1')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🎵<br>Alegre</button>
-            <button id="bgTrack-2" onclick="selectFinalMusicTrack('2')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🌙<br>Cuna</button>
-            <button id="bgTrack-3" onclick="selectFinalMusicTrack('3')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">✨<br>Mágica</button>
-            <button id="bgTrack-4" onclick="selectFinalMusicTrack('4')" style="padding:8px 4px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:11px;cursor:pointer;text-align:center">🌟<br>Aventura</button>
-          </div>
-          <div style="font-size:10px;color:#9B7B6B;font-style:italic">Tocá una para escuchar 10s de preview</div>
-        </div>
+        <!-- Textarea oculto para compatibilidad -->
+        <textarea id="storyTextInput" style="display:none"></textarea>
 
-        <!-- 4. ESCUCHAR COMO EL NIÑO -->
-        <div style="background:rgba(201,168,76,0.08);border-radius:14px;padding:14px;margin-bottom:14px;border:2px solid rgba(201,168,76,0.3)">
-          <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">4️⃣ Escuchar como tu hijo</div>
-          <button onclick="previewAsKid()" id="btnPreviewAsKid"
-            style="width:100%;padding:12px;border-radius:12px;border:none;
-                   background:linear-gradient(135deg,#C9A84C,#e8c97a);
-                   color:white;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer">
-            👂 Escuchar todo junto
-          </button>
-          <div style="font-size:10px;color:#9B7B6B;margin-top:6px;font-style:italic;text-align:center">Voz + distorsión + música tal como lo escucha el niño</div>
-        </div>
-
-        <!-- Texto del cuento (opcional) -->
-        <div style="background:white;border-radius:14px;padding:14px;margin-bottom:14px;border:2px solid rgba(201,168,76,0.15)">
-          <div style="font-family:'Fredoka One',cursive;font-size:13px;color:#9B7B6B;margin-bottom:8px">📝 Texto del cuento (opcional)</div>
-          <textarea id="storyTextInput" rows="3" placeholder="Podés escribir el texto del cuento..." style="margin-bottom:8px;resize:vertical;line-height:1.6;color:#5C4033"></textarea>
-        </div>
-
-        <!-- ENVIAR -->
-        <div style="display:flex;gap:8px;margin-bottom:8px">
-          <button class="btn btn-ghost btn-sm" onclick="goRecStep(3)">← Volver</button>
-          <button style="flex:1;padding:16px;border-radius:14px;border:none;background:linear-gradient(135deg,#C9A84C,#e8c97a);color:white;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer" onclick="applyDistortionAndSave()">
-            🚀 Enviar al niño
-          </button>
-        </div>
-        <div style="font-size:11px;color:#9B7B6B;text-align:center">El cuento quedará disponible en la app del niño</div>
+        <!-- Volver -->
+        <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="goRecStep(3)">← Volver a grabar</button>
       </div>
 
     </div>

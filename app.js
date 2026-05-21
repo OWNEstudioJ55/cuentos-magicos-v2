@@ -1486,6 +1486,7 @@ function dismissRecGuide() {
 }
 
 function goRecStep(n) {
+  if(appState.isRecording) stopRecording();
   currentRecStep=n;
   // Autosave borrador al avanzar pasos
   autoSaveDraft();
@@ -1638,6 +1639,7 @@ const BG_MUSIC_TRACKS = [
   {id:'4',label:'🌟 Aventura',file:'/public/musica/musica4.mp3'},
 ];
 let _bgMusicOn=false, _bgMusicTrackId='1', _bgMusicAudio=null, _bgMusicPreviewAudio=null;
+let _finalMusicTrackId=null;
 let _kidBgMusicAudio=null;
 
 function startBgMusic(){
@@ -1852,45 +1854,68 @@ let _distortPreviewAudio = null;
 function showVoiceDistortionPanel() {
   const wrap = document.getElementById('recApplyVoiceWrap');
   if(!wrap) return;
+  _finalMusicTrackId = null;
+  _selectedDistortion = null;
   wrap.innerHTML = `
-    <div style="background:white;border-radius:16px;padding:14px;margin-top:12px;border:2px solid rgba(201,168,76,0.2)">
-      <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:10px">🎭 Distorsionar voz (opcional)</div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div style="background:white;border-radius:14px;padding:14px;margin-bottom:12px;border:2px solid rgba(201,168,76,0.2)">
+
+      <!-- DISTORSIÓN -->
+      <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">🎭 Distorsión de voz</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px">
+        <button onclick="selectDistortion(null,this)" id="distBtn-none"
+          style="padding:10px 4px;border-radius:12px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);cursor:pointer;font-size:11px;color:#C9A84C;font-family:'Fredoka One',cursive;text-align:center">
+          🎤<br>Sin dist.
+        </button>
         ${VOICE_DISTORTIONS.map(v=>`
-          <button onclick="selectDistortion('${v.id}',this)"
-            style="flex:1;padding:10px 6px;border-radius:12px;border:2px solid rgba(201,168,76,0.2);
-                   background:#FFF8E7;cursor:pointer;font-size:13px;font-weight:700;
-                   color:#9B7B6B;font-family:'Fredoka One',cursive;
-                   display:flex;flex-direction:column;align-items:center;gap:4px"
-            id="distBtn-${v.id}">
-            <span style="font-size:24px">${v.label.split(' ')[0]}</span>
-            <span>${v.label.split(' ')[1]}</span>
+          <button onclick="selectDistortion('${v.id}',this)" id="distBtn-${v.id}"
+            style="padding:10px 4px;border-radius:12px;border:2px solid rgba(201,168,76,0.2);background:#FFF8E7;cursor:pointer;font-size:11px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">
+            ${v.label.split(' ')[0]}<br>${v.label.split(' ')[1]}
           </button>`).join('')}
       </div>
-      <div id="distortPreviewWrap" style="display:none;margin-bottom:10px">
-        <button onclick="previewDistortion()"
-          style="width:100%;padding:10px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
-                 background:#FFF8E7;color:#5C4033;font-family:'Fredoka One',cursive;
-                 font-size:14px;cursor:pointer"
-          id="btnDistPreview">👂 Escuchar con distorsión</button>
+
+      <!-- MÚSICA -->
+      <div style="font-family:'Fredoka One',cursive;font-size:14px;color:#5C4033;margin-bottom:10px">🎵 Música de fondo</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:14px">
+        <button onclick="selectFinalMusicTrack('0')" id="bgTrack-0"
+          style="padding:8px 2px;border-radius:10px;border:2px solid #C9A84C;background:rgba(201,168,76,0.15);cursor:pointer;font-size:10px;color:#C9A84C;font-family:'Fredoka One',cursive;text-align:center">🔇<br>Sin mús.</button>
+        <button onclick="selectFinalMusicTrack('1')" id="bgTrack-1"
+          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">🎵<br>Alegre</button>
+        <button onclick="selectFinalMusicTrack('2')" id="bgTrack-2"
+          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">🌙<br>Cuna</button>
+        <button onclick="selectFinalMusicTrack('3')" id="bgTrack-3"
+          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">✨<br>Mágica</button>
+        <button onclick="selectFinalMusicTrack('4')" id="bgTrack-4"
+          style="padding:8px 2px;border-radius:10px;border:2px solid rgba(201,168,76,0.2);background:white;cursor:pointer;font-size:10px;color:#9B7B6B;font-family:'Fredoka One',cursive;text-align:center">🌟<br>Aventura</button>
       </div>
+
+      <!-- ESCUCHAR COMO EL NIÑO -->
+      <button onclick="previewAsKid()" id="btnPreviewAsKid"
+        style="width:100%;padding:11px;border-radius:12px;border:2px solid rgba(201,168,76,0.4);
+               background:#FFF8E7;color:#5C4033;font-family:'Fredoka One',cursive;
+               font-size:14px;cursor:pointer;margin-bottom:12px">
+        👂 Escuchar como el niño
+      </button>
+
+      <!-- BOTONES ENVIAR -->
       <div style="display:flex;gap:8px">
         <button onclick="applyDistortionAndSave()"
-          style="flex:1;padding:12px;border-radius:12px;border:none;
+          style="flex:1;padding:13px;border-radius:12px;border:none;
                  background:linear-gradient(135deg,#C9A84C,#e8c97a);
-                 color:white;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer"
-          id="btnApplyDistort" disabled>✅ Aplicar y enviar</button>
+                 color:white;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer">
+          ✨ Enviar con efectos
+        </button>
         <button onclick="saveStoryWithoutDistortion()"
-          style="flex:1;padding:12px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
-                 background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:15px;cursor:pointer">
-          Sin distorsión →</button>
+          style="flex:1;padding:13px;border-radius:12px;border:2px solid rgba(201,168,76,0.3);
+                 background:white;color:#9B7B6B;font-family:'Fredoka One',cursive;font-size:14px;cursor:pointer">
+          🎤 Solo la voz
+        </button>
       </div>
     </div>`;
   wrap.style.display = 'block';
 }
 
 function selectDistortion(id, btn) {
-  _selectedDistortion = VOICE_DISTORTIONS.find(v=>v.id===id);
+  _selectedDistortion = id ? VOICE_DISTORTIONS.find(v=>v.id===id) : null;
   document.querySelectorAll('[id^="distBtn-"]').forEach(b=>{
     b.style.border = '2px solid rgba(201,168,76,0.2)';
     b.style.color = '#9B7B6B';
@@ -1901,8 +1926,6 @@ function selectDistortion(id, btn) {
     btn.style.color = '#C9A84C';
     btn.style.background = 'rgba(201,168,76,0.15)';
   }
-  document.getElementById('distortPreviewWrap').style.display = 'block';
-  document.getElementById('btnApplyDistort').disabled = false;
 }
 
 let _distortCtx=null, _tonePlayer=null, _tonePitchShift=null;
@@ -1910,7 +1933,6 @@ let _distortCtx=null, _tonePlayer=null, _tonePitchShift=null;
 async function previewDistortion() {
   if(!_selectedDistortion||!appState.recordedBlob) return;
   const btn=document.getElementById('btnDistPreview');
-  // Parar si está reproduciendo
   if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
   if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
   if(_distortPreviewAudio&&!_distortPreviewAudio.paused){
@@ -1920,11 +1942,7 @@ async function previewDistortion() {
   if(btn) btn.textContent='⏳ Cargando...';
   try {
     if(typeof Tone==='undefined'){
-      await new Promise((res,rej)=>{
-        const s=document.createElement('script');
-        s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js';
-        s.onload=res; s.onerror=rej; document.head.appendChild(s);
-      });
+      await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
     }
     await Tone.start();
     const url=URL.createObjectURL(appState.recordedBlob);
@@ -1936,7 +1954,6 @@ async function previewDistortion() {
     const dur=(_tonePlayer.buffer?.duration||5)*1000;
     setTimeout(()=>{if(btn)btn.textContent='👂 Escuchar con distorsión';},dur+300);
   } catch(e) {
-    console.error('Tone preview:',e);
     const url=URL.createObjectURL(appState.recordedBlob);
     const audio=new Audio(url);
     audio.onended=()=>{if(btn)btn.textContent='👂 Escuchar con distorsión';};
@@ -1946,23 +1963,109 @@ async function previewDistortion() {
   }
 }
 
+function selectFinalMusicTrack(id) {
+  _finalMusicTrackId = id==='0' ? null : id;
+  document.querySelectorAll('[id^="bgTrack-"]').forEach(b=>{
+    const a=b.id==='bgTrack-'+id;
+    b.style.border=a?'2px solid #C9A84C':'2px solid rgba(201,168,76,0.2)';
+    b.style.background=a?'rgba(201,168,76,0.15)':'white';
+    b.style.color=a?'#C9A84C':'#9B7B6B';
+  });
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  if(_finalMusicTrackId && typeof BG_MUSIC_TRACKS!=='undefined') {
+    const tk=BG_MUSIC_TRACKS.find(t=>t.id===_finalMusicTrackId);
+    if(tk){
+      _bgMusicPreviewAudio=new Audio(tk.file); _bgMusicPreviewAudio.volume=0.4;
+      _bgMusicPreviewAudio.play().catch(()=>{});
+      setTimeout(()=>{if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}},10000);
+    }
+  }
+}
+
+let _previewAsKidAudio=null, _previewAsKidMusic=null;
+async function previewAsKid() {
+  const btn=document.getElementById('btnPreviewAsKid');
+  if(_previewAsKidAudio||_previewAsKidMusic){
+    if(_previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} _previewAsKidAudio=null;
+    if(_previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}} _previewAsKidMusic=null;
+    if(btn) btn.textContent='👂 Escuchar como el niño';
+    return;
+  }
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();_bgMusicPreviewAudio=null;}catch(e){}}
+  if(!appState.recordedBlob){ showToast('No hay grabacion'); return; }
+  if(btn) btn.textContent='Preparando...';
+  try {
+    const url=URL.createObjectURL(appState.recordedBlob);
+    if(_selectedDistortion&&_selectedDistortion.pitch) {
+      if(typeof Tone==='undefined'){
+        await new Promise((res,rej)=>{ const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js'; s.onload=res; s.onerror=rej; document.head.appendChild(s); });
+      }
+      await Tone.start();
+      const ps=new Tone.PitchShift(_selectedDistortion.pitch).toDestination();
+      const pl=new Tone.Player(url).connect(ps);
+      await new Promise(res=>setTimeout(res,600));
+      pl.start();
+      const dur=(pl.buffer?.duration||10)*1000;
+      _previewAsKidAudio={pause:function(){try{pl.stop();ps.dispose();}catch(e){}}};
+      setTimeout(()=>{
+        _previewAsKidAudio=null;
+        if(_previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}} _previewAsKidMusic=null;
+        if(btn) btn.textContent='👂 Escuchar como el niño';
+      }, dur+300);
+    } else {
+      const audio=new Audio(url);
+      audio.onended=()=>{
+        _previewAsKidAudio=null;
+        if(_previewAsKidMusic){try{_previewAsKidMusic.pause();_previewAsKidMusic=null;}catch(e){}}
+        if(btn) btn.textContent='👂 Escuchar como el niño';
+      };
+      await audio.play();
+      _previewAsKidAudio=audio;
+    }
+    if(_finalMusicTrackId&&typeof BG_MUSIC_TRACKS!=='undefined'){
+      const tk=BG_MUSIC_TRACKS.find(t=>t.id===_finalMusicTrackId);
+      if(tk){ _previewAsKidMusic=new Audio(tk.file); _previewAsKidMusic.volume=0.5; _previewAsKidMusic.loop=true; _previewAsKidMusic.play().catch(()=>{}); }
+    }
+    if(btn) btn.textContent='Pausar preview';
+  } catch(e) {
+    console.error('previewAsKid:',e);
+    if(btn) btn.textContent='👂 Escuchar como el niño';
+  }
+}
+
 async function applyDistortionAndSave() {
+  // Parar todos los previews
+  if(window._previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} _previewAsKidAudio=null;
+  if(window._previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}} _previewAsKidMusic=null;
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();}catch(e){}} _bgMusicPreviewAudio=null;
+  if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
+  if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
+  // Distorsión
   if(_selectedDistortion){
     appState.selectedDistortionRate=_selectedDistortion.rate||1;
     appState.selectedDistortionId=_selectedDistortion.id;
     appState.selectedDistortionPitch=_selectedDistortion.pitch||0;
-    showToast('✅ Distorsión aplicada — guardando...');
+  } else {
+    appState.selectedDistortionRate=1;
+    appState.selectedDistortionId=null;
+    appState.selectedDistortionPitch=0;
   }
-  if(_tonePlayer){try{_tonePlayer.stop();_tonePlayer.dispose();_tonePlayer=null;}catch(e){}}
-  if(_tonePitchShift){try{_tonePitchShift.dispose();_tonePitchShift=null;}catch(e){}}
+  // Música elegida
+  _bgMusicOn=!!_finalMusicTrackId;
+  if(_finalMusicTrackId) _bgMusicTrackId=_finalMusicTrackId;
   await saveStory();
 }
 
 async function saveStoryWithoutDistortion() {
+  if(window._previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} _previewAsKidAudio=null;
+  if(window._previewAsKidMusic){try{_previewAsKidMusic.pause();}catch(e){}} _previewAsKidMusic=null;
+  if(_bgMusicPreviewAudio){try{_bgMusicPreviewAudio.pause();}catch(e){}} _bgMusicPreviewAudio=null;
   appState.selectedDistortionRate=1;
   appState.selectedDistortionId=null;
   appState.selectedDistortionPitch=0;
   _selectedDistortion=null;
+  _bgMusicOn=false;
+  _finalMusicTrackId=null;
   await saveStory();
 }
 
@@ -4140,7 +4243,6 @@ function loadKidAudioFromBlob(blob, distortionRate, distortionPitch) {
     appState.kidIsPlaying=false;
     if(appState.kidSlideInterval){ clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
     showFin();
-    stopKidBgMusic();
     updateKidProgress('storiesListened');
   };
   audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4245,7 +4347,6 @@ async function openKidStory(id) {
           appState.kidIsPlaying=false;
           if(appState.kidSlideInterval){ clearInterval(appState.kidSlideInterval); appState.kidSlideInterval=null; }
           showFin();
-          stopKidBgMusic();
           updateKidProgress('storiesListened');
         };
         audio.onerror=()=>{ const t=document.getElementById('kidTimeDisplay'); if(t) t.textContent='Error de audio'; };
@@ -4582,6 +4683,9 @@ function stopKidPlay() {
   if(appState.kidAudio) { appState.kidAudio.pause(); appState.kidIsPlaying=false; }
   if(window.speechSynthesis) window.speechSynthesis.cancel();
 }
+function stopKidBgMusic(){
+  if(_kidBgMusicAudio){try{_kidBgMusicAudio.pause();_kidBgMusicAudio=null;}catch(e){}}
+}
 
 async function _applyTonePitchToKid(url,pitchVal){
   try {
@@ -4605,7 +4709,7 @@ async function _applyTonePitchToKid(url,pitchVal){
   } catch(e){
     console.error('Tone kid:',e);
     const audio=new Audio(); audio.preload='auto'; audio.src=url; audio.load();
-    audio.onended=()=>{appState.kidIsPlaying=false;if(appState.kidSlideInterval){clearInterval(appState.kidSlideInterval);appState.kidSlideInterval=null;}try{showFin();}catch(e){}stopKidBgMusic();updateKidProgress('storiesListened');};
+    audio.onended=()=>{appState.kidIsPlaying=false;if(appState.kidSlideInterval){clearInterval(appState.kidSlideInterval);appState.kidSlideInterval=null;}try{showFin();}catch(e){}updateKidProgress('storiesListened');};
     appState.kidAudio=audio;
   }
 }
