@@ -492,10 +492,10 @@
           <div id="portadaTitleOverlay" style="display:none;position:absolute;bottom:0;left:0;right:0;background:linear-gradient(to top,rgba(0,0,0,0.88),transparent);padding:14px 10px 12px;font-family:'Fredoka One',cursive;font-size:17px;color:white;text-shadow:0 2px 6px rgba(0,0,0,0.9);text-align:center;word-break:break-word"></div>
         </div>
 
-        <input type="text" id="storyTitle" placeholder="✏️ Título del cuento..." style="margin-bottom:12px;font-size:16px;text-align:center" oninput="updatePortadaTitleOverlay();if(this.value.trim().length>2)avanzarTutorial('titulo')">
+        <input type="text" id="storyTitle" placeholder="✏️ Título del cuento..." style="margin-bottom:12px;font-size:16px;text-align:center" oninput="updatePortadaTitleOverlay()">
         <div class="char-grid" id="parentCharGrid" style="margin-bottom:12px"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-gold btn-sm btn-full" onclick="generatePortadaImage()">✨ Generar portada con IA</button>
+          <button id="btnGenPortada" class="btn btn-gold btn-sm btn-full" onclick="generatePortadaImage()">✨ Generar portada con IA</button>
           <button class="btn btn-ghost btn-sm btn-full" onclick="document.getElementById('portadaUploadInput').click()">📷 Subir foto de portada</button>
         </div>
         <input type="file" id="portadaUploadInput" accept="image/*" style="display:none" onchange="handlePortadaUpload(event)">

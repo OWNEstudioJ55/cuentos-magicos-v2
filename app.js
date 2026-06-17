@@ -3162,6 +3162,7 @@ function generatePortadaImage() {
     // Save portada separately so it doesn't get overwritten
     appState.portadaUrl = url;
     showToast('✅ Portada generada');
+    avanzarTutorial('portada');
   });
 }
 function handlePortadaUpload(e) {
@@ -3176,6 +3177,7 @@ function handlePortadaUpload(e) {
     appState.portadaUrl = ev.target.result;
     updatePortadaTitleOverlay();
     showToast('✅ Portada cargada');
+    avanzarTutorial('portada');
   };
   reader.readAsDataURL(file);
 }
@@ -6459,50 +6461,58 @@ const TUTORIAL_STEPS = [
   {
     id: 'titulo',
     emoji: '✏️',
-    titulo: '¡Escribí el título!',
-    msg: 'Primero dale un nombre al cuento de tu hijo.\nTocá el campo de abajo y escribí algo lindo 😊',
+    titulo: 'Paso 1 — Escribí el título',
+    msg: 'Tocá el campo de abajo y escribí\nel nombre del cuento 😊',
     apuntaA: 'storyTitle',
-    posMsg: 'bottom',
+    stepReq: 1, // solo activo en recStep 1
+  },
+  {
+    id: 'portada',
+    emoji: '🎨',
+    titulo: 'Paso 2 — Generá la portada',
+    msg: 'Tocá "Generar portada con IA"\npara crear la imagen del cuento ✨',
+    apuntaA: 'btnGenPortada',
+    stepReq: 1,
   },
   {
     id: 'escenas',
     emoji: '🖼️',
-    titulo: '¡Generá las imágenes!',
-    msg: 'Ahora tocá este botón para crear las 5 imágenes del cuento.\n¡Mirá cómo aparecen las escenas!',
+    titulo: 'Paso 3 — Generá las escenas',
+    msg: 'Tocá este botón para crear\nlas 5 imágenes del cuento 🎬',
     apuntaA: 'btnGenScenes',
-    posMsg: 'bottom',
+    stepReq: 2,
   },
   {
     id: 'grabar',
     emoji: '🎙️',
-    titulo: '¡Grabá tu voz!',
-    msg: 'Tocá el botón grande para empezar a grabar.\nContá el cuento como si tu hijo estuviera al lado 💛',
+    titulo: 'Paso 4 — ¡Grabá tu voz!',
+    msg: 'Tocá el botón grande rojo\ny contá el cuento en voz alta 💛',
     apuntaA: 'recBtn',
-    posMsg: 'top',
+    stepReq: 3,
   },
   {
     id: 'detener',
     emoji: '⏹️',
-    titulo: '¡Listo, pará la grabación!',
-    msg: 'Tocá de nuevo para detener.\n¡Ya grabaste tu primer cuento!',
+    titulo: 'Paso 5 — Pará la grabación',
+    msg: 'Cuando termines de contar,\ntocá el botón de nuevo para parar ⏹️',
     apuntaA: 'recBtn',
-    posMsg: 'top',
+    stepReq: 3,
   },
   {
     id: 'efectos',
     emoji: '✨',
-    titulo: '¡Elegí magia opcional!',
-    msg: 'Podés poner una voz divertida o música de fondo.\n¡O mandarlo tal cual!',
+    titulo: 'Paso 6 — Efectos opcionales',
+    msg: 'Podés agregar voz divertida\no música de fondo 🎵\n¡O mandarlo tal cual!',
     apuntaA: 'recApplyVoiceWrap',
-    posMsg: 'top',
+    stepReq: 4,
   },
   {
     id: 'enviar',
     emoji: '🚀',
-    titulo: '¡Mandalo!',
-    msg: '¡Este es el momento! Tocá para enviar el cuento.\nTu hijo lo va a recibir ahora mismo 🎉',
-    apuntaA: null, // se busca dinámicamente
-    posMsg: 'top',
+    titulo: '¡Último paso — Mandalo!',
+    msg: 'Tocá el botón dorado para enviar.\n¡Tu hijo lo recibe ahora mismo! 🎉',
+    apuntaA: null,
+    stepReq: 4,
   },
 ];
 
@@ -6585,25 +6595,37 @@ function _arrancarOverlayTutorial() {
   _tutorialActive = true;
   _tutorialStep = 0;
 
-  // Overlay semitransparente (más suave)
+  // Canvas SVG para el overlay con hueco real (clip-path approach)
+  // Usamos 4 divs negros alrededor del elemento iluminado
+  // Más simple y confiable: un div oscuro encima con pointer-events none
+  // y el spot es solo el borde amarillo sin background
+
+  // Overlay oscuro — pointer-events none para que se pueda tocar
   _tutorialOverlay = document.createElement('div');
   _tutorialOverlay.id = 'tutorialOverlay';
   _tutorialOverlay.style.cssText = `
     position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.0);z-index:99990;
-    pointer-events:none;
+    z-index:99990;pointer-events:none;
+  `;
+  // 4 rectángulos oscuros (top, bottom, left, right)
+  _tutorialOverlay.innerHTML = `
+    <div id="tov-top"    style="position:absolute;left:0;right:0;top:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
+    <div id="tov-bottom" style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
+    <div id="tov-left"   style="position:absolute;top:0;bottom:0;left:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
+    <div id="tov-right"  style="position:absolute;top:0;bottom:0;right:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
   `;
   document.body.appendChild(_tutorialOverlay);
 
-  // Spot iluminado con fondo blanco visible
+  // Borde amarillo alrededor del elemento (solo borde, sin fondo)
   _tutorialSpot = document.createElement('div');
   _tutorialSpot.id = 'tutorialSpot';
   _tutorialSpot.style.cssText = `
     position:fixed;border-radius:14px;
-    box-shadow:0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 4px #F9C74F, 0 0 20px 6px rgba(249,199,79,0.6);
-    z-index:99992;pointer-events:none;
-    transition:all 0.35s cubic-bezier(.4,0,.2,1);
-    background:white;
+    border:3px solid #F9C74F;
+    box-shadow:0 0 16px 4px rgba(249,199,79,0.7);
+    z-index:99993;pointer-events:none;
+    transition:all 0.3s cubic-bezier(.4,0,.2,1);
+    background:transparent;
   `;
   document.body.appendChild(_tutorialSpot);
 
@@ -6616,11 +6638,11 @@ function _arrancarOverlayTutorial() {
     background:linear-gradient(135deg,#fff9f0,#fff3e0);
     border-radius:20px;border:3px solid #F9C74F;
     padding:16px 16px 12px;
-    z-index:99995;
-    box-shadow:0 8px 32px rgba(0,0,0,0.3);
+    z-index:99996;
+    box-shadow:0 8px 32px rgba(0,0,0,0.35);
     text-align:center;
     font-family:'Nunito',sans-serif;
-    transition:top 0.35s cubic-bezier(.4,0,.2,1);
+    transition:top 0.3s cubic-bezier(.4,0,.2,1);
   `;
   document.body.appendChild(_tutorialBox);
 
@@ -6634,62 +6656,94 @@ function mostrarPasoTutorial(idx) {
 
   // Buscar elemento objetivo
   let el = paso.apuntaA ? document.getElementById(paso.apuntaA) : null;
-
-  // Para "enviar", buscar el botón dinámicamente
   if (paso.id === 'enviar') {
-    el = document.querySelector('[onclick*="applyDistortionAndSave"], [onclick*="saveStoryWithoutDistortion"]');
+    el = document.querySelector('[onclick*="applyDistortionAndSave"]') ||
+         document.querySelector('[onclick*="saveStoryWithoutDistortion"]');
   }
 
-  // Posicionar el spot
+  const posicionarSpot = () => {
+    if (!el || !_tutorialSpot) return;
+    const r = el.getBoundingClientRect();
+    const pad = 10;
+    const x = r.left - pad;
+    const y = r.top - pad;
+    const w = r.width + pad * 2;
+    const h = r.height + pad * 2;
+
+    // Spot (borde amarillo transparente)
+    _tutorialSpot.style.display = 'block';
+    _tutorialSpot.style.left = x + 'px';
+    _tutorialSpot.style.top = y + 'px';
+    _tutorialSpot.style.width = w + 'px';
+    _tutorialSpot.style.height = h + 'px';
+
+    // 4 rectángulos oscuros alrededor
+    const vH = window.innerHeight;
+    const vW = window.innerWidth;
+    const top    = document.getElementById('tov-top');
+    const bottom = document.getElementById('tov-bottom');
+    const left   = document.getElementById('tov-left');
+    const right  = document.getElementById('tov-right');
+    if (top)    { top.style.height = y + 'px'; }
+    if (bottom) { bottom.style.height = (vH - y - h) + 'px'; }
+    if (left)   { left.style.top = y + 'px'; left.style.height = h + 'px'; left.style.width = x + 'px'; }
+    if (right)  { right.style.top = y + 'px'; right.style.height = h + 'px'; right.style.width = (vW - x - w) + 'px'; }
+
+    // Posicionar la caja arriba o abajo
+    const boxH = 210;
+    const espacioAbajo = vH - r.bottom - 16;
+    const espacioArriba = r.top - 16;
+    let topBox;
+    if (espacioAbajo >= boxH) {
+      topBox = r.bottom + 14;
+    } else if (espacioArriba >= boxH) {
+      topBox = r.top - boxH - 14;
+    } else {
+      topBox = 12;
+    }
+    if (_tutorialBox) {
+      _tutorialBox.style.top = Math.max(8, Math.min(topBox, vH - boxH - 8)) + 'px';
+      _tutorialBox.style.transform = 'translateX(-50%)';
+    }
+  };
+
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(() => {
-      const r = el.getBoundingClientRect();
-      const pad = 8;
-      _tutorialSpot.style.display = 'block';
-      _tutorialSpot.style.left = (r.left - pad) + 'px';
-      _tutorialSpot.style.top = (r.top - pad) + 'px';
-      _tutorialSpot.style.width = (r.width + pad * 2) + 'px';
-      _tutorialSpot.style.height = (r.height + pad * 2) + 'px';
-
-      // Posicionar caja: preferir abajo, si no hay espacio arriba
-      const boxH = 200;
-      const espacioAbajo = window.innerHeight - r.bottom - 16;
-      const espacioArriba = r.top - 16;
-      let topBox;
-      if (espacioAbajo >= boxH) {
-        topBox = r.bottom + 12;
-      } else if (espacioArriba >= boxH) {
-        topBox = r.top - boxH - 12;
-      } else {
-        // No hay espacio ni arriba ni abajo — poner en el centro superior
-        topBox = 16;
-      }
-      _tutorialBox.style.top = Math.max(8, topBox) + 'px';
-      _tutorialBox.style.transform = 'translateX(-50%)';
-    }, 350);
+    setTimeout(posicionarSpot, 380);
   } else {
-    _tutorialSpot.style.display = 'none';
-    _tutorialBox.style.top = '30%';
-    _tutorialBox.style.transform = 'translateX(-50%) translateY(-50%)';
+    if (_tutorialSpot) _tutorialSpot.style.display = 'none';
+    // Oscurecer todo
+    ['tov-top','tov-bottom','tov-left','tov-right'].forEach(id => {
+      const d = document.getElementById(id);
+      if (d) { d.style.width=''; d.style.height=''; d.style.top=''; }
+    });
+    const top = document.getElementById('tov-top');
+    if (top) top.style.height = '100%';
+    if (_tutorialBox) {
+      _tutorialBox.style.top = '35%';
+      _tutorialBox.style.transform = 'translateX(-50%) translateY(-50%)';
+    }
   }
 
-  // Contenido de la caja
+  // Progreso
   const progreso = TUTORIAL_STEPS.map((s, i) =>
-    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i === idx ? '#F9C74F' : i < idx ? '#10b981' : 'rgba(0,0,0,0.15)'};transition:background 0.3s"></span>`
+    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;
+      background:${i === idx ? '#F9C74F' : i < idx ? '#10b981' : 'rgba(0,0,0,0.15)'};
+      transition:background 0.3s"></span>`
   ).join('');
 
   const esUltimo = idx === TUTORIAL_STEPS.length - 1;
 
-  _tutorialBox.innerHTML = `
-    <div style="font-size:30px;margin-bottom:4px">${paso.emoji}</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033;margin-bottom:6px">${paso.titulo}</div>
+  if (_tutorialBox) _tutorialBox.innerHTML = `
+    <div style="font-size:28px;margin-bottom:4px">${paso.emoji}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033;margin-bottom:6px">${paso.titulo}</div>
     <div style="font-size:12px;color:#7B5E50;line-height:1.6;margin-bottom:10px;white-space:pre-line">${paso.msg}</div>
-    <div style="margin-bottom:10px">${progreso}</div>
-    ${!esUltimo ? `<div style="font-size:11px;color:#C9A84C;font-weight:700">👆 Completá la acción de arriba</div>` : ''}
-    <div style="margin-top:10px">
-      <button onclick="saltarTutorial()" style="padding:6px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#B8967A;font-size:11px;cursor:pointer;font-family:'Nunito',sans-serif">Saltar tutorial</button>
-    </div>
+    <div style="margin-bottom:8px">${progreso}</div>
+    ${!esUltimo ? `<div style="font-size:11px;color:#C9A84C;font-weight:700;margin-bottom:6px">👆 Hacé la acción indicada</div>` : ''}
+    <button onclick="saltarTutorial()" style="padding:5px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);
+      background:transparent;color:#B8967A;font-size:11px;cursor:pointer;font-family:'Nunito',sans-serif">
+      Saltar tutorial
+    </button>
   `;
 }
 
