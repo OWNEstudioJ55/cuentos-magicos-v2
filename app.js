@@ -6522,26 +6522,88 @@ function marcarTutorialCompleto() {
 
 function iniciarTutorialPadre() {
   if (tutorialYaCompletado()) return;
+  mostrarBienvenidaTutorial();
+}
+
+function mostrarBienvenidaTutorial() {
+  const bienvenida = document.createElement('div');
+  bienvenida.id = 'tutorialBienvenida';
+  bienvenida.style.cssText = `
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:linear-gradient(160deg,#3D1C02 0%,#7B3F1A 60%,#C9A84C 100%);
+    z-index:99999;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    font-family:'Nunito',sans-serif;padding:32px 24px;box-sizing:border-box;
+    text-align:center;
+  `;
+  bienvenida.innerHTML = `
+    <div style="animation:floatBear 3s ease-in-out infinite;margin-bottom:16px">
+      <div style="width:90px;height:90px;background-image:url('/sprites_kid_OWN.png');
+        background-size:613px 458px;background-position:-161px -398px;
+        background-repeat:no-repeat;margin:0 auto;
+        filter:drop-shadow(0 8px 24px rgba(0,0,0,0.4))"></div>
+    </div>
+    <div style="font-family:'Fredoka One',cursive;font-size:28px;color:#F9C74F;margin-bottom:8px;
+      text-shadow:0 2px 8px rgba(0,0,0,0.3)">¡Bienvenido a OWN!</div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:8px;max-width:280px">
+      Te voy a guiar para enviar tu<br><strong style="color:#F9C74F">primer cuento mágico</strong> 🌟
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:32px;max-width:260px;line-height:1.6">
+      Vamos paso a paso.<br>¡Es muy fácil!
+    </div>
+    <button onclick="arrancarTutorialReal()" style="
+      padding:16px 40px;border-radius:50px;border:none;
+      background:linear-gradient(135deg,#F9C74F,#e8a020);
+      color:#5C4033;font-family:'Fredoka One',cursive;font-size:20px;
+      cursor:pointer;box-shadow:0 6px 20px rgba(249,199,79,0.5);
+      transform:scale(1);transition:transform 0.15s;
+    " onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"
+       ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
+      ¡Comencemos! 🚀
+    </button>
+    <button onclick="document.getElementById('tutorialBienvenida').remove();marcarTutorialCompleto()" style="
+      margin-top:16px;padding:8px 20px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);
+      background:transparent;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;
+      font-family:'Nunito',sans-serif;
+    ">Saltar tutorial</button>
+  `;
+  document.body.appendChild(bienvenida);
+}
+
+function arrancarTutorialReal() {
+  const bienvenida = document.getElementById('tutorialBienvenida');
+  if (bienvenida) {
+    bienvenida.style.transition = 'opacity 0.3s';
+    bienvenida.style.opacity = '0';
+    setTimeout(() => { bienvenida.remove(); _arrancarOverlayTutorial(); }, 300);
+  } else {
+    _arrancarOverlayTutorial();
+  }
+}
+
+function _arrancarOverlayTutorial() {
   _tutorialActive = true;
   _tutorialStep = 0;
 
-  // Overlay oscuro
+  // Overlay semitransparente (más suave)
   _tutorialOverlay = document.createElement('div');
   _tutorialOverlay.id = 'tutorialOverlay';
   _tutorialOverlay.style.cssText = `
     position:fixed;top:0;left:0;width:100%;height:100%;
-    background:rgba(0,0,0,0.75);z-index:99990;
-    pointer-events:all;
+    background:rgba(0,0,0,0.0);z-index:99990;
+    pointer-events:none;
   `;
   document.body.appendChild(_tutorialOverlay);
 
-  // Spot iluminado (hueco en el overlay)
+  // Spot iluminado con fondo blanco visible
   _tutorialSpot = document.createElement('div');
   _tutorialSpot.id = 'tutorialSpot';
   _tutorialSpot.style.cssText = `
     position:fixed;border-radius:14px;
-    box-shadow:0 0 0 9999px rgba(0,0,0,0.75), 0 0 0 4px #F9C74F, 0 0 24px 8px rgba(249,199,79,0.5);
-    z-index:99992;pointer-events:none;transition:all 0.35s cubic-bezier(.4,0,.2,1);
+    box-shadow:0 0 0 9999px rgba(0,0,0,0.65), 0 0 0 4px #F9C74F, 0 0 20px 6px rgba(249,199,79,0.6);
+    z-index:99992;pointer-events:none;
+    transition:all 0.35s cubic-bezier(.4,0,.2,1);
+    background:white;
   `;
   document.body.appendChild(_tutorialSpot);
 
@@ -6550,15 +6612,15 @@ function iniciarTutorialPadre() {
   _tutorialBox.id = 'tutorialBox';
   _tutorialBox.style.cssText = `
     position:fixed;left:50%;transform:translateX(-50%);
-    width:min(320px,88vw);
+    width:min(300px,86vw);
     background:linear-gradient(135deg,#fff9f0,#fff3e0);
     border-radius:20px;border:3px solid #F9C74F;
-    padding:20px 18px 16px;
+    padding:16px 16px 12px;
     z-index:99995;
-    box-shadow:0 8px 32px rgba(0,0,0,0.25);
+    box-shadow:0 8px 32px rgba(0,0,0,0.3);
     text-align:center;
     font-family:'Nunito',sans-serif;
-    transition:top 0.35s cubic-bezier(.4,0,.2,1), bottom 0.35s;
+    transition:top 0.35s cubic-bezier(.4,0,.2,1);
   `;
   document.body.appendChild(_tutorialBox);
 
@@ -6580,28 +6642,35 @@ function mostrarPasoTutorial(idx) {
 
   // Posicionar el spot
   if (el) {
-    const r = el.getBoundingClientRect();
-    const pad = 10;
-    _tutorialSpot.style.display = 'block';
-    _tutorialSpot.style.left = (r.left - pad) + 'px';
-    _tutorialSpot.style.top = (r.top - pad) + 'px';
-    _tutorialSpot.style.width = (r.width + pad * 2) + 'px';
-    _tutorialSpot.style.height = (r.height + pad * 2) + 'px';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+      const r = el.getBoundingClientRect();
+      const pad = 8;
+      _tutorialSpot.style.display = 'block';
+      _tutorialSpot.style.left = (r.left - pad) + 'px';
+      _tutorialSpot.style.top = (r.top - pad) + 'px';
+      _tutorialSpot.style.width = (r.width + pad * 2) + 'px';
+      _tutorialSpot.style.height = (r.height + pad * 2) + 'px';
 
-    // Posicionar caja arriba o abajo del spot
-    const boxH = 180;
-    const arriba = r.top - boxH - 20;
-    const abajo = r.bottom + 20;
-    if (paso.posMsg === 'top' && arriba > 10) {
-      _tutorialBox.style.top = arriba + 'px';
-      _tutorialBox.style.bottom = 'auto';
-    } else {
-      _tutorialBox.style.top = Math.min(abajo, window.innerHeight - boxH - 10) + 'px';
-      _tutorialBox.style.bottom = 'auto';
-    }
+      // Posicionar caja: preferir abajo, si no hay espacio arriba
+      const boxH = 200;
+      const espacioAbajo = window.innerHeight - r.bottom - 16;
+      const espacioArriba = r.top - 16;
+      let topBox;
+      if (espacioAbajo >= boxH) {
+        topBox = r.bottom + 12;
+      } else if (espacioArriba >= boxH) {
+        topBox = r.top - boxH - 12;
+      } else {
+        // No hay espacio ni arriba ni abajo — poner en el centro superior
+        topBox = 16;
+      }
+      _tutorialBox.style.top = Math.max(8, topBox) + 'px';
+      _tutorialBox.style.transform = 'translateX(-50%)';
+    }, 350);
   } else {
     _tutorialSpot.style.display = 'none';
-    _tutorialBox.style.top = '50%';
+    _tutorialBox.style.top = '30%';
     _tutorialBox.style.transform = 'translateX(-50%) translateY(-50%)';
   }
 
@@ -6613,25 +6682,15 @@ function mostrarPasoTutorial(idx) {
   const esUltimo = idx === TUTORIAL_STEPS.length - 1;
 
   _tutorialBox.innerHTML = `
-    <div style="font-size:36px;margin-bottom:6px">${paso.emoji}</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:8px">${paso.titulo}</div>
-    <div style="font-size:13px;color:#7B5E50;line-height:1.6;margin-bottom:14px;white-space:pre-line">${paso.msg}</div>
-    <div style="margin-bottom:14px">${progreso}</div>
-    ${esUltimo ? '' : `<div style="font-size:11px;color:#B8967A;opacity:0.7">Completá la acción para continuar ↑</div>`}
-    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
-      <button onclick="saltarTutorial()" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#B8967A;font-size:12px;cursor:pointer;font-family:'Nunito',sans-serif">Saltar tutorial</button>
+    <div style="font-size:30px;margin-bottom:4px">${paso.emoji}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:17px;color:#5C4033;margin-bottom:6px">${paso.titulo}</div>
+    <div style="font-size:12px;color:#7B5E50;line-height:1.6;margin-bottom:10px;white-space:pre-line">${paso.msg}</div>
+    <div style="margin-bottom:10px">${progreso}</div>
+    ${!esUltimo ? `<div style="font-size:11px;color:#C9A84C;font-weight:700">👆 Completá la acción de arriba</div>` : ''}
+    <div style="margin-top:10px">
+      <button onclick="saltarTutorial()" style="padding:6px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#B8967A;font-size:11px;cursor:pointer;font-family:'Nunito',sans-serif">Saltar tutorial</button>
     </div>
   `;
-
-  // Hacer que el overlay no bloquee el elemento objetivo
-  if (_tutorialOverlay) {
-    _tutorialOverlay.style.pointerEvents = 'none';
-  }
-
-  // Scroll al elemento si no está visible
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
 }
 
 function avanzarTutorial(idPaso) {
