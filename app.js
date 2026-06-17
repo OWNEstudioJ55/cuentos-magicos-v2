@@ -2173,6 +2173,7 @@ async function saveStory() {
     appState.recAudio=null;
     localStorage.removeItem('ownDraft');
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
+    stopBgMusic();
     showCelebration('🎉 ¡Cuento enviado a ' + (appState.kidName||'tu hijo') + '!');
     setTimeout(()=>_doSwitchParentTab('library'), 2000);
   } catch(err) {
