@@ -1309,6 +1309,7 @@ function _doSwitchParentTab(tab) {
   if(tab==='library') { loadParentLibrary(); loadParentKidMessages(); }
   if(tab==='home') { loadParentHomeStories(); buildProgressSummary(); loadParentKidMessages(); }
   if(tab==='record' && !tutorialYaCompletado()) { setTimeout(()=>iniciarTutorialPadre(), 600); }
+  if(tab==='record') { setTimeout(()=>tutHook('tab_record'), 700); }
   if(tab==='record') showRecTab();
 }
 
@@ -1442,6 +1443,7 @@ function selectParentChar(e) {
   appState.selectedChar=e;
   buildParentCharGrid();
   updatePortadaChar();
+  tutHook('char_elegido');
 }
 
 // ===================== RECORD STEPS =====================
@@ -1498,6 +1500,7 @@ function goRecStep(n) {
     if(tab) { tab.classList.toggle('active',i===n); tab.classList.toggle('done',i<n); }
   });
   if(n===2) {
+    tutHook('tab_escenas');
     // Si estamos editando y ya hay imágenes, habilitar el botón siguiente
     const nextBtn=document.getElementById('btnGoStep3');
     const genBtn=document.getElementById('btnGenScenes');
@@ -1515,13 +1518,14 @@ function goRecStep(n) {
     }
   }
   if(n===3) {
+    tutHook('ir_grabar');
     // Sync title from step 1 to step 3 editable field
     const t1=document.getElementById('storyTitle');
     const t3=document.getElementById('storyTitleStep3');
     if(t1&&t3) t3.value=t1.value;
     buildRecSlideshow(appState.currentStoryImages||[]);
   }
-  if(n===4) { updateRecStep4Summary(); setTimeout(()=>avanzarTutorial('efectos'), 800); }
+  if(n===4) { updateRecStep4Summary(); tutHook('paso4_abierto'); }
   const content=document.getElementById('parentContent');
   if(content) content.scrollTo(0,0);
 }
@@ -1741,7 +1745,7 @@ async function toggleRecord() {
     appState.mediaRecorder.start(100);
     appState.isRecording=true;
     appState.recordSeconds=0;
-    avanzarTutorial('grabar');
+    tutHook('rec_start');
     // Arrancar música de fondo si está activada
     if(document.getElementById('btnBgMusic')?.dataset.enabled==='1') startBgMusic();
     // Arrancar slideshow automáticamente con la duración del slider
@@ -1783,7 +1787,7 @@ function stopRecording() {
     }
     const rs=document.getElementById('recStatus'); if(rs) rs.textContent='✅ Grabación completa — escuchala ↓';
     stopAutoAdvance();
-    avanzarTutorial('detener');
+    tutHook('rec_stop');
   }
 }
 
@@ -1987,6 +1991,7 @@ function selectFinalMusicTrack(id) {
 
 let _previewAsKidAudio=null, _previewAsKidMusic=null;
 async function previewAsKid() {
+  tutHook('preview_kid');
   const btn=document.getElementById('btnPreviewAsKid');
   if(_previewAsKidAudio||_previewAsKidMusic){
     if(_previewAsKidAudio){try{_previewAsKidAudio.pause();}catch(e){}} _previewAsKidAudio=null;
@@ -2176,7 +2181,7 @@ async function saveStory() {
     appState.recAudio=null;
     localStorage.removeItem('ownDraft');
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
-    avanzarTutorial('enviar');
+    tutHook('enviar');
     showCelebration('🎉 ¡Cuento enviado a ' + (appState.kidName||'tu hijo') + '!');
     setTimeout(()=>_doSwitchParentTab('library'), 2000);
   } catch(err) {
@@ -3162,7 +3167,7 @@ function generatePortadaImage() {
     // Save portada separately so it doesn't get overwritten
     appState.portadaUrl = url;
     showToast('✅ Portada generada');
-    avanzarTutorial('portada');
+    tutHook('portada_gen');
   });
 }
 function handlePortadaUpload(e) {
@@ -3177,7 +3182,7 @@ function handlePortadaUpload(e) {
     appState.portadaUrl = ev.target.result;
     updatePortadaTitleOverlay();
     showToast('✅ Portada cargada');
-    avanzarTutorial('portada');
+    tutHook('portada_gen');
   };
   reader.readAsDataURL(file);
 }
@@ -4015,13 +4020,14 @@ function selectParentSeqChar(sceneIdx,char) {
   parentSequenceData[sceneIdx].char=char;
   const pid=`charPicker${sceneIdx}`;
   buildParentSequenceScenes();
-  // Reopen picker after rebuild so user can see selection
   const picker=document.getElementById(pid); if(picker) picker.style.display='none';
+  tutHook('seq_char');
 }
 function selectParentSeqAction(sceneIdx,actionIdx) {
   parentSequenceData[sceneIdx].action=actionIdx;
   buildParentSequenceScenes();
   const picker=document.getElementById(`actionPicker${sceneIdx}`); if(picker) picker.style.display='none';
+  tutHook('seq_action');
 }
 function selectParentCelebration(cel) {
   parentSelectedCelebration=cel;
@@ -4062,7 +4068,7 @@ async function generateParentSequenceImages() {
   buildRecSlideshow(imgs);
   hideLoading();
   showToast('✅ ¡5 escenas listas! Avanzá al paso 3 para grabar');
-  avanzarTutorial('escenas');
+  tutHook('imgs_generadas');
 }
 
 // ===================== KID APP =====================
@@ -6454,328 +6460,480 @@ document.addEventListener('keydown',e=>{
 // ===================== BOOT =====================
 window.addEventListener('load',()=>{ initSupabase(); openDB().then(()=>init()); });
 
+
 // ===================== TUTORIAL PADRE =====================
-// Tutorial guiado para el primer cuento — como un juego
+// Tutorial guiado paso a paso — flujo completo primer cuento
 
-const TUTORIAL_STEPS = [
-  {
-    id: 'titulo',
-    emoji: '✏️',
-    titulo: 'Paso 1 — Escribí el título',
-    msg: 'Tocá el campo de abajo y escribí\nel nombre del cuento 😊',
-    apuntaA: 'storyTitle',
-    stepReq: 1, // solo activo en recStep 1
-  },
-  {
-    id: 'portada',
-    emoji: '🎨',
-    titulo: 'Paso 2 — Generá la portada',
-    msg: 'Tocá "Generar portada con IA"\npara crear la imagen del cuento ✨',
-    apuntaA: 'btnGenPortada',
-    stepReq: 1,
-  },
-  {
-    id: 'escenas',
-    emoji: '🖼️',
-    titulo: 'Paso 3 — Generá las escenas',
-    msg: 'Tocá este botón para crear\nlas 5 imágenes del cuento 🎬',
-    apuntaA: 'btnGenScenes',
-    stepReq: 2,
-  },
-  {
-    id: 'grabar',
-    emoji: '🎙️',
-    titulo: 'Paso 4 — ¡Grabá tu voz!',
-    msg: 'Tocá el botón grande rojo\ny contá el cuento en voz alta 💛',
-    apuntaA: 'recBtn',
-    stepReq: 3,
-  },
-  {
-    id: 'detener',
-    emoji: '⏹️',
-    titulo: 'Paso 5 — Pará la grabación',
-    msg: 'Cuando termines de contar,\ntocá el botón de nuevo para parar ⏹️',
-    apuntaA: 'recBtn',
-    stepReq: 3,
-  },
-  {
-    id: 'efectos',
-    emoji: '✨',
-    titulo: 'Paso 6 — Efectos opcionales',
-    msg: 'Podés agregar voz divertida\no música de fondo 🎵\n¡O mandarlo tal cual!',
-    apuntaA: 'recApplyVoiceWrap',
-    stepReq: 4,
-  },
-  {
-    id: 'enviar',
-    emoji: '🚀',
-    titulo: '¡Último paso — Mandalo!',
-    msg: 'Tocá el botón dorado para enviar.\n¡Tu hijo lo recibe ahora mismo! 🎉',
-    apuntaA: null,
-    stepReq: 4,
-  },
+let _tut = {
+  active: false,
+  fase: 0,           // fase actual
+  scenesCompleted: 0, // cuántas escenas completó
+  overlay: null,
+  spot: null,
+  box: null,
+};
+
+// Fases del tutorial (en orden)
+const TUT_FASES = [
+  'bienvenida',      // 0 — pantalla inicial con oso
+  'boton_crear',     // 1 — "tocá Crear para empezar"
+  'titulo',          // 2 — "escribí el título"
+  'portada_char',    // 3 — "elegí el personaje de la portada"
+  'portada_gen',     // 4 — "tocá Generar portada"
+  'escenas_btn',     // 5 — "tocá Elegir escenas"
+  'escena_char',     // 6 — "elegí el personaje" (por escena)
+  'escena_action',   // 7 — "elegí la acción"
+  'escenas_5x',      // 8 — "hacelo 5 veces" (overlay general)
+  'generar_imgs',    // 9 — "tocá Generar imágenes"
+  'siguiente_grabar',// 10 — "tocá Siguiente para grabar"
+  'grabar',          // 11 — "tocá para grabar"
+  'detener',         // 12 — "tocá para detener"
+  'paso4_efectos',   // 13 — "escuchemos cómo queda"
+  'distorsion_musica',// 14 — "cambiá la voz y música"
+  'escuchar_niño',   // 15 — "tocá escuchar como el niño"
+  'enviar',          // 16 — "tocá para enviar"
 ];
-
-let _tutorialActive = false;
-let _tutorialStep = 0;
-let _tutorialOverlay = null;
-let _tutorialBox = null;
-let _tutorialSpot = null;
 
 function tutorialYaCompletado() {
   return localStorage.getItem('ownTutorialPadreOK') === '1';
 }
-
 function marcarTutorialCompleto() {
   localStorage.setItem('ownTutorialPadreOK', '1');
 }
-
-function iniciarTutorialPadre() {
-  if (tutorialYaCompletado()) return;
-  mostrarBienvenidaTutorial();
-}
-
-function mostrarBienvenidaTutorial() {
-  const bienvenida = document.createElement('div');
-  bienvenida.id = 'tutorialBienvenida';
-  bienvenida.style.cssText = `
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    background:linear-gradient(160deg,#3D1C02 0%,#7B3F1A 60%,#C9A84C 100%);
-    z-index:99999;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;
-    font-family:'Nunito',sans-serif;padding:32px 24px;box-sizing:border-box;
-    text-align:center;
-  `;
-  bienvenida.innerHTML = `
-    <div style="animation:floatBear 3s ease-in-out infinite;margin-bottom:16px">
-      <div style="width:90px;height:90px;background-image:url('/sprites_kid_OWN.png');
-        background-size:613px 458px;background-position:-161px -398px;
-        background-repeat:no-repeat;margin:0 auto;
-        filter:drop-shadow(0 8px 24px rgba(0,0,0,0.4))"></div>
-    </div>
-    <div style="font-family:'Fredoka One',cursive;font-size:28px;color:#F9C74F;margin-bottom:8px;
-      text-shadow:0 2px 8px rgba(0,0,0,0.3)">¡Bienvenido a OWN!</div>
-    <div style="font-size:15px;color:rgba(255,255,255,0.9);line-height:1.7;margin-bottom:8px;max-width:280px">
-      Te voy a guiar para enviar tu<br><strong style="color:#F9C74F">primer cuento mágico</strong> 🌟
-    </div>
-    <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:32px;max-width:260px;line-height:1.6">
-      Vamos paso a paso.<br>¡Es muy fácil!
-    </div>
-    <button onclick="arrancarTutorialReal()" style="
-      padding:16px 40px;border-radius:50px;border:none;
-      background:linear-gradient(135deg,#F9C74F,#e8a020);
-      color:#5C4033;font-family:'Fredoka One',cursive;font-size:20px;
-      cursor:pointer;box-shadow:0 6px 20px rgba(249,199,79,0.5);
-      transform:scale(1);transition:transform 0.15s;
-    " onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'"
-       ontouchstart="this.style.transform='scale(0.95)'" ontouchend="this.style.transform='scale(1)'">
-      ¡Comencemos! 🚀
-    </button>
-    <button onclick="document.getElementById('tutorialBienvenida').remove();marcarTutorialCompleto()" style="
-      margin-top:16px;padding:8px 20px;border-radius:20px;border:1px solid rgba(255,255,255,0.2);
-      background:transparent;color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer;
-      font-family:'Nunito',sans-serif;
-    ">Saltar tutorial</button>
-  `;
-  document.body.appendChild(bienvenida);
-}
-
-function arrancarTutorialReal() {
-  const bienvenida = document.getElementById('tutorialBienvenida');
-  if (bienvenida) {
-    bienvenida.style.transition = 'opacity 0.3s';
-    bienvenida.style.opacity = '0';
-    setTimeout(() => { bienvenida.remove(); _arrancarOverlayTutorial(); }, 300);
-  } else {
-    _arrancarOverlayTutorial();
-  }
-}
-
-function _arrancarOverlayTutorial() {
-  _tutorialActive = true;
-  _tutorialStep = 0;
-
-  // Canvas SVG para el overlay con hueco real (clip-path approach)
-  // Usamos 4 divs negros alrededor del elemento iluminado
-  // Más simple y confiable: un div oscuro encima con pointer-events none
-  // y el spot es solo el borde amarillo sin background
-
-  // Overlay oscuro — pointer-events none para que se pueda tocar
-  _tutorialOverlay = document.createElement('div');
-  _tutorialOverlay.id = 'tutorialOverlay';
-  _tutorialOverlay.style.cssText = `
-    position:fixed;top:0;left:0;width:100%;height:100%;
-    z-index:99990;pointer-events:none;
-  `;
-  // 4 rectángulos oscuros (top, bottom, left, right)
-  _tutorialOverlay.innerHTML = `
-    <div id="tov-top"    style="position:absolute;left:0;right:0;top:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
-    <div id="tov-bottom" style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
-    <div id="tov-left"   style="position:absolute;top:0;bottom:0;left:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
-    <div id="tov-right"  style="position:absolute;top:0;bottom:0;right:0;background:rgba(0,0,0,0.72);transition:all 0.3s"></div>
-  `;
-  document.body.appendChild(_tutorialOverlay);
-
-  // Borde amarillo alrededor del elemento (solo borde, sin fondo)
-  _tutorialSpot = document.createElement('div');
-  _tutorialSpot.id = 'tutorialSpot';
-  _tutorialSpot.style.cssText = `
-    position:fixed;border-radius:14px;
-    border:3px solid #F9C74F;
-    box-shadow:0 0 16px 4px rgba(249,199,79,0.7);
-    z-index:99993;pointer-events:none;
-    transition:all 0.3s cubic-bezier(.4,0,.2,1);
-    background:transparent;
-  `;
-  document.body.appendChild(_tutorialSpot);
-
-  // Caja de mensaje
-  _tutorialBox = document.createElement('div');
-  _tutorialBox.id = 'tutorialBox';
-  _tutorialBox.style.cssText = `
-    position:fixed;left:50%;transform:translateX(-50%);
-    width:min(300px,86vw);
-    background:linear-gradient(135deg,#fff9f0,#fff3e0);
-    border-radius:20px;border:3px solid #F9C74F;
-    padding:16px 16px 12px;
-    z-index:99996;
-    box-shadow:0 8px 32px rgba(0,0,0,0.35);
-    text-align:center;
-    font-family:'Nunito',sans-serif;
-    transition:top 0.3s cubic-bezier(.4,0,.2,1);
-  `;
-  document.body.appendChild(_tutorialBox);
-
-  mostrarPasoTutorial(0);
-}
-
-function mostrarPasoTutorial(idx) {
-  if (!_tutorialActive || idx >= TUTORIAL_STEPS.length) return;
-  _tutorialStep = idx;
-  const paso = TUTORIAL_STEPS[idx];
-
-  // Buscar elemento objetivo
-  let el = paso.apuntaA ? document.getElementById(paso.apuntaA) : null;
-  if (paso.id === 'enviar') {
-    el = document.querySelector('[onclick*="applyDistortionAndSave"]') ||
-         document.querySelector('[onclick*="saveStoryWithoutDistortion"]');
-  }
-
-  const posicionarSpot = () => {
-    if (!el || !_tutorialSpot) return;
-    const r = el.getBoundingClientRect();
-    const pad = 10;
-    const x = r.left - pad;
-    const y = r.top - pad;
-    const w = r.width + pad * 2;
-    const h = r.height + pad * 2;
-
-    // Spot (borde amarillo transparente)
-    _tutorialSpot.style.display = 'block';
-    _tutorialSpot.style.left = x + 'px';
-    _tutorialSpot.style.top = y + 'px';
-    _tutorialSpot.style.width = w + 'px';
-    _tutorialSpot.style.height = h + 'px';
-
-    // 4 rectángulos oscuros alrededor
-    const vH = window.innerHeight;
-    const vW = window.innerWidth;
-    const top    = document.getElementById('tov-top');
-    const bottom = document.getElementById('tov-bottom');
-    const left   = document.getElementById('tov-left');
-    const right  = document.getElementById('tov-right');
-    if (top)    { top.style.height = y + 'px'; }
-    if (bottom) { bottom.style.height = (vH - y - h) + 'px'; }
-    if (left)   { left.style.top = y + 'px'; left.style.height = h + 'px'; left.style.width = x + 'px'; }
-    if (right)  { right.style.top = y + 'px'; right.style.height = h + 'px'; right.style.width = (vW - x - w) + 'px'; }
-
-    // Posicionar la caja arriba o abajo
-    const boxH = 210;
-    const espacioAbajo = vH - r.bottom - 16;
-    const espacioArriba = r.top - 16;
-    let topBox;
-    if (espacioAbajo >= boxH) {
-      topBox = r.bottom + 14;
-    } else if (espacioArriba >= boxH) {
-      topBox = r.top - boxH - 14;
-    } else {
-      topBox = 12;
-    }
-    if (_tutorialBox) {
-      _tutorialBox.style.top = Math.max(8, Math.min(topBox, vH - boxH - 8)) + 'px';
-      _tutorialBox.style.transform = 'translateX(-50%)';
-    }
-  };
-
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    setTimeout(posicionarSpot, 380);
-  } else {
-    if (_tutorialSpot) _tutorialSpot.style.display = 'none';
-    // Oscurecer todo
-    ['tov-top','tov-bottom','tov-left','tov-right'].forEach(id => {
-      const d = document.getElementById(id);
-      if (d) { d.style.width=''; d.style.height=''; d.style.top=''; }
-    });
-    const top = document.getElementById('tov-top');
-    if (top) top.style.height = '100%';
-    if (_tutorialBox) {
-      _tutorialBox.style.top = '35%';
-      _tutorialBox.style.transform = 'translateX(-50%) translateY(-50%)';
-    }
-  }
-
-  // Progreso
-  const progreso = TUTORIAL_STEPS.map((s, i) =>
-    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;
-      background:${i === idx ? '#F9C74F' : i < idx ? '#10b981' : 'rgba(0,0,0,0.15)'};
-      transition:background 0.3s"></span>`
-  ).join('');
-
-  const esUltimo = idx === TUTORIAL_STEPS.length - 1;
-
-  if (_tutorialBox) _tutorialBox.innerHTML = `
-    <div style="font-size:28px;margin-bottom:4px">${paso.emoji}</div>
-    <div style="font-family:'Fredoka One',cursive;font-size:16px;color:#5C4033;margin-bottom:6px">${paso.titulo}</div>
-    <div style="font-size:12px;color:#7B5E50;line-height:1.6;margin-bottom:10px;white-space:pre-line">${paso.msg}</div>
-    <div style="margin-bottom:8px">${progreso}</div>
-    ${!esUltimo ? `<div style="font-size:11px;color:#C9A84C;font-weight:700;margin-bottom:6px">👆 Hacé la acción indicada</div>` : ''}
-    <button onclick="saltarTutorial()" style="padding:5px 14px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);
-      background:transparent;color:#B8967A;font-size:11px;cursor:pointer;font-family:'Nunito',sans-serif">
-      Saltar tutorial
-    </button>
-  `;
-}
-
-function avanzarTutorial(idPaso) {
-  if (!_tutorialActive) return;
-  const paso = TUTORIAL_STEPS[_tutorialStep];
-  if (!paso || paso.id !== idPaso) return;
-  const sig = _tutorialStep + 1;
-  if (sig >= TUTORIAL_STEPS.length) {
-    cerrarTutorial(true);
-  } else {
-    setTimeout(() => mostrarPasoTutorial(sig), 400);
-  }
-}
-
-function saltarTutorial() {
-  cerrarTutorial(false);
-}
-
-function cerrarTutorial(completado) {
-  _tutorialActive = false;
-  if (_tutorialOverlay) { _tutorialOverlay.remove(); _tutorialOverlay = null; }
-  if (_tutorialSpot) { _tutorialSpot.remove(); _tutorialSpot = null; }
-  if (_tutorialBox) { _tutorialBox.remove(); _tutorialBox = null; }
-  if (completado) {
-    marcarTutorialCompleto();
-    setTimeout(() => showToast('🎉 ¡Completaste el tutorial! Ya sos un experto en OWN'), 300);
-  }
-}
-
-// Función para resetear el tutorial (útil para testing)
 function resetTutorialPadre() {
   localStorage.removeItem('ownTutorialPadreOK');
   showToast('Tutorial reseteado — recargá la app');
 }
+
+// ── ENTRADA PRINCIPAL ──────────────────────────────────────
+function iniciarTutorialPadre() {
+  if (tutorialYaCompletado()) return;
+  _tut.active = true;
+  _tut.fase = 0;
+  _tut.scenesCompleted = 0;
+  _mostrarBienvenidaTutorial();
+}
+
+// ── PANTALLA DE BIENVENIDA ─────────────────────────────────
+function _mostrarBienvenidaTutorial() {
+  const div = document.createElement('div');
+  div.id = 'tutBienvenida';
+  div.style.cssText = `
+    position:fixed;inset:0;z-index:99999;
+    background:linear-gradient(160deg,#2D0E00 0%,#7B3F1A 55%,#C9A84C 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:32px 24px;box-sizing:border-box;text-align:center;
+    font-family:'Nunito',sans-serif;
+  `;
+  div.innerHTML = `
+    <div style="margin-bottom:20px;animation:floatBear 3s ease-in-out infinite">
+      <div style="width:140px;height:180px;
+        background-image:url('/sprites_kid_OWN.png');
+        background-size:613px 458px;
+        background-position:-2px -2px;
+        background-repeat:no-repeat;
+        margin:0 auto;
+        filter:drop-shadow(0 12px 32px rgba(0,0,0,0.5))">
+      </div>
+    </div>
+    <div style="font-family:'Fredoka One',cursive;font-size:30px;color:#F9C74F;margin-bottom:10px;
+      text-shadow:0 2px 10px rgba(0,0,0,0.4)">¡Bienvenido a OWN!</div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.92);line-height:1.8;margin-bottom:8px;max-width:280px">
+      Te voy a guiar para enviar tu<br>
+      <strong style="color:#F9C74F;font-size:17px">primer cuento mágico 🌟</strong>
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.55);margin-bottom:36px;max-width:260px;line-height:1.6">
+      Seguí los pasos y en minutos<br>tu hijo recibe tu voz ✨
+    </div>
+    <button onclick="_arrancarTutorial()" style="
+      padding:18px 44px;border-radius:50px;border:none;
+      background:linear-gradient(135deg,#F9C74F,#e8a020);
+      color:#5C4033;font-family:'Fredoka One',cursive;font-size:22px;
+      cursor:pointer;box-shadow:0 6px 24px rgba(249,199,79,0.55);
+      letter-spacing:0.5px;
+    ">¡Comencemos! 🚀</button>
+    <button onclick="_cerrarTutorial(false)" style="
+      margin-top:18px;padding:8px 22px;border-radius:20px;
+      border:1px solid rgba(255,255,255,0.2);background:transparent;
+      color:rgba(255,255,255,0.4);font-size:12px;cursor:pointer;
+      font-family:'Nunito',sans-serif;
+    ">Saltar tutorial</button>
+  `;
+  document.body.appendChild(div);
+}
+
+function _arrancarTutorial() {
+  const bv = document.getElementById('tutBienvenida');
+  if (bv) {
+    bv.style.transition = 'opacity 0.3s';
+    bv.style.opacity = '0';
+    setTimeout(() => { bv.remove(); _crearOverlay(); _irFase(1); }, 300);
+  }
+}
+
+// ── OVERLAY (4 rectángulos + borde amarillo) ───────────────
+function _crearOverlay() {
+  // 4 oscuros
+  const ov = document.createElement('div');
+  ov.id = 'tutOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:99990;pointer-events:none;';
+  ov.innerHTML = `
+    <div id="tov-t" style="position:absolute;left:0;right:0;top:0;background:rgba(0,0,0,0.72);transition:height .3s,top .3s"></div>
+    <div id="tov-b" style="position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,0.72);transition:height .3s"></div>
+    <div id="tov-l" style="position:absolute;background:rgba(0,0,0,0.72);transition:all .3s"></div>
+    <div id="tov-r" style="position:absolute;background:rgba(0,0,0,0.72);transition:all .3s"></div>
+  `;
+  document.body.appendChild(ov);
+
+  // Borde amarillo
+  const sp = document.createElement('div');
+  sp.id = 'tutSpot';
+  sp.style.cssText = `
+    position:fixed;border-radius:14px;border:3px solid #F9C74F;
+    box-shadow:0 0 0 3px rgba(249,199,79,0.3),0 0 20px 6px rgba(249,199,79,0.5);
+    z-index:99993;pointer-events:none;display:none;
+    transition:all .3s cubic-bezier(.4,0,.2,1);
+  `;
+  document.body.appendChild(sp);
+
+  // Caja de texto
+  const bx = document.createElement('div');
+  bx.id = 'tutBox';
+  bx.style.cssText = `
+    position:fixed;left:50%;transform:translateX(-50%);
+    width:min(290px,84vw);
+    background:linear-gradient(135deg,#fff9f0,#fff3e0);
+    border-radius:20px;border:3px solid #F9C74F;
+    padding:14px 16px 12px;
+    z-index:99996;
+    box-shadow:0 8px 32px rgba(0,0,0,0.35);
+    text-align:center;font-family:'Nunito',sans-serif;
+    transition:top .3s cubic-bezier(.4,0,.2,1);
+    display:none;
+  `;
+  document.body.appendChild(bx);
+
+  _tut.overlay = ov;
+  _tut.spot = sp;
+  _tut.box = bx;
+}
+
+// ── POSICIONAR EL FOCO ─────────────────────────────────────
+function _focoEn(el, pad) {
+  if (!el || !_tut.spot) return;
+  pad = pad || 10;
+  const r = el.getBoundingClientRect();
+  const x = r.left - pad, y = r.top - pad;
+  const w = r.width + pad*2, h = r.height + pad*2;
+  const vW = window.innerWidth, vH = window.innerHeight;
+
+  _tut.spot.style.display = 'block';
+  _tut.spot.style.left = x + 'px';
+  _tut.spot.style.top  = y + 'px';
+  _tut.spot.style.width = w + 'px';
+  _tut.spot.style.height = h + 'px';
+
+  const t = document.getElementById('tov-t');
+  const b = document.getElementById('tov-b');
+  const l = document.getElementById('tov-l');
+  const rv = document.getElementById('tov-r');
+  if(t)  { t.style.height = Math.max(0,y) + 'px'; }
+  if(b)  { b.style.height = Math.max(0, vH-y-h) + 'px'; }
+  if(l)  { l.style.cssText += `;top:${y}px;height:${h}px;width:${Math.max(0,x)}px;left:0`; }
+  if(rv) { rv.style.cssText += `;top:${y}px;height:${h}px;width:${Math.max(0,vW-x-w)}px;right:0`; }
+
+  // Posicionar caja
+  const boxH = 185;
+  let top;
+  if (vH - r.bottom > boxH + 16) top = r.bottom + 14;
+  else if (r.top > boxH + 16) top = r.top - boxH - 14;
+  else top = 14;
+  if (_tut.box) {
+    _tut.box.style.top = Math.max(8, Math.min(top, vH - boxH - 8)) + 'px';
+    _tut.box.style.display = 'block';
+    _tut.box.style.transform = 'translateX(-50%)';
+  }
+}
+
+function _oscurecerTodo() {
+  const vH = window.innerHeight;
+  const t = document.getElementById('tov-t');
+  const b = document.getElementById('tov-b');
+  const l = document.getElementById('tov-l');
+  const r = document.getElementById('tov-r');
+  if(t) { t.style.height = vH + 'px'; }
+  if(b) { b.style.height = '0px'; }
+  if(l) { l.style.width = '0px'; }
+  if(r) { r.style.width = '0px'; }
+  if(_tut.spot) _tut.spot.style.display = 'none';
+}
+
+// ── MOSTRAR TEXTO EN LA CAJA ───────────────────────────────
+function _texto(emoji, titulo, msg, mostrarSaltar) {
+  if (!_tut.box) return;
+  const total = TUT_FASES.length - 2; // excluir bienvenida
+  const current = Math.max(0, _tut.fase - 1);
+  const dots = TUT_FASES.slice(1).map((_,i) =>
+    `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 2px;
+      background:${i===current-1?'#10b981':i<current-1?'#10b981':'rgba(0,0,0,0.15)'}"></span>`
+  ).join('');
+
+  _tut.box.style.display = 'block';
+  _tut.box.innerHTML = `
+    <div style="font-size:26px;margin-bottom:3px">${emoji}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#5C4033;margin-bottom:5px">${titulo}</div>
+    <div style="font-size:12px;color:#7B5E50;line-height:1.6;white-space:pre-line;margin-bottom:8px">${msg}</div>
+    ${mostrarSaltar!==false?`<button onclick="_cerrarTutorial(false)" style="padding:5px 12px;border-radius:10px;
+      border:1px solid rgba(0,0,0,0.1);background:transparent;color:#B8967A;font-size:10px;
+      cursor:pointer;font-family:'Nunito',sans-serif">Saltar tutorial</button>`:''}
+  `;
+}
+
+// ── NAVEGACIÓN DE FASES ────────────────────────────────────
+function _irFase(n) {
+  if (!_tut.active) return;
+  _tut.fase = n;
+
+  switch(n) {
+
+    case 1: { // Botón Crear en nav
+      _oscurecerTodo();
+      setTimeout(() => {
+        const el = document.getElementById('pnav-record');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 8); _texto('👆','¡Tocá "Crear"!','Empezamos por aquí.\nTocá el botón Crear del menú de abajo.', true); }, 350);
+        }
+      }, 200);
+      break;
+    }
+
+    case 2: { // Campo título
+      setTimeout(() => {
+        const el = document.getElementById('storyTitle');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 8); _texto('✏️','Nombre del cuento','Escribí el nombre del cuento\nde tu hijo/a aquí 😊', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 3: { // Grid de personajes de portada
+      setTimeout(() => {
+        const el = document.getElementById('parentCharGrid');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 8); _texto('🐉','Elegí la portada','Elegí el personaje principal\nde tu cuento 👇', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 4: { // Botón generar portada
+      setTimeout(() => {
+        const el = document.getElementById('btnGenPortada');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 8); _texto('✨','Generá la portada','Tocá aquí para crear\nla imagen de portada con IA 🎨', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 5: { // Botón ir al paso 2 (escenas) — el "Siguiente" del paso 1
+      setTimeout(() => {
+        // Buscar botón que lleva al paso 2
+        const el = document.querySelector('[onclick*="goRecStep(2)"]');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 8); _texto('🖼️','Elegí las escenas','Ahora vamos a elegir las imágenes\nque van con tu voz. ¡Tocá aquí!', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 6: { // Personaje de escena 1
+      setTimeout(() => {
+        // Primer grupo de botones de personaje dentro de parentSequenceScenes
+        const container = document.getElementById('parentSequenceScenes');
+        if (container) {
+          // El primer bloque de personajes está en la primera escena
+          const charBtns = container.querySelector('div div div');
+          container.scrollIntoView({behavior:'smooth',block:'start'});
+          setTimeout(() => {
+            // Iluminar el área de personaje de la escena 1
+            const escena1 = container.children[0];
+            if (escena1) { _focoEn(escena1, 8); }
+            _texto('🐉','Elegí el personaje','Tocá el nombre del personaje\npara la escena 1 👆', true);
+          }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 7: { // Acción de escena 1
+      setTimeout(() => {
+        const container = document.getElementById('parentSequenceScenes');
+        if (container) {
+          const escena1 = container.children[0];
+          if (escena1) {
+            escena1.scrollIntoView({behavior:'smooth',block:'center'});
+            setTimeout(() => { _focoEn(escena1, 8); _texto('🎬','Elegí la acción','Ahora tocá qué hace\nel personaje en esta escena 👇', true); }, 350);
+          }
+        }
+      }, 400);
+      break;
+    }
+
+    case 8: { // "Hacelo 5 veces" — overlay suave sobre todas las escenas
+      setTimeout(() => {
+        const container = document.getElementById('parentSequenceScenes');
+        if (container) {
+          container.scrollIntoView({behavior:'smooth',block:'start'});
+          setTimeout(() => {
+            _focoEn(container, 8);
+            _texto('🔁','¡5 escenas!',`¡Muy bien! Completaste ${_tut.scenesCompleted} de 5 escenas.\nElegí personaje y acción\npara cada una 💪`, true);
+          }, 350);
+        }
+      }, 300);
+      break;
+    }
+
+    case 9: { // Botón generar imágenes
+      setTimeout(() => {
+        const el = document.getElementById('btnGenScenes');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 10); _texto('🖼️','¡Generá las imágenes!','Tocá aquí para crear\nlas 5 imágenes del cuento ✨', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 10: { // Botón Siguiente: Grabar
+      setTimeout(() => {
+        const el = document.getElementById('btnGoStep3');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 10); _texto('🎙️','¡Vamos a grabar!','¡Las imágenes están listas!\nTocá aquí para ir a grabar tu voz 👆', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 11: { // Botón grabar
+      setTimeout(() => {
+        const el = document.getElementById('recBtn');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 12); _texto('🔴','¡Tocá para grabar!','Contá el cuento como si\ntu hijo estuviera al lado 💛\nTocá para empezar.', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 12: { // Botón detener (mismo botón, distinto estado)
+      setTimeout(() => {
+        const el = document.getElementById('recBtn');
+        if (el) {
+          _focoEn(el, 12);
+          _texto('⏹️','¡Pará cuando termines!','Cuando termines de contar\nel cuento, tocá para detener ⏹️', true);
+        }
+      }, 300);
+      break;
+    }
+
+    case 13: { // Paso 4 — panel completo efectos
+      setTimeout(() => {
+        const el = document.getElementById('recApplyVoiceWrap');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 10); _texto('🎧','¡Escuchemos cómo queda!','Tocá "Escuchar como el niño"\npara escuchar tu cuento con música 🎶', true); }, 350);
+        }
+      }, 600);
+      break;
+    }
+
+    case 14: { // Distorsión y música
+      setTimeout(() => {
+        const el = document.getElementById('recApplyVoiceWrap');
+        if (el) {
+          _focoEn(el, 10);
+          _texto('🎭','Cambiá la voz y música','Elegí una voz divertida\ny música de fondo si querés 🎵\n¡O dejalo natural!', true);
+        }
+      }, 3200); // después de 3s del preview
+      break;
+    }
+
+    case 15: { // Botón escuchar como el niño
+      setTimeout(() => {
+        const el = document.getElementById('btnPreviewAsKid');
+        if (el) {
+          el.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(el, 8); _texto('👂','¡Escuchalo!','Tocá para escuchar exactamente\ncómo lo va a oír tu hijo 🌟', true); }, 350);
+        }
+      }, 400);
+      break;
+    }
+
+    case 16: { // Botones enviar
+      setTimeout(() => {
+        const el = document.querySelector('[onclick*="applyDistortionAndSave"]') ||
+                   document.querySelector('[onclick*="saveStoryWithoutDistortion"]');
+        const wrap = el ? el.closest('div') : null;
+        if (wrap || el) {
+          const target = wrap || el;
+          target.scrollIntoView({behavior:'smooth',block:'center'});
+          setTimeout(() => { _focoEn(target, 10); _texto('🚀','¡Mandalo!','¡Este es el momento!\nTocá para enviar el cuento.\n¡Tu hijo lo recibe ahora! 🎉', false); }, 350);
+        }
+      }, 400);
+      break;
+    }
+  }
+}
+
+// ── HOOKS DESDE EL FLUJO DE LA APP ────────────────────────
+function tutHook(evento) {
+  if (!_tut.active) return;
+  const f = _tut.fase;
+
+  if (evento === 'tab_record'   && f === 1) { _irFase(2); return; }
+  if (evento === 'titulo_ok'    && f === 2) { _irFase(3); return; }
+  if (evento === 'char_elegido' && f === 3) { _irFase(4); return; }
+  if (evento === 'portada_gen'  && f === 4) { _irFase(5); return; }
+  if (evento === 'tab_escenas'  && f === 5) { _irFase(6); return; }
+  if (evento === 'seq_char'     && f === 6) { _irFase(7); return; }
+  if (evento === 'seq_action'   && (f === 7 || f === 8)) {
+    _tut.scenesCompleted++;
+    if (_tut.scenesCompleted >= 5) { _irFase(9); }
+    else { _tut.fase = 8; _irFase(8); }
+    return;
+  }
+  if (evento === 'imgs_generadas' && f === 9)  { _irFase(10); return; }
+  if (evento === 'ir_grabar'      && f === 10) { _irFase(11); return; }
+  if (evento === 'rec_start'      && f === 11) { _irFase(12); return; }
+  if (evento === 'rec_stop'       && f === 12) { _irFase(13); return; }
+  if (evento === 'preview_kid'    && f === 13) { _irFase(14); return; }
+  if (evento === 'paso4_abierto'  && f === 13) { _irFase(15); return; } // si saltea el preview
+  if (evento === 'enviar'         && (f >= 13)) { _cerrarTutorial(true); return; }
+}
+
+function _cerrarTutorial(completado) {
+  _tut.active = false;
+  ['tutBienvenida','tutOverlay','tutSpot','tutBox'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+  });
+  _tut.overlay = null; _tut.spot = null; _tut.box = null;
+  if (completado) {
+    marcarTutorialCompleto();
+    setTimeout(() => showToast('🎉 ¡Tutorial completado! Ya sos un experto en OWN 🐻'), 400);
+  }
+}
+
+// Alias para compatibilidad con código viejo
+function avanzarTutorial(id) {} // desactivado — ahora usamos tutHook
+function saltarTutorial() { _cerrarTutorial(false); }
+function cerrarTutorial(c) { _cerrarTutorial(c); }
+
