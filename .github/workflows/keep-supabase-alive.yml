@@ -1,0 +1,16 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    - cron: '0 12 * * 1'  # Cada lunes a las 12:00 UTC
+  workflow_dispatch:       # También se puede correr manualmente
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          curl -s https://hqhnjyiureadmdqhgfbk.supabase.co/rest/v1/ \
+            -o /dev/null -w "Status: %{http_code}\n"
+          echo "Ping enviado a Supabase - $(date)"
