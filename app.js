@@ -2173,7 +2173,6 @@ async function saveStory() {
     appState.recAudio=null;
     localStorage.removeItem('ownDraft');
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
-    stopBgMusic();
     showCelebration('🎉 ¡Cuento enviado a ' + (appState.kidName||'tu hijo') + '!');
     setTimeout(()=>_doSwitchParentTab('library'), 2000);
   } catch(err) {
@@ -5875,7 +5874,27 @@ function initCanvas() {
     drawCtx.lineTo(p.x,p.y); drawCtx.stroke();
     e.preventDefault();
   };
-  const up=()=>{ isDrawing=false; };
+  let _autoSaveTimer=null;
+  const up=()=>{
+    isDrawing=false;
+    // Auto-guardar en el slot actual con debounce de 600ms
+    clearTimeout(_autoSaveTimer);
+    _autoSaveTimer=setTimeout(()=>{
+      const canvas=document.getElementById('drawCanvas');
+      if(!canvas||!drawCtx) return;
+      const d=drawCtx.getImageData(0,0,canvas.width,canvas.height).data;
+      const hasContent=Array.from({length:Math.min(d.length,2000)}).some((_,i)=>i%4!==3&&d[i]<200);
+      if(!hasContent) return;
+      const tempCanvas=document.createElement('canvas');
+      tempCanvas.width=canvas.width; tempCanvas.height=canvas.height;
+      const tempCtx=tempCanvas.getContext('2d');
+      tempCtx.fillStyle=canvasBg||'#ffffff';
+      tempCtx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
+      tempCtx.drawImage(canvas,0,0);
+      kidDrawSequence[kidDrawCurrentSlot]=tempCanvas.toDataURL('image/png');
+      updateKidDrawSlots();
+    }, 600);
+  };
   canvas.addEventListener('mousedown',down); canvas.addEventListener('mousemove',move); canvas.addEventListener('mouseup',up);
   canvas.addEventListener('touchstart',down,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',up);
 }
