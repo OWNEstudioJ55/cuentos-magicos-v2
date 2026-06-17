@@ -1308,6 +1308,7 @@ function _doSwitchParentTab(tab) {
   });
   if(tab==='library') { loadParentLibrary(); loadParentKidMessages(); }
   if(tab==='home') { loadParentHomeStories(); buildProgressSummary(); loadParentKidMessages(); }
+  if(tab==='record' && !tutorialYaCompletado()) { setTimeout(()=>iniciarTutorialPadre(), 600); }
   if(tab==='record') showRecTab();
 }
 
@@ -1520,7 +1521,7 @@ function goRecStep(n) {
     if(t1&&t3) t3.value=t1.value;
     buildRecSlideshow(appState.currentStoryImages||[]);
   }
-  if(n===4) updateRecStep4Summary();
+  if(n===4) { updateRecStep4Summary(); setTimeout(()=>avanzarTutorial('efectos'), 800); }
   const content=document.getElementById('parentContent');
   if(content) content.scrollTo(0,0);
 }
@@ -1740,6 +1741,7 @@ async function toggleRecord() {
     appState.mediaRecorder.start(100);
     appState.isRecording=true;
     appState.recordSeconds=0;
+    avanzarTutorial('grabar');
     // Arrancar música de fondo si está activada
     if(document.getElementById('btnBgMusic')?.dataset.enabled==='1') startBgMusic();
     // Arrancar slideshow automáticamente con la duración del slider
@@ -1781,6 +1783,7 @@ function stopRecording() {
     }
     const rs=document.getElementById('recStatus'); if(rs) rs.textContent='✅ Grabación completa — escuchala ↓';
     stopAutoAdvance();
+    avanzarTutorial('detener');
   }
 }
 
@@ -2173,6 +2176,7 @@ async function saveStory() {
     appState.recAudio=null;
     localStorage.removeItem('ownDraft');
     const eb=document.getElementById('editModeBanner'); if(eb) eb.style.display='none';
+    avanzarTutorial('enviar');
     showCelebration('🎉 ¡Cuento enviado a ' + (appState.kidName||'tu hijo') + '!');
     setTimeout(()=>_doSwitchParentTab('library'), 2000);
   } catch(err) {
@@ -4056,6 +4060,7 @@ async function generateParentSequenceImages() {
   buildRecSlideshow(imgs);
   hideLoading();
   showToast('✅ ¡5 escenas listas! Avanzá al paso 3 para grabar');
+  avanzarTutorial('escenas');
 }
 
 // ===================== KID APP =====================
@@ -6446,3 +6451,218 @@ document.addEventListener('keydown',e=>{
 
 // ===================== BOOT =====================
 window.addEventListener('load',()=>{ initSupabase(); openDB().then(()=>init()); });
+
+// ===================== TUTORIAL PADRE =====================
+// Tutorial guiado para el primer cuento — como un juego
+
+const TUTORIAL_STEPS = [
+  {
+    id: 'titulo',
+    emoji: '✏️',
+    titulo: '¡Escribí el título!',
+    msg: 'Primero dale un nombre al cuento de tu hijo.\nTocá el campo de abajo y escribí algo lindo 😊',
+    apuntaA: 'storyTitle',
+    posMsg: 'bottom',
+  },
+  {
+    id: 'escenas',
+    emoji: '🖼️',
+    titulo: '¡Generá las imágenes!',
+    msg: 'Ahora tocá este botón para crear las 5 imágenes del cuento.\n¡Mirá cómo aparecen las escenas!',
+    apuntaA: 'btnGenScenes',
+    posMsg: 'bottom',
+  },
+  {
+    id: 'grabar',
+    emoji: '🎙️',
+    titulo: '¡Grabá tu voz!',
+    msg: 'Tocá el botón grande para empezar a grabar.\nContá el cuento como si tu hijo estuviera al lado 💛',
+    apuntaA: 'recBtn',
+    posMsg: 'top',
+  },
+  {
+    id: 'detener',
+    emoji: '⏹️',
+    titulo: '¡Listo, pará la grabación!',
+    msg: 'Tocá de nuevo para detener.\n¡Ya grabaste tu primer cuento!',
+    apuntaA: 'recBtn',
+    posMsg: 'top',
+  },
+  {
+    id: 'efectos',
+    emoji: '✨',
+    titulo: '¡Elegí magia opcional!',
+    msg: 'Podés poner una voz divertida o música de fondo.\n¡O mandarlo tal cual!',
+    apuntaA: 'recApplyVoiceWrap',
+    posMsg: 'top',
+  },
+  {
+    id: 'enviar',
+    emoji: '🚀',
+    titulo: '¡Mandalo!',
+    msg: '¡Este es el momento! Tocá para enviar el cuento.\nTu hijo lo va a recibir ahora mismo 🎉',
+    apuntaA: null, // se busca dinámicamente
+    posMsg: 'top',
+  },
+];
+
+let _tutorialActive = false;
+let _tutorialStep = 0;
+let _tutorialOverlay = null;
+let _tutorialBox = null;
+let _tutorialSpot = null;
+
+function tutorialYaCompletado() {
+  return localStorage.getItem('ownTutorialPadreOK') === '1';
+}
+
+function marcarTutorialCompleto() {
+  localStorage.setItem('ownTutorialPadreOK', '1');
+}
+
+function iniciarTutorialPadre() {
+  if (tutorialYaCompletado()) return;
+  _tutorialActive = true;
+  _tutorialStep = 0;
+
+  // Overlay oscuro
+  _tutorialOverlay = document.createElement('div');
+  _tutorialOverlay.id = 'tutorialOverlay';
+  _tutorialOverlay.style.cssText = `
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.75);z-index:99990;
+    pointer-events:all;
+  `;
+  document.body.appendChild(_tutorialOverlay);
+
+  // Spot iluminado (hueco en el overlay)
+  _tutorialSpot = document.createElement('div');
+  _tutorialSpot.id = 'tutorialSpot';
+  _tutorialSpot.style.cssText = `
+    position:fixed;border-radius:14px;
+    box-shadow:0 0 0 9999px rgba(0,0,0,0.75), 0 0 0 4px #F9C74F, 0 0 24px 8px rgba(249,199,79,0.5);
+    z-index:99992;pointer-events:none;transition:all 0.35s cubic-bezier(.4,0,.2,1);
+  `;
+  document.body.appendChild(_tutorialSpot);
+
+  // Caja de mensaje
+  _tutorialBox = document.createElement('div');
+  _tutorialBox.id = 'tutorialBox';
+  _tutorialBox.style.cssText = `
+    position:fixed;left:50%;transform:translateX(-50%);
+    width:min(320px,88vw);
+    background:linear-gradient(135deg,#fff9f0,#fff3e0);
+    border-radius:20px;border:3px solid #F9C74F;
+    padding:20px 18px 16px;
+    z-index:99995;
+    box-shadow:0 8px 32px rgba(0,0,0,0.25);
+    text-align:center;
+    font-family:'Nunito',sans-serif;
+    transition:top 0.35s cubic-bezier(.4,0,.2,1), bottom 0.35s;
+  `;
+  document.body.appendChild(_tutorialBox);
+
+  mostrarPasoTutorial(0);
+}
+
+function mostrarPasoTutorial(idx) {
+  if (!_tutorialActive || idx >= TUTORIAL_STEPS.length) return;
+  _tutorialStep = idx;
+  const paso = TUTORIAL_STEPS[idx];
+
+  // Buscar elemento objetivo
+  let el = paso.apuntaA ? document.getElementById(paso.apuntaA) : null;
+
+  // Para "enviar", buscar el botón dinámicamente
+  if (paso.id === 'enviar') {
+    el = document.querySelector('[onclick*="applyDistortionAndSave"], [onclick*="saveStoryWithoutDistortion"]');
+  }
+
+  // Posicionar el spot
+  if (el) {
+    const r = el.getBoundingClientRect();
+    const pad = 10;
+    _tutorialSpot.style.display = 'block';
+    _tutorialSpot.style.left = (r.left - pad) + 'px';
+    _tutorialSpot.style.top = (r.top - pad) + 'px';
+    _tutorialSpot.style.width = (r.width + pad * 2) + 'px';
+    _tutorialSpot.style.height = (r.height + pad * 2) + 'px';
+
+    // Posicionar caja arriba o abajo del spot
+    const boxH = 180;
+    const arriba = r.top - boxH - 20;
+    const abajo = r.bottom + 20;
+    if (paso.posMsg === 'top' && arriba > 10) {
+      _tutorialBox.style.top = arriba + 'px';
+      _tutorialBox.style.bottom = 'auto';
+    } else {
+      _tutorialBox.style.top = Math.min(abajo, window.innerHeight - boxH - 10) + 'px';
+      _tutorialBox.style.bottom = 'auto';
+    }
+  } else {
+    _tutorialSpot.style.display = 'none';
+    _tutorialBox.style.top = '50%';
+    _tutorialBox.style.transform = 'translateX(-50%) translateY(-50%)';
+  }
+
+  // Contenido de la caja
+  const progreso = TUTORIAL_STEPS.map((s, i) =>
+    `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;margin:0 3px;background:${i === idx ? '#F9C74F' : i < idx ? '#10b981' : 'rgba(0,0,0,0.15)'};transition:background 0.3s"></span>`
+  ).join('');
+
+  const esUltimo = idx === TUTORIAL_STEPS.length - 1;
+
+  _tutorialBox.innerHTML = `
+    <div style="font-size:36px;margin-bottom:6px">${paso.emoji}</div>
+    <div style="font-family:'Fredoka One',cursive;font-size:18px;color:#5C4033;margin-bottom:8px">${paso.titulo}</div>
+    <div style="font-size:13px;color:#7B5E50;line-height:1.6;margin-bottom:14px;white-space:pre-line">${paso.msg}</div>
+    <div style="margin-bottom:14px">${progreso}</div>
+    ${esUltimo ? '' : `<div style="font-size:11px;color:#B8967A;opacity:0.7">Completá la acción para continuar ↑</div>`}
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center">
+      <button onclick="saltarTutorial()" style="padding:8px 16px;border-radius:10px;border:1px solid rgba(0,0,0,0.1);background:transparent;color:#B8967A;font-size:12px;cursor:pointer;font-family:'Nunito',sans-serif">Saltar tutorial</button>
+    </div>
+  `;
+
+  // Hacer que el overlay no bloquee el elemento objetivo
+  if (_tutorialOverlay) {
+    _tutorialOverlay.style.pointerEvents = 'none';
+  }
+
+  // Scroll al elemento si no está visible
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function avanzarTutorial(idPaso) {
+  if (!_tutorialActive) return;
+  const paso = TUTORIAL_STEPS[_tutorialStep];
+  if (!paso || paso.id !== idPaso) return;
+  const sig = _tutorialStep + 1;
+  if (sig >= TUTORIAL_STEPS.length) {
+    cerrarTutorial(true);
+  } else {
+    setTimeout(() => mostrarPasoTutorial(sig), 400);
+  }
+}
+
+function saltarTutorial() {
+  cerrarTutorial(false);
+}
+
+function cerrarTutorial(completado) {
+  _tutorialActive = false;
+  if (_tutorialOverlay) { _tutorialOverlay.remove(); _tutorialOverlay = null; }
+  if (_tutorialSpot) { _tutorialSpot.remove(); _tutorialSpot = null; }
+  if (_tutorialBox) { _tutorialBox.remove(); _tutorialBox = null; }
+  if (completado) {
+    marcarTutorialCompleto();
+    setTimeout(() => showToast('🎉 ¡Completaste el tutorial! Ya sos un experto en OWN'), 300);
+  }
+}
+
+// Función para resetear el tutorial (útil para testing)
+function resetTutorialPadre() {
+  localStorage.removeItem('ownTutorialPadreOK');
+  showToast('Tutorial reseteado — recargá la app');
+}
